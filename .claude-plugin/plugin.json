@@ -1,0 +1,9 @@
+{
+  "name": "home-assistant-assistant",
+  "version": "0.1.0",
+  "description": "Natural language management of Home Assistant configurations",
+  "author": {
+    "name": "Ben"
+  },
+  "keywords": ["home-assistant", "automation", "smart-home", "yaml"]
+}
