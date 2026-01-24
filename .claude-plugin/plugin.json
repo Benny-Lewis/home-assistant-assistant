@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "ha-toolkit",
   "version": "0.1.0",
   "description": "Home Assistant toolkit for end-users: configuration management, automation generation, naming standardization, and smart suggestions",
