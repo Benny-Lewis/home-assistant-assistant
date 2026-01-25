@@ -1,4 +1,4 @@
-# Home Assistant Toolkit for Claude Code
+﻿# Home Assistant Toolkit for Claude Code
 
 A comprehensive Claude Code plugin for Home Assistant end-users. Generate configurations, manage naming, deploy changes, and get smart suggestions for your smart home.
 
@@ -38,16 +38,16 @@ The plugin provides specialized knowledge in:
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    ha-toolkit Plugin                     │
-├─────────────────────────────────────────────────────────┤
-│  YAML Configs (Git)      │  Registry Ops (hass-cli)    │
-│  ─────────────────────   │  ─────────────────────      │
-│  • Edit locally          │  • Entity renaming          │
-│  • Git push to remote    │  • Device management        │
-│  • HA Git Pull add-on    │  • Area assignments         │
-│  • Auto-reload           │  • State queries            │
-└─────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    ha-toolkit Plugin                     â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  YAML Configs (Git)      â”‚  Registry Ops (hass-cli)    â”‚
+â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€   â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€      â”‚
+â”‚  â€¢ Edit locally          â”‚  â€¢ Entity renaming          â”‚
+â”‚  â€¢ Git push to remote    â”‚  â€¢ Device management        â”‚
+â”‚  â€¢ HA Git Pull add-on    â”‚  â€¢ Area assignments         â”‚
+â”‚  â€¢ Auto-reload           â”‚  â€¢ State queries            â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ## Prerequisites
