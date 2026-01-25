@@ -1,9 +1,14 @@
 ﻿{
   "name": "ha-toolkit",
   "version": "0.1.0",
-  "description": "Home Assistant toolkit for end-users: configuration management, automation generation, naming standardization, and smart suggestions",
+  "description": "Natural language management of Home Assistant configurations - create automations, scripts, and scenes through conversation",
   "author": {
     "name": "blewis"
   },
-  "keywords": ["home-assistant", "smart-home", "automation", "yaml", "iot"]
+  "homepage": "https://github.com/ben/home-assistant-assistant",
+  "keywords": ["home-assistant", "automation", "smart-home", "yaml", "iot"],
+  "commands": "./commands",
+  "agents": "./agents",
+  "skills": "./skills",
+  "hooks": "./hooks/hooks.json"
 }
