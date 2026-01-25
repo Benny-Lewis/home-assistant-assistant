@@ -1,0 +1,13 @@
+{
+  "PreToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "If editing automations.yaml, scripts.yaml, or scenes.yaml: After making changes, remind the user to run /ha-deploy to validate and deploy, or mention they can continue making more changes first."
+        }
+      ]
+    }
+  ]
+}
