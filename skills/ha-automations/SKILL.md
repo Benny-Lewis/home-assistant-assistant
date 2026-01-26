@@ -8,7 +8,7 @@ allowed-tools: Read, Bash(hass-cli:*), Edit, Write
 
 ## Your Project's Conventions
 
-!`cat .claude/home-assistant-assistant.md 2>/dev/null | head -60 || echo "No conventions configured - using defaults"`
+!`awk '/^---$/{if(++n==2)exit}1' .claude/home-assistant-assistant.md 2>/dev/null || echo "No conventions configured - using defaults"`
 
 ## Default Conventions (if none above)
 
@@ -134,22 +134,6 @@ After generating automation YAML, validate before presenting to user:
    - Fix the YAML
    - Run validation again
    - Only proceed when all checks pass
-
-## Automation Creation Progress
-
-Copy this checklist and track progress:
-
-```
-- [ ] Step 0: Load and verify conventions from settings
-- [ ] Step 1: Resolve entity IDs via ha-entity-resolver
-- [ ] Step 2: Determine timer vs delay based on duration
-- [ ] Step 3: Generate automation YAML following conventions
-- [ ] Step 4: Validate against naming patterns
-- [ ] Step 5: If timer needed, generate timer.yaml entry
-- [ ] Step 6: Present to user for review
-- [ ] Step 7: Write to automations.yaml
-- [ ] Step 8: Deploy via /ha-deploy
-```
 
 ## References
 
