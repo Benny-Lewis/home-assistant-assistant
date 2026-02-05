@@ -1,8 +1,8 @@
 # HA Plugins Merge Progress
 
 > **Last updated:** 2026-02-05 by Claude
-> **Current phase:** 4 - Skills Consolidation
-> **Overall:** 48/61 items complete
+> **Current phase:** 7 - Testing & Cleanup
+> **Overall:** 55/61 items complete
 
 This file tracks incremental progress on merging the two plugin implementations. Each checkbox represents one commit-sized unit of work. See `ha_plugins_merge_fix_plan-v4.md` for detailed context on each item.
 
@@ -86,16 +86,16 @@ This file tracks incremental progress on merging the two plugin implementations.
 
 ---
 
-## Phase 6: Agents Consolidation (0/7)
+## Phase 6: Agents Consolidation (7/7)
 *From merge plan sections 1.12, 2.8-2.10*
 
-- [ ] **6.1** ha-entity-resolver: Standardize capability snapshot flow
-- [ ] **6.2** ha-config-validator: Add evidence tables, remove python dependency
-- [ ] **6.3** ha-log-analyzer: Make resolver-driven, add portable trace guidance
-- [ ] **6.4** ha-naming-analyzer: Tighten tool scope (read-only), add output scaling
-- [ ] **6.5** ha-convention-analyzer: Align with conventions skill
-- [ ] **6.6** config-debugger: Wire into troubleshooting spine
-- [ ] **6.7** device-advisor: Add mandatory capability discovery step
+- [x] **6.1** ha-entity-resolver: Standardize capability snapshot flow
+- [x] **6.2** ha-config-validator: Add evidence tables, remove python dependency
+- [x] **6.3** ha-log-analyzer: Make resolver-driven, add portable trace guidance
+- [x] **6.4** ha-naming-analyzer: Tighten tool scope (read-only), add output scaling
+- [x] **6.5** ha-convention-analyzer: Align with conventions skill
+- [x] **6.6** config-debugger: Wire into troubleshooting spine
+- [x] **6.7** device-advisor: Add mandatory capability discovery step
 
 ---
 

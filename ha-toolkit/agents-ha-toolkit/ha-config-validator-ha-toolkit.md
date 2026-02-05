@@ -4,66 +4,108 @@ description: Validates Home Assistant configuration files. Use before deploying 
 tools:
   - Bash
   - Read
+  - Grep
 ---
 
 # Config Validator Agent
 
 Validate Home Assistant YAML configuration before deployment.
 
+> **Safety Invariant #6:** Always show "what ran vs skipped" evidence tables.
+> Every validation output must document exactly what was checked.
+
 ## Task
 
 Check configuration files for errors before they're deployed.
 
-## Validation Steps
+## Validation Tiers
 
-1. **YAML Syntax Check**
-   ```bash
-   python -c "import yaml; yaml.safe_load(open('automations.yaml'))"
-   ```
+Validation progresses through tiers, stopping if any tier fails:
 
-2. **Entity Existence Check**
-   Extract entity IDs from config and verify each exists:
-   ```bash
-   hass-cli state get <entity_id>
-   ```
+### Tier 1: YAML Syntax (no dependencies)
 
-3. **Service Validation**
-   Verify service calls are valid:
-   ```bash
-   hass-cli service list | grep "<domain>.<service>"
-   ```
+Use hass-cli's built-in YAML parsing or read-and-parse:
+```bash
+# Preferred: HA-backed validation includes YAML check
+hass-cli raw post /api/config/core/check_config
 
-4. **HA Config Check**
-   Use HA's built-in validation:
-   ```bash
-   hass-cli raw post /api/config/core/check_config
-   ```
+# Fallback if HA not connected: use yq if available
+yq eval '.' automations.yaml > /dev/null 2>&1 && echo "Valid" || echo "Invalid"
 
-## Output Format
+# Last resort: Check for obvious syntax issues via grep
+# (Tabs instead of spaces, unquoted special chars)
+grep -n "	" automations.yaml  # Check for tabs
+```
+
+**Note:** Do NOT use `python -c "import yaml..."` - this creates an unnecessary Python dependency.
+
+### Tier 2: Entity Existence Check
+Extract entity IDs from config and verify each exists:
+```bash
+hass-cli state get <entity_id>
+```
+
+### Tier 3: Service Validation
+Verify service calls are valid:
+```bash
+hass-cli service list | grep "<domain>.<service>"
+```
+
+### Tier 4: HA-Backed Validation (most authoritative)
+Use Home Assistant's built-in validation:
+```bash
+hass-cli raw post /api/config/core/check_config
+```
+
+## Output Format (with Evidence Table)
 
 ### If Valid
 ```
-Validation passed.
+## Validation Result: PASSED ✅
 
-Checked:
-- YAML syntax: OK
-- Entities (5): All exist
-- Services (3): All valid
-- HA config check: Valid
+### Evidence Table: What Ran vs Skipped
+
+| Tier | Check | Status | Evidence |
+|------|-------|--------|----------|
+| 1 | YAML Syntax | ✅ Passed | check_config returned valid |
+| 2 | Entity existence | ✅ Passed | 5/5 entities verified |
+| 3 | Service validation | ✅ Passed | 3/3 services exist |
+| 4 | HA config check | ✅ Passed | API returned success |
+
+### Entities Verified
+- light.living_room_ceiling ✅
+- binary_sensor.front_door ✅
+- switch.garage_door ✅
+- climate.main_thermostat ✅
+- sensor.outdoor_temp ✅
+
+### Services Verified
+- light.turn_on ✅
+- notify.mobile_app ✅
+- climate.set_temperature ✅
 ```
 
 ### If Errors Found
 ```
-Validation failed.
+## Validation Result: FAILED ❌
 
-Errors:
-1. YAML syntax error at line 23: unexpected indent
-2. Entity not found: light.kitchen_overheadz
-   Did you mean: light.kitchen_overhead?
-3. Service not found: light.turn_onn
-   Did you mean: light.turn_on?
+### Evidence Table: What Ran vs Skipped
 
-Fix these issues before deploying.
+| Tier | Check | Status | Evidence |
+|------|-------|--------|----------|
+| 1 | YAML Syntax | ✅ Passed | No syntax errors |
+| 2 | Entity existence | ❌ Failed | 1 entity not found |
+| 3 | Service validation | ⏭️ Skipped | Blocked by Tier 2 failure |
+| 4 | HA config check | ⏭️ Skipped | Blocked by Tier 2 failure |
+
+### Errors
+
+1. **Entity not found:** `light.kitchen_overheadz`
+   - Location: automations.yaml, line 47
+   - Did you mean: `light.kitchen_overhead`?
+
+### Next Steps
+Fix the entity reference and re-run validation.
 ```
 
 ## Suggestions
@@ -72,3 +114,4 @@ When errors are found, provide:
 - Exact line numbers
 - Suggested corrections (typos)
 - Similar valid values
+- Clear indication of what was checked vs skipped

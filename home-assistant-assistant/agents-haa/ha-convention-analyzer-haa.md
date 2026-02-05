@@ -16,6 +16,11 @@ model: sonnet
 
 Analyze existing Home Assistant configuration files to detect naming patterns and conventions.
 
+> **Safety Invariant #2:** Timer "preference" detected here is observational only.
+> Convention detection does NOT justify timer substitution for inactivity patterns.
+> Timer vs delay decisions are made by the intent classifier at generation time.
+> See `modules/intent-classifier.md`.
+
 ## Task
 
 Given access to the HA config directory, extract naming patterns from:
@@ -48,11 +53,14 @@ Given access to the HA config directory, extract naming patterns from:
    - Detect separator characters (`:`, `-`, `→`)
    - Note capitalization style
 
-5. **Detect timer usage**
+5. **Observe timer usage** (informational only)
    - Count automations with inline `delay:` actions
    - Count automations using `timer.start` service
    - Check if timer.yaml has entries
-   - Determine user's preference
+   - Report observations WITHOUT making recommendations
+
+   **IMPORTANT:** This observation is for context only. The intent classifier
+   (not this agent) determines when timers are appropriate based on semantics.
 
 6. **Handle mixed/legacy conventions**
    - If distinct groups of naming styles found, report both
@@ -98,13 +106,15 @@ Return findings in this structure:
   - `"Kitchen: Motion → Light On"`
 - **Confidence:** high (9/10 match)
 
-### Timer Usage
-- **Preference:** Timer helpers (or inline delays)
+### Timer Usage (Observation Only)
+- **Observed pattern:** Timer helpers / inline delays / mixed
 - **Evidence:**
   - X automations use `timer.start`
   - Y automations use inline `delay:`
   - Z entries in timer.yaml
-- **Confidence:** medium
+- **Note:** This is an observation, not a recommendation. Timer vs delay
+  decisions are made by the intent classifier based on semantic analysis
+  (inactivity detection vs pure delay), not convention preference.
 
 ### Conflicts Detected
 (Only if multiple patterns found)
@@ -134,9 +144,19 @@ No existing automations to analyze. Recommend adopting Home Assistant community 
 - Use timer helpers for delays > 30 seconds
 ```
 
+## Output Location
+
+The `/ha-conventions` skill writes detected conventions to:
+```
+.claude/ha.conventions.json
+```
+
+This agent provides the analysis; the skill handles user confirmation and file writing.
+
 ## Important Notes
 
 - Be conservative with confidence levels - don't overfit from small samples
 - Report actual examples, not invented ones
 - If patterns conflict, present both and let user choose
 - Focus on what CAN be determined, note what cannot
+- Timer observations are NOT recommendations - semantic classification determines timer usage
