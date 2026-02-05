@@ -7,30 +7,47 @@ argument-hint: [file-or-directory]
 
 # Validate Home Assistant Configuration
 
+> **Evidence-First Approach:** Always show what checks ran vs. were skipped.
+> Users need to know what was validated, not just what passed.
+
 Check Home Assistant configuration files for errors and issues.
 
-## Validation Methods
+## Validation Tiers
 
-### Method 1: Local YAML Validation
+Validation runs in tiers. Higher tiers require more infrastructure but catch more issues.
 
-Check YAML syntax and structure locally:
+### Tier 1: YAML Syntax (always runs)
+- Valid YAML structure
+- Proper indentation
+- No duplicate keys
 
-1. Find all YAML files in config directory
-2. Parse each file for YAML syntax errors
-3. Check for common HA-specific issues:
-   - Invalid entity_id format
-   - Missing required keys
-   - Deprecated configuration
-   - Duplicate keys
+### Tier 2: Schema Validation (always runs)
+- HA-specific structure checks
+- Required keys present
+- Valid entity_id format
+- Valid service format
 
-### Method 2: HA Config Check (if hass-cli available)
+### Tier 3: HA-Backed Validation (when connected)
+- Full config check via HA API
+- Integration-specific validation
+- Template rendering verification
 
-Use Home Assistant's built-in validation:
+**Prefer HA-backed validation when available** - it catches issues that local checks miss.
+
+## Routing to HA-Backed Validation
+
+Check if hass-cli is configured:
+```bash
+[ -n "$HASS_TOKEN" ] && [ -n "$HASS_SERVER" ] && echo "Connected" || echo "Not connected"
+```
+
+**If connected**, prefer HA-backed validation:
 ```bash
 hass-cli service call homeassistant.check_config
 ```
 
-This validates against the actual HA installation.
+**If not connected**, run local validation only and note limitation:
+"Note: Running local validation only. For complete validation, connect to HA with `/ha-connect`."
 
 ## Scope
 
@@ -46,35 +63,50 @@ If no arguments:
 
 ## Checks Performed
 
-### YAML Syntax
+### YAML Syntax (Tier 1)
 - Valid YAML structure
 - Proper indentation (2 spaces)
 - Correct quoting of strings
 - Valid boolean values (true/false, not True/False)
+- No duplicate keys
 
-### Home Assistant Specific
+### Home Assistant Schema (Tier 2)
 - Entity ID format: `domain.entity_name` (lowercase, underscores)
 - Service format: `domain.service_name`
 - Required keys present (alias for automations, etc.)
 - Valid domains (light, switch, sensor, etc.)
-- Template syntax (Jinja2 validation)
+- Deprecated options flagged
 
-### Security Checks
+### HA-Backed (Tier 3)
+- Full config check against running HA
+- Integration availability
+- Template rendering
+- Entity existence verification
+
+### Security Checks (all tiers)
 - No hardcoded passwords/tokens
 - secrets.yaml references used appropriately
 - No sensitive data in tracked files
 
-### Best Practice Checks
-- Automations have descriptions
-- Entity IDs follow naming convention
-- No duplicate entity IDs
-- Deprecated options flagged
+## Output Format (Evidence Table)
 
-## Output Format
+**Always include the "What Ran vs Skipped" table:**
 
 ```
-Configuration Validation Report
-═══════════════════════════════
+## Configuration Validation Report
+
+### Evidence Table: What Ran vs Skipped
+
+| Check | Status | Notes |
+|-------|--------|-------|
+| YAML Syntax | ✅ Ran | 8 files parsed |
+| Schema Validation | ✅ Ran | HA 2024+ schema |
+| HA Config Check | ⏭️ Skipped | Not connected to HA |
+| Entity Existence | ⏭️ Skipped | Requires HA connection |
+| Template Rendering | ⏭️ Skipped | Requires HA connection |
+| Security Scan | ✅ Ran | No secrets exposed |
+
+### Results
 
 ✅ configuration.yaml - Valid
 ✅ automations.yaml - Valid (12 automations)
@@ -83,15 +115,23 @@ Configuration Validation Report
 ❌ packages/lights.yaml - 1 error
    Line 45: Invalid entity_id 'light.Living Room' (spaces not allowed)
 
-Summary:
-────────
-Files checked: 8
-Errors: 1
-Warnings: 1
-Passed: 6
+### Summary
 
-To fix errors, review the files above or run:
-  /ha:generate to recreate configurations
+| Metric | Count |
+|--------|-------|
+| Files checked | 8 |
+| Errors | 1 |
+| Warnings | 1 |
+| Passed | 6 |
+
+### Limitations
+
+The following checks were skipped because HA is not connected:
+- Entity existence verification
+- Template rendering validation
+- Integration-specific checks
+
+Run `/ha-connect` to enable full validation.
 ```
 
 ## Error Explanations
@@ -110,11 +150,17 @@ For common issues, offer to fix automatically:
 - Boolean formatting
 - Entity ID casing
 
-Ask user before making any changes.
+**Always ask user before making any changes.**
 
 ## Integration with Deploy
 
-After validation passes, suggest:
+After validation passes:
 ```
-Configuration is valid! Run /ha:deploy to push changes to Home Assistant.
+Configuration is valid! Run /ha-deploy to push changes to Home Assistant.
+```
+
+If HA-backed validation was skipped:
+```
+Local validation passed, but full validation requires HA connection.
+You can deploy with /ha-deploy, but some issues may only appear after reload.
 ```
