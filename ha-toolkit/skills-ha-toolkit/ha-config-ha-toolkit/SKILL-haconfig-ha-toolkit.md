@@ -2,11 +2,31 @@
 name: ha-config
 description: This skill should be used when the user asks about "configuration.yaml", "HA config structure", "packages", "includes", "secrets.yaml", "splitting config files", "YAML organization", mentions Home Assistant configuration organization, or needs help structuring their Home Assistant setup. Provides comprehensive guidance on Home Assistant configuration file organization and best practices.
 version: 0.1.0
+allowed-tools: Read, Grep, Glob
 ---
 
 # Home Assistant Configuration Patterns
 
+> **This skill is REFERENCE ONLY.** It provides guidance on config organization.
+> To modify configuration files, use the appropriate skill:
+> - `ha-automations` for automations.yaml
+> - `ha-scripts` for scripts.yaml
+> - `ha-scenes` for scenes.yaml
+> See file-target rules below.
+
 This skill provides guidance on organizing and structuring Home Assistant configuration files effectively.
+
+## File-Target Rules
+
+| File | Owner Skill | Notes |
+|------|-------------|-------|
+| `configuration.yaml` | Manual/Advanced | Core config, rarely needs changes |
+| `automations.yaml` | `ha-automations` | Use automation skill for changes |
+| `scripts.yaml` | `ha-scripts` | Use scripts skill for changes |
+| `scenes.yaml` | `ha-scenes` | Use scenes skill for changes |
+| `secrets.yaml` | NEVER | Never read or write secrets |
+| `packages/*.yaml` | Manual/Advanced | Packages are user-organized |
+| `.storage/*` | NEVER | Internal HA state, never touch |
 
 ## Core Configuration Structure
 
