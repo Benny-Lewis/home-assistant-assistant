@@ -1,12 +1,26 @@
 ---
 name: ha:audit-naming
 description: Audit entity and device naming for consistency issues
-allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
+allowed-tools: Read, Bash, Glob, Grep
 ---
 
 # Audit Naming Consistency
 
+> **This command is READ-ONLY.** It analyzes and reports, but does NOT modify.
+> To apply changes, use `/ha:apply-naming` after reviewing the audit.
+
 Scan all entities, devices, areas, automations, scripts, and scenes for naming inconsistencies.
+
+## Data Source Citation
+
+**Every finding must cite its source:**
+
+```
+Issue: light.light_1 has no descriptive name
+Source: hass-cli entity list | grep "light.light"
+```
+
+Do NOT report issues for entities you haven't verified exist.
 
 ## What Gets Audited
 

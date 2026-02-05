@@ -1,12 +1,34 @@
 ---
 name: ha:new-device
 description: Workflow for adding and configuring a new device in Home Assistant
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Task
+allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion, Task
 ---
 
 # New Device Setup Workflow
 
+> **Safety Invariant #1:** Before suggesting automations for the device,
+> get a capability snapshot. See `modules/resolver.md`.
+
 Guide the user through setting up a new device in Home Assistant: naming, automations, dashboard integration, and related configurations.
+
+## Capability Check (Mandatory)
+
+**Before suggesting any automations or scenes, get device capabilities:**
+
+```bash
+# Resolve actual entity_id
+hass-cli state list | grep -i "<device_name>"
+
+# Get capability snapshot
+hass-cli state get <entity_id>
+```
+
+Check for:
+- `supported_features` - What the device can do
+- `supported_color_modes` - For lights
+- `hvac_modes` - For climate devices
+
+**Only suggest automations using supported capabilities.**
 
 ## Trigger the Device Advisor Agent
 

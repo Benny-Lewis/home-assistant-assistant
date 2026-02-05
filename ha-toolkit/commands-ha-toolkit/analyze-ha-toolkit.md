@@ -7,7 +7,25 @@ argument-hint: [focus-area]
 
 # Analyze Home Assistant Setup
 
+> **Data-Derived Analysis:** All metrics and suggestions must be backed by evidence.
+> Do NOT invent statistics. Only report what was actually measured.
+
 Perform comprehensive analysis of the Home Assistant configuration and provide actionable suggestions for improvements, new automations, and optimizations.
+
+## Evidence Requirements
+
+**Every metric reported must include:**
+1. How it was measured (command or file read)
+2. Actual count/value (not estimated)
+3. Source (hass-cli output, file path, or "not available")
+
+**Example:**
+```
+Entities: 147 (from: hass-cli entity list | wc -l)
+Automations: 23 (from: grep -c "^- id:" automations.yaml)
+```
+
+**Do NOT report metrics you cannot verify.**
 
 ## Analysis Areas
 

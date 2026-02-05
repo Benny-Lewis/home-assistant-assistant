@@ -1,13 +1,46 @@
 ---
 name: ha:apply-naming
 description: Execute the naming plan to rename entities and update references
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
-argument-hint: [--dry-run | --phase N]
+disable-model-invocation: true
+allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
+argument-hint: [--execute | --phase N]
 ---
 
 # Apply Naming Plan
 
+> **Safety Invariant #5:** Never deploy unless explicitly requested.
+> **Safety Invariant #3:** Use AST editing, not brittle string replacement.
+>
+> Default mode is DRY-RUN. Use `--execute` to apply changes.
+
 Execute the naming plan created by `/ha:plan-naming` to rename entities, devices, and update all references.
+
+## Dry-Run Default
+
+**By default, this command shows what WOULD change without modifying anything.**
+
+To actually apply changes, user must explicitly add `--execute`:
+```
+/ha:apply-naming --execute
+```
+
+Without `--execute`, show preview:
+```
+## Dry Run Preview
+
+The following changes would be made:
+
+| Entity | Current | New |
+|--------|---------|-----|
+| light.light_1 | light.light_1 | light.living_room_ceiling |
+| light.light_2 | light.light_2 | light.living_room_lamp |
+
+Files that would be updated:
+- automations.yaml (3 references)
+- scenes.yaml (2 references)
+
+Run with `--execute` to apply these changes.
+```
 
 ## Prerequisites
 
@@ -22,11 +55,13 @@ Before any changes, create a backup:
 - Git commit current state with message "Pre-rename backup"
 - Record entity states via hass-cli
 
-### Dry Run Mode
-If `--dry-run` in arguments:
-- Show all changes that would be made
-- Don't execute any renames
-- Validate the plan can be executed
+### AST Editing
+**Do NOT use simple string replacement.** Entity IDs may appear in:
+- YAML values: `entity_id: light.light_1`
+- Template strings: `{{ states('light.light_1') }}`
+- Service targets: `target: { entity_id: light.light_1 }`
+
+Use the Editor module (`modules/editor.md`) for safe YAML modifications.
 
 ### Phased Execution
 If `--phase N` in arguments:

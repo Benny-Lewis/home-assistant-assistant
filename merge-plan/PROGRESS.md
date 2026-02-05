@@ -2,7 +2,7 @@
 
 > **Last updated:** 2026-02-05 by Claude
 > **Current phase:** 4 - Skills Consolidation
-> **Overall:** 44/61 items complete
+> **Overall:** 48/61 items complete
 
 This file tracks incremental progress on merging the two plugin implementations. Each checkbox represents one commit-sized unit of work. See `ha_plugins_merge_fix_plan-v4.md` for detailed context on each item.
 
@@ -65,7 +65,7 @@ This file tracks incremental progress on merging the two plugin implementations.
 
 ---
 
-## Phase 5: Commands Consolidation (11/15)
+## Phase 5: Commands Consolidation (15/15)
 *From merge plan sections 1.2-1.7, 2.5-2.16*
 
 - [x] **5.1** /ha-connect: Add secret safety (never print tokens), cross-platform guidance
@@ -79,10 +79,10 @@ This file tracks incremental progress on merging the two plugin implementations.
 - [x] **5.9** /ha:generate: Update YAML schema (ban automation: root)
 - [x] **5.10** /ha:setup: Unify with /ha-connect shared procedure
 - [x] **5.11** /ha:onboard: Merge into unified connection wizard
-- [ ] **5.12** /ha:new-device: Add capability checks, naming contract integration
-- [ ] **5.13** /ha:analyze: Make data-derived, require evidence for metrics
-- [ ] **5.14** /ha:audit-naming: Ensure read-only, cite data sources
-- [ ] **5.15** /ha:apply-naming: Add dry-run default, AST editing, disable-model-invocation
+- [x] **5.12** /ha:new-device: Add capability checks, naming contract integration
+- [x] **5.13** /ha:analyze: Make data-derived, require evidence for metrics
+- [x] **5.14** /ha:audit-naming: Ensure read-only, cite data sources
+- [x] **5.15** /ha:apply-naming: Add dry-run default, AST editing, disable-model-invocation
 
 ---
 
