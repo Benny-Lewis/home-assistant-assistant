@@ -1,13 +1,17 @@
 ---
 name: ha-automations
 description: Use when user mentions Home Assistant automations, describes "when X happens do Y" patterns, asks about triggers/conditions/actions, or wants to automate smart home devices.
+allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
 ---
 
 # Home Assistant Automations
 
+> **Safety Invariants:** #1 (capability check), #2 (no timer substitution), #5 (no implicit deploy)
+> See `references/safety-invariants.md` and `modules/intent-classifier.md`
+
 ## Overview
 
-Create Home Assistant automations from natural language descriptions. Core principle: resolve entities first, validate before writing.
+Create Home Assistant automations from natural language descriptions. Core principle: resolve entities first, classify intent, validate before writing.
 
 ## When to Use
 
@@ -32,21 +36,41 @@ Create Home Assistant automations from natural language descriptions. Core princ
 
 ## Process
 
-1. **Resolve entities** via ha-entity-resolver agent
-2. **Check conflicts** for existing automations on same entities
-3. **Generate YAML** using `references/yaml-syntax.md` and `references/common-patterns.md`
-4. **Preview** with inline comments
-5. **Write** to automations.yaml
-6. **Deploy** via /ha-deploy
+1. **Resolve entities** via ha-entity-resolver agent (Invariant #1)
+2. **Classify intent** - Is this inactivity detection or pure delay? (Invariant #2)
+   - "After no motion for X" → Inactivity → Use `for:` in trigger, NOT timers
+   - "Wait X then do Y" → Pure delay → `delay:` or timer acceptable
+   - See `modules/intent-classifier.md` for classification rules
+3. **Get capability snapshot** for devices being controlled
+4. **Check conflicts** for existing automations on same entities
+5. **Generate YAML** using `references/yaml-syntax.md` and `references/common-patterns.md`
+6. **Preview** with inline comments explaining choices
+7. **Offer options** (Invariant #5 - never auto-deploy):
+   - Save to automations.yaml (local only)
+   - Save and deploy via /ha-deploy
+   - Copy to clipboard for manual paste
+
+## Inactivity vs Delay (Critical)
+
+**This is the #1 source of broken automations.** See `modules/intent-classifier.md`.
+
+| User Says | Intent | Correct Pattern |
+|-----------|--------|-----------------|
+| "Turn off after 5 min of no motion" | Inactivity | `to: "off"` with `for: "00:05:00"` |
+| "Wait 5 minutes then turn off" | Delay | `delay:` in actions |
+| "5 min after motion stops" | Inactivity | `to: "off"` with `for:` |
+
+**NEVER use timers for inactivity** unless you also add cancel-on-motion logic.
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---------|-----|
 | Guessing entity IDs | Always resolve via ha-entity-resolver |
+| Timer for inactivity | Use `for:` in trigger instead |
 | Missing conditions | Add time/state guards to prevent unwanted triggers |
 | Invalid services | Verify service exists before using |
-| YAML syntax errors | Validate with hass-cli before writing |
+| Auto-deploying | Ask user first, never assume |
 
 ## References
 
