@@ -1,8 +1,8 @@
 # HA Plugins Merge Progress
 
 > **Last updated:** 2026-02-05 by Claude
-> **Current phase:** 2 - Core Shared Modules
-> **Overall:** 11/61 items complete
+> **Current phase:** 3 - Safety Invariants Implementation
+> **Overall:** 12/61 items complete
 
 This file tracks incremental progress on merging the two plugin implementations. Each checkbox represents one commit-sized unit of work. See `ha_plugins_merge_fix_plan-v4.md` for detailed context on each item.
 
@@ -22,13 +22,13 @@ This file tracks incremental progress on merging the two plugin implementations.
 
 ---
 
-## Phase 2: Core Shared Modules (3/4)
+## Phase 2: Core Shared Modules (4/4)
 *From merge plan section 3.3*
 
 - [x] **2.1** Create Resolver module (entity resolution, capability snapshots)
 - [x] **2.2** Create Editor module (YAML AST editing via ruamel.yaml or fallback)
 - [x] **2.3** Create Validator module (evidence-based, HA-backed)
-- [ ] **2.4** Create Connection check procedure (reusable across commands)
+- [x] **2.4** Create Connection check procedure (reusable across commands)
 
 ---
 
