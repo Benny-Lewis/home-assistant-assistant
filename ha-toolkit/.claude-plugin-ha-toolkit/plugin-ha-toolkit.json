@@ -5,7 +5,7 @@
   "author": {
     "name": "blewis"
   },
-  "homepage": "https://github.com/ben/home-assistant-assistant",
+  "homepage": "https://github.com/Benny-Lewis/home-assistant-assistant",
   "keywords": ["home-assistant", "automation", "smart-home", "yaml", "iot"],
   "commands": "./commands",
   "agents": "./agents",

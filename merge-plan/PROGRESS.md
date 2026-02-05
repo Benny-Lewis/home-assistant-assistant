@@ -2,16 +2,16 @@
 
 > **Last updated:** 2026-02-05 by Claude
 > **Current phase:** 1 - Foundation & Structure
-> **Overall:** 0/61 items complete
+> **Overall:** 1/61 items complete
 
 This file tracks incremental progress on merging the two plugin implementations. Each checkbox represents one commit-sized unit of work. See `ha_plugins_merge_fix_plan-v4.md` for detailed context on each item.
 
 ---
 
-## Phase 1: Foundation & Structure (0/8)
+## Phase 1: Foundation & Structure (1/8)
 *From merge plan sections 0.2, 2.6, 2.11, 3.2.1*
 
-- [ ] **1.1** Fix ha-toolkit manifest homepage (currently points to wrong repo)
+- [x] **1.1** Fix ha-toolkit manifest homepage (currently points to wrong repo)
 - [ ] **1.2** Add explicit commands/agents/skills/hooks paths to HAA manifest
 - [ ] **1.3** Establish final merged plugin directory layout
 - [ ] **1.4** Unify settings storage → `.claude/settings.local.json`
