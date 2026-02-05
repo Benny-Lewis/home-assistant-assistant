@@ -2,6 +2,9 @@
 
 Shared procedures for safe YAML editing that preserves formatting and avoids brittle string replacements.
 
+> **Safety Invariant #3:** No brittle string insertions for YAML changes (AST editing only).
+> See `references/safety-invariants.md` for full details.
+
 ## Purpose
 
 Home Assistant YAML files often have:
