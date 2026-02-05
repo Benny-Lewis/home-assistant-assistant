@@ -1,0 +1,13 @@
+# User-local settings (created by plugin, never commit)
+.claude/settings.local.json
+.claude/*.local.md
+.claude/naming-plan.yaml
+.claude/ha.conventions.json
+
+# Legacy settings file patterns (from pre-merge plugins)
+.claude/ha-toolkit.local.md
+.claude/home-assistant-assistant.md
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,14 @@
+{
+  "name": "ha-toolkit",
+  "version": "0.2.0",
+  "description": "Natural language management of Home Assistant configurations - create automations, scripts, scenes, and dashboards through conversation",
+  "author": {
+    "name": "Benny Lewis"
+  },
+  "homepage": "https://github.com/Benny-Lewis/home-assistant-assistant",
+  "keywords": ["home-assistant", "automation", "smart-home", "yaml", "iot", "dashboard"],
+  "commands": "./commands",
+  "agents": "./agents",
+  "skills": "./skills",
+  "hooks": "./hooks/hooks.json"
+}

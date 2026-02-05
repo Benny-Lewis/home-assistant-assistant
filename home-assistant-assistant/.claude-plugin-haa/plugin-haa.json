@@ -1,0 +1,14 @@
+{
+  "name": "home-assistant-assistant",
+  "version": "0.1.0",
+  "description": "Natural language management of Home Assistant configurations - create automations, scripts, and scenes through conversation",
+  "author": {
+    "name": "Ben"
+  },
+  "homepage": "https://github.com/Benny-Lewis/home-assistant-assistant",
+  "keywords": ["home-assistant", "automation", "smart-home", "yaml", "iot"],
+  "commands": "./commands-haa",
+  "agents": "./agents-haa",
+  "skills": "./skills-haa",
+  "hooks": "./hooks-haa/hooks-haa.json"
+}
