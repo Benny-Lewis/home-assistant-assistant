@@ -10,15 +10,26 @@ This is a Claude Code plugin for Home Assistant. It allows users to manage Home 
 
 ## Repository Structure
 
-The repo contains two previously separate plugin implementations being consolidated:
-
 ```
-ha-toolkit/                    # First implementation (files suffixed -ha-toolkit)
-home-assistant-assistant/      # Second implementation (files suffixed -haa)
-merge-plan/                    # Merge documentation and analysis
+ha-toolkit/                    # Primary plugin implementation (61-item merge complete)
+home-assistant-assistant/      # Legacy implementation (content merged into ha-toolkit)
+merge-plan/                    # Merge documentation and progress tracking
+references/                    # Shared reference documentation
+modules/                       # Shared procedures (resolver, editor, validator)
 ```
 
-Both follow the same plugin architecture but have different feature sets. The merge plan documents the consolidation strategy.
+**Status:** The 61-item merge plan is complete. The `ha-toolkit/` folder contains the consolidated, safety-hardened implementation. The `home-assistant-assistant/` folder is retained for reference but `ha-toolkit/` is the active codebase.
+
+## Safety Invariants
+
+All generated YAML and commands enforce these invariants:
+
+1. **No unsupported attributes** - Always check `supported_features`/`supported_color_modes` before suggesting device attributes
+2. **No semantic substitution** - Never replace "after no motion" (inactivity) with raw timers
+3. **AST editing only** - No brittle string replacement; use Edit tool with precise old/new strings
+4. **No secrets printed** - Never echo tokens; show "TOKEN is set ✓" not the value
+5. **Never auto-deploy** - All side-effectful commands require explicit user request
+6. **Evidence tables** - All validation outputs show "what ran vs skipped"
 
 ## Plugin Architecture
 
@@ -88,13 +99,28 @@ export HASS_TOKEN="your-long-lived-access-token"
 
 ## Key Files
 
-- `merge-plan/analysis-report.md` - Compliance review against Anthropic docs (48 sections analyzed)
+**Merge documentation:**
+- `merge-plan/PROGRESS.md` - 61-item checklist (all complete)
 - `merge-plan/ha_plugins_merge_fix_plan-v4.md` - Detailed merge strategy
-- `ha-toolkit/.planning-ha-toolkit/PROJECT-ha-toolkit.md` - Original project requirements
-- `home-assistant-assistant/docs-haa/external-haa/` - Reference documentation for Claude Code APIs
+- `merge-plan/analysis-report.md` - Compliance review against Anthropic docs
+
+**Core modules:**
+- `modules/resolver.md` - Entity resolution and capability snapshots
+- `modules/editor.md` - YAML AST editing procedures
+- `modules/validator.md` - Evidence-based validation
+- `modules/intent-classifier.md` - Inactivity vs delay classification
+
+**Testing:**
+- `ha-toolkit/TEST_PLAN-ha-toolkit.md` - Manual test plan with safety invariant tests
+
+**References:**
+- `references/yaml-syntax.md` - HA 2024+ YAML schema (triggers/conditions/actions)
+- `references/log-patterns.md` - Common error patterns and fixes
 
 ## Development Notes
 
-- Settings stored in `.claude/ha-toolkit.local.md` or `.claude/home-assistant-assistant.md` (gitignored)
+- Settings stored in `.claude/settings.local.json` (gitignored)
+- Conventions stored in `.claude/ha.conventions.json` (user's naming patterns)
 - Hooks trigger on Edit/Write operations targeting `.yaml` files to remind users about deployment
 - The plugin uses hass-cli for HA API operations and git for configuration deployment
+- All commands with side effects have `disable-model-invocation: true` in frontmatter
