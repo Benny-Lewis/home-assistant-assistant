@@ -1,9 +1,14 @@
 ---
 name: ha-troubleshooting
 description: Use when user asks "why didn't X work", "not working", "debug", "check logs", mentions something "stopped working", or needs to diagnose Home Assistant issues.
+allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
 ---
 
 # Home Assistant Troubleshooting
+
+> **This skill is READ-ONLY.** It diagnoses issues but does not fix them.
+> To apply fixes, use the appropriate generator skill (ha-automations, ha-scripts, ha-scenes)
+> with proper safety guards. See `modules/resolver.md` for entity verification.
 
 ## Overview
 
@@ -35,10 +40,18 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
 ## Process
 
 1. **Identify issue** - What automation/entity/feature isn't working?
-2. **Gather data** via ha-log-analyzer agent
-3. **Analyze** - Compare expected vs actual behavior
-4. **Report** - Present timeline and findings
-5. **Offer fixes** - If issue identified, offer to fix it
+2. **Resolve entities** - Use Resolver module to verify entity_ids exist
+   - Check if entities mentioned in error actually exist
+   - Look for typos, renamed entities, missing integrations
+3. **Gather data** via ha-log-analyzer agent
+   - Automation state (enabled/disabled)
+   - Recent traces and error logs
+   - Entity history around incident time
+4. **Analyze** - Compare expected vs actual behavior
+5. **Report with evidence** - Present findings with "what was checked" table
+6. **Suggest fixes** - Describe what to change, but do NOT auto-apply
+   - Route to appropriate skill (ha-automations, ha-scripts, ha-scenes)
+   - User must explicitly request changes
 
 ## Common Mistakes
 
