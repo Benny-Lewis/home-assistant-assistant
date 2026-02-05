@@ -2,11 +2,36 @@
 name: ha-jinja
 description: This skill should be used when the user asks about "template", "jinja", "jinja2", "template sensor", "value_template", "state_attr", "states()", mentions Jinja syntax, template debugging, or needs help with Home Assistant templating patterns.
 version: 0.1.0
+allowed-tools: Read, Grep, Glob
 ---
 
 # Home Assistant Jinja2 Templating
 
 This skill provides guidance on Jinja2 templating in Home Assistant.
+
+## Where Jinja Runs
+
+**Jinja2 templates are evaluated server-side by Home Assistant's backend.**
+
+They do NOT run in the browser. This is important to understand:
+
+### Jinja WORKS in (server-side evaluation):
+- `automations.yaml` - conditions, templates in actions
+- `scripts.yaml` - data_template, conditions
+- `configuration.yaml` - template sensors, customizations
+- Notification messages (service calls)
+- Developer Tools → Template (for testing)
+
+### Jinja does NOT work in (client-side/browser):
+- **Native Lovelace cards** - `{{ states('sensor.x') }}` will display as literal text
+- Dashboard YAML `title:`, `name:`, etc. fields
+- Frontend themes
+
+**For dynamic Lovelace content**, use:
+- Template entities (create a sensor, display that sensor's state)
+- Custom cards that implement their own templating (e.g., `button-card`, `card-mod`)
+
+See `ha-lovelace` skill for dashboard-specific patterns.
 
 ## Template Basics
 
@@ -16,13 +41,6 @@ Templates allow dynamic values in configurations using Jinja2 syntax.
 - `{{ }}` - Output expression result
 - `{% %}` - Statements (if, for, set)
 - `{# #}` - Comments
-
-### Where Templates Work
-- Template sensors/binary sensors
-- Automation conditions and actions
-- Scripts
-- Notifications
-- Lovelace cards (with card-mod or custom cards)
 
 ## State Access
 
