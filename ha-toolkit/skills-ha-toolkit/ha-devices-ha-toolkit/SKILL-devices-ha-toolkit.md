@@ -2,11 +2,32 @@
 name: ha-devices
 description: This skill should be used when the user asks about "device", "integration", "entity", "add device", "device setup", "Zigbee", "Z-Wave", "WiFi devices", mentions device types, integration configuration, or needs help understanding Home Assistant device and integration concepts.
 version: 0.1.0
+allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
 ---
 
 # Home Assistant Devices and Integrations
 
+> **Safety Invariant #1:** Before suggesting automations/scenes for devices, get a capability snapshot.
+> See `modules/resolver.md` for the procedure.
+
 This skill provides guidance on Home Assistant devices, integrations, and entity management.
+
+## Capability Snapshot Contract
+
+**Before generating YAML that controls a device, you MUST:**
+
+1. Resolve the entity_id via `hass-cli state list`
+2. Get capabilities via `hass-cli state get <entity_id>`
+3. Check `supported_features`, `supported_color_modes`, `hvac_modes`, etc.
+4. Only emit attributes the device actually supports
+
+**Example for a light:**
+```bash
+hass-cli state get light.living_room
+# Check: supported_color_modes, min_mireds, max_mireds, supported_features
+```
+
+If `supported_color_modes` only includes `brightness`, do NOT include `color_temp` or `rgb_color` in scenes/automations.
 
 ## Concepts
 
