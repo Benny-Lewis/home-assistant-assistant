@@ -2,7 +2,7 @@
 
 > **Last updated:** 2026-02-05 by Claude
 > **Current phase:** 4 - Skills Consolidation
-> **Overall:** 29/61 items complete
+> **Overall:** 30/61 items complete
 
 This file tracks incremental progress on merging the two plugin implementations. Each checkbox represents one commit-sized unit of work. See `ha_plugins_merge_fix_plan-v4.md` for detailed context on each item.
 
@@ -44,7 +44,7 @@ This file tracks incremental progress on merging the two plugin implementations.
 
 ---
 
-## Phase 4: Skills Consolidation (11/15)
+## Phase 4: Skills Consolidation (12/15)
 *From merge plan sections 1.1-1.16, 2.17-2.22*
 
 - [x] **4.1** ha-automations: Add intent classifier (inactivity vs delay)
@@ -58,7 +58,7 @@ This file tracks incremental progress on merging the two plugin implementations.
 - [x] **4.9** ha-devices: Fix frontmatter, add capability snapshot contract
 - [x] **4.10** ha-jinja: Fix frontmatter, clarify where Jinja runs
 - [x] **4.11** ha-lovelace: Fix frontmatter, avoid teaching unsupported templating
-- [ ] **4.12** ha-naming: Fix frontmatter, progressive disclosure (move tables to references/)
+- [x] **4.12** ha-naming: Fix frontmatter, progressive disclosure (move tables to references/)
 - [ ] **4.13** Consolidate YAML syntax references (automations/scenes/scripts)
 - [ ] **4.14** Update log-patterns reference (resolver-first, portable)
 - [ ] **4.15** Add ha-log-analyzer resolver-driven fixes
