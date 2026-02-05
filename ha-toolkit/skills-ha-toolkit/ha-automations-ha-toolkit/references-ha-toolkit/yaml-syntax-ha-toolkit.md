@@ -1,62 +1,78 @@
 # Automation YAML Syntax Reference
 
+> **Schema Version:** Home Assistant 2024+ (current)
+> Uses `triggers:`/`conditions:`/`actions:` (plural) with `trigger:`/`condition:`/`action:` inside.
+
 ## Basic Structure
 
 ```yaml
-- alias: "Descriptive Name"
+- id: unique_automation_id
+  alias: "Descriptive Name"
   description: "What this automation does"
-  trigger:
-    - platform: <trigger_type>
-      # trigger config
-  condition:
-    - condition: <condition_type>
-      # condition config (optional)
-  action:
-    - service: <domain>.<service>
-      # action config
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.motion
+      to: "on"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.enabled
+      state: "on"
+  actions:
+    - action: light.turn_on
+      target:
+        entity_id: light.living_room
 ```
 
 ## Trigger Types
 
 ### State Trigger
 ```yaml
-trigger:
-  - platform: state
+triggers:
+  - trigger: state
     entity_id: binary_sensor.motion
     to: "on"
     from: "off"  # optional
-    for: "00:01:00"  # optional, must be in state for duration
+    for: "00:05:00"  # optional - must be in state for duration (use for inactivity!)
 ```
 
 ### Time Trigger
 ```yaml
-trigger:
-  - platform: time
+triggers:
+  - trigger: time
     at: "07:00:00"
 ```
 
 ### Sun Trigger
 ```yaml
-trigger:
-  - platform: sun
+triggers:
+  - trigger: sun
     event: sunset
     offset: "-00:30:00"  # 30 min before sunset
 ```
 
 ### Numeric State Trigger
 ```yaml
-trigger:
-  - platform: numeric_state
+triggers:
+  - trigger: numeric_state
     entity_id: sensor.temperature
     above: 75
     below: 85
+```
+
+### Event Trigger
+```yaml
+triggers:
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.kitchen_delay
 ```
 
 ## Condition Types
 
 ### State Condition
 ```yaml
-condition:
+conditions:
   - condition: state
     entity_id: binary_sensor.someone_home
     state: "on"
@@ -64,7 +80,7 @@ condition:
 
 ### Sun Condition
 ```yaml
-condition:
+conditions:
   - condition: sun
     after: sunset
     before: sunrise
@@ -72,7 +88,7 @@ condition:
 
 ### Time Condition
 ```yaml
-condition:
+conditions:
   - condition: time
     after: "22:00:00"
     before: "06:00:00"
@@ -80,7 +96,7 @@ condition:
 
 ### And/Or Conditions
 ```yaml
-condition:
+conditions:
   - condition: and
     conditions:
       - condition: state
@@ -94,45 +110,96 @@ condition:
 
 ### Service Call
 ```yaml
-action:
-  - service: light.turn_on
+actions:
+  - action: light.turn_on
     target:
       entity_id: light.living_room
     data:
       brightness_pct: 100
-      color_temp: 350
+      # Only include attributes device supports! (Invariant #1)
 ```
 
-### Delay
+### Delay (Pure Delay Only)
 ```yaml
-action:
+actions:
   - delay: "00:05:00"
 ```
 
+**Note:** For inactivity patterns, use `for:` in the trigger instead of `delay:` in actions.
+
 ### Wait for Trigger
 ```yaml
-action:
+actions:
   - wait_for_trigger:
-      - platform: state
+      - trigger: state
         entity_id: binary_sensor.motion
         to: "off"
     timeout: "00:10:00"
+    continue_on_timeout: true
 ```
 
 ### Choose (Conditional)
 ```yaml
-action:
+actions:
   - choose:
       - conditions:
           - condition: state
             entity_id: input_boolean.guest_mode
             state: "on"
         sequence:
-          - service: light.turn_on
+          - action: light.turn_on
             target:
               entity_id: light.guest_room
     default:
-      - service: light.turn_off
+      - action: light.turn_off
         target:
           entity_id: light.guest_room
 ```
+
+### Variables
+```yaml
+actions:
+  - variables:
+      brightness_level: "{{ states('input_number.default_brightness') | int }}"
+  - action: light.turn_on
+    target:
+      entity_id: light.living_room
+    data:
+      brightness: "{{ brightness_level }}"
+```
+
+## Inactivity Pattern (Correct Way)
+
+**Use `for:` in trigger, NOT delay/timer in actions:**
+
+```yaml
+- id: motion_light_off_after_inactivity
+  alias: "Turn off light after no motion"
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.kitchen_motion
+      to: "off"
+      for: "00:05:00"  # Only fires if motion stays off for 5 min
+  actions:
+    - action: light.turn_off
+      target:
+        entity_id: light.kitchen
+```
+
+## Automation Modes
+
+```yaml
+- id: example_automation
+  alias: "Example"
+  mode: single  # single, restart, queued, parallel
+  max: 10  # only for queued/parallel
+  triggers: [...]
+  actions: [...]
+```
+
+| Mode | Behavior |
+|------|----------|
+| single | Ignore new triggers while running (default) |
+| restart | Stop current run, start new |
+| queued | Queue new triggers, run sequentially |
+| parallel | Run multiple instances simultaneously |
