@@ -1,9 +1,13 @@
 ---
 name: ha-scripts
 description: Use when user wants reusable action sequences, mentions "script", "sequence of actions", or needs to chain multiple commands that can be triggered manually or from automations.
+allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
 ---
 
 # Home Assistant Scripts
+
+> **Safety Invariants:** #1 (capability check), #5 (no implicit deploy)
+> See `references/safety-invariants.md`
 
 ## Overview
 
@@ -34,20 +38,25 @@ Create reusable action sequences that can be triggered manually or from automati
 ## Process
 
 1. **Understand intent** - What sequence of actions?
-2. **Resolve entities** via ha-entity-resolver agent
-3. **Generate YAML** using `references/yaml-syntax.md`
-4. **Preview** with inline comments
-5. **Write** to scripts.yaml
-6. **Deploy** via /ha-deploy
+2. **Resolve entities** via ha-entity-resolver agent (Invariant #1)
+3. **Get capability snapshot** - For each device, verify supported services/attributes
+4. **Generate YAML** using `references/yaml-syntax.md`
+5. **Preview** with inline comments explaining choices
+6. **Offer options** (Invariant #5 - never auto-deploy):
+   - Save to scripts.yaml (local only)
+   - Save and deploy via /ha-deploy
+   - Copy to clipboard for manual paste
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---------|-----|
 | Using script when automation needed | If there's a trigger event, use automation instead |
+| Unsupported service attributes | Get capability snapshot first (Invariant #1) |
 | Forgetting mode for long sequences | Add `mode: restart` or `queued` for interruptible scripts |
 | Hardcoding values | Use `fields` for reusable parameters |
 | Missing delays between actions | Add `delay` between sequential device commands |
+| Auto-deploying without asking | Offer options, let user choose (Invariant #5) |
 
 ## References
 
