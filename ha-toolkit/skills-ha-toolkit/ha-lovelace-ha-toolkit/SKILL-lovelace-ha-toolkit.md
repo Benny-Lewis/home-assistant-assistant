@@ -2,11 +2,28 @@
 name: ha-lovelace
 description: This skill should be used when the user asks about "dashboard", "lovelace", "card", "view", "theme", "UI", mentions dashboard design, card configuration, dashboard layout, or needs help with Home Assistant Lovelace dashboard creation and customization.
 version: 0.1.0
+allowed-tools: Read, Grep, Glob
 ---
 
 # Home Assistant Lovelace Dashboards
 
 This skill provides guidance on creating effective Lovelace dashboards.
+
+## Important: Templating in Lovelace
+
+**Most Lovelace cards do NOT support Jinja2 templating.**
+
+If you type `{{ states('sensor.x') }}` in an Entities card, Button card, or most other cards,
+it will display as literal text - NOT the sensor value.
+
+**Exception: Markdown Card** - The Markdown Card renders templates server-side. This is one of
+the few native cards that supports Jinja. See the Markdown Card section below.
+
+For dynamic values in other cards, use one of these approaches:
+1. **Template entities** - Create a template sensor/binary_sensor, display that entity
+2. **Custom cards** - Install cards like `button-card` that implement their own templating
+
+See `ha-jinja` skill for templating reference.
 
 ## Dashboard Structure
 
@@ -201,8 +218,8 @@ card:
     - sensor.details
 ```
 
-### Markdown Card
-Rich text content:
+### Markdown Card (Supports Templates!)
+Rich text content with Jinja2 - **this is the exception** where Jinja works natively:
 ```yaml
 type: markdown
 title: Welcome
@@ -211,6 +228,7 @@ content: |
 
   Temperature: {{ states('sensor.temperature') }}°F
 ```
+Note: Templates are rendered server-side. Other cards do NOT support this.
 
 ## Tap Actions
 
