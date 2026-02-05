@@ -1,14 +1,14 @@
 # HA Plugins Merge Progress
 
 > **Last updated:** 2026-02-05 by Claude
-> **Current phase:** 1 - Foundation & Structure
-> **Overall:** 7/61 items complete
+> **Current phase:** 2 - Core Shared Modules
+> **Overall:** 8/61 items complete
 
 This file tracks incremental progress on merging the two plugin implementations. Each checkbox represents one commit-sized unit of work. See `ha_plugins_merge_fix_plan-v4.md` for detailed context on each item.
 
 ---
 
-## Phase 1: Foundation & Structure (7/8)
+## Phase 1: Foundation & Structure (8/8)
 *From merge plan sections 0.2, 2.6, 2.11, 3.2.1*
 
 - [x] **1.1** Fix ha-toolkit manifest homepage (currently points to wrong repo)
@@ -18,7 +18,7 @@ This file tracks incremental progress on merging the two plugin implementations.
 - [x] **1.5** Merge hooks.json (post-edit lint + neutral deploy posture)
 - [x] **1.6** Frontmatter compliance audit - all skills (name: lowercase-hyphenated)
 - [x] **1.7** Frontmatter compliance audit - all commands
-- [ ] **1.8** Frontmatter compliance audit - all agents
+- [x] **1.8** Frontmatter compliance audit - all agents
 
 ---
 

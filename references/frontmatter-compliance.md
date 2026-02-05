@@ -53,6 +53,24 @@ Audit date: 2026-02-05
 | ha-toolkit/commands-ha-toolkit/setup-ha-toolkit.md | `ha:setup` |
 | ha-toolkit/commands-ha-toolkit/validate-ha-toolkit.md | `ha:validate` |
 
+## Agents Audit
+
+### All Compliant (no changes needed)
+| File | name |
+|------|------|
+| ha-toolkit/agents-ha-toolkit/config-debugger-ha-toolkit.md | `config-debugger` |
+| ha-toolkit/agents-ha-toolkit/device-advisor-ha-toolkit.md | `device-advisor` |
+| ha-toolkit/agents-ha-toolkit/ha-config-validator-ha-toolkit.md | `ha-config-validator` |
+| ha-toolkit/agents-ha-toolkit/ha-entity-resolver-ha-toolkit.md | `ha-entity-resolver` |
+| ha-toolkit/agents-ha-toolkit/ha-log-analyzer-ha-toolkit.md | `ha-log-analyzer` |
+| ha-toolkit/agents-ha-toolkit/naming-analyzer-ha-toolkit.md | `naming-analyzer` |
+| home-assistant-assistant/agents-haa/ha-config-validator-haa.md | `ha-config-validator` |
+| home-assistant-assistant/agents-haa/ha-convention-analyzer-haa.md | `ha-convention-analyzer` |
+| home-assistant-assistant/agents-haa/ha-entity-resolver-haa.md | `ha-entity-resolver` |
+| home-assistant-assistant/agents-haa/ha-log-analyzer-haa.md | `ha-log-analyzer` |
+
+---
+
 ## Rules Applied
 
 1. **name**: Must be lowercase-hyphenated (e.g., `ha-automations`)
