@@ -1,5 +1,5 @@
 ---
-name: Home Assistant Configuration
+name: ha-config
 description: This skill should be used when the user asks about "configuration.yaml", "HA config structure", "packages", "includes", "secrets.yaml", "splitting config files", "YAML organization", mentions Home Assistant configuration organization, or needs help structuring their Home Assistant setup. Provides comprehensive guidance on Home Assistant configuration file organization and best practices.
 version: 0.1.0
 ---

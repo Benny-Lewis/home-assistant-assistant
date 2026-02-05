@@ -1,5 +1,5 @@
 ---
-name: Home Assistant Naming Conventions
+name: ha-naming
 description: This skill should be used when the user asks about "naming", "entity_id", "rename", "naming convention", "entity naming", "device naming", "consistent names", mentions organizing entities, standardizing names, or needs help with Home Assistant naming best practices.
 version: 0.1.0
 ---

@@ -1,5 +1,5 @@
 ---
-name: Home Assistant Automation
+name: ha-automation
 description: This skill should be used when the user asks about "automation", "trigger", "condition", "action", "blueprint", "automation mode", "automation trace", mentions creating automations, debugging automations, or needs help with Home Assistant automation patterns and best practices.
 version: 0.1.0
 ---

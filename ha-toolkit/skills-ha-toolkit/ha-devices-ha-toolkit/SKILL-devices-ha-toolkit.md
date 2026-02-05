@@ -1,5 +1,5 @@
 ---
-name: Home Assistant Devices and Integrations
+name: ha-devices
 description: This skill should be used when the user asks about "device", "integration", "entity", "add device", "device setup", "Zigbee", "Z-Wave", "WiFi devices", mentions device types, integration configuration, or needs help understanding Home Assistant device and integration concepts.
 version: 0.1.0
 ---
