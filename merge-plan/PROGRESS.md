@@ -2,7 +2,7 @@
 
 > **Last updated:** 2026-02-05 by Claude
 > **Current phase:** 7 - Testing & Cleanup
-> **Overall:** 55/61 items complete
+> **Overall:** 60/61 items complete
 
 This file tracks incremental progress on merging the two plugin implementations. Each checkbox represents one commit-sized unit of work. See `ha_plugins_merge_fix_plan-v4.md` for detailed context on each item.
 
@@ -99,14 +99,14 @@ This file tracks incremental progress on merging the two plugin implementations.
 
 ---
 
-## Phase 7: Testing & Cleanup (0/6)
+## Phase 7: Testing & Cleanup (5/6)
 *From merge plan section 4*
 
-- [ ] **7.1** Add regression test: plugin-onboarding (no secrets printed)
-- [ ] **7.2** Add regression test: scene-creation (capability-checked)
-- [ ] **7.3** Add regression test: simple-automation (inactivity preserved)
-- [ ] **7.4** Add regression test: ambiguous-entity (resolver + gating)
-- [ ] **7.5** Add regression test: complex-automation (helper creation)
+- [x] **7.1** Add regression test: plugin-onboarding (no secrets printed)
+- [x] **7.2** Add regression test: scene-creation (capability-checked)
+- [x] **7.3** Add regression test: simple-automation (inactivity preserved)
+- [x] **7.4** Add regression test: ambiguous-entity (resolver + gating)
+- [x] **7.5** Add regression test: complex-automation (helper creation)
 - [ ] **7.6** Final cleanup: remove duplicate files, update README
 
 ---
