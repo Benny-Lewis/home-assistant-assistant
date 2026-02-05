@@ -39,7 +39,7 @@ The plugin provides specialized knowledge in:
 
 ```
 â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    ha-toolkit Plugin                     â”‚
+â”‚                    home-assistant-assistant Plugin                     â”‚
 â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
 â”‚  YAML Configs (Git)      â”‚  Registry Ops (hass-cli)    â”‚
 â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€   â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€      â”‚
@@ -72,7 +72,7 @@ The plugin provides specialized knowledge in:
 
 ## Configuration
 
-Settings are stored in `.claude/ha-toolkit.local.md` (gitignored).
+Settings are stored in `.claude/home-assistant-assistant.local.md` (gitignored).
 
 ```yaml
 ---

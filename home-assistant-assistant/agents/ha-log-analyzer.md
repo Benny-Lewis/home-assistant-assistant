@@ -62,7 +62,7 @@ Check systematically:
 
 ### 4. Check Common Patterns
 
-See `references-ha-toolkit/log-patterns-ha-toolkit.md` for:
+See `references-home-assistant-assistant/log-patterns.md` for:
 - Entity not found errors
 - Service not found errors
 - Template errors

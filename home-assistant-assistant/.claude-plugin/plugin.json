@@ -1,5 +1,5 @@
 ﻿{
-  "name": "ha-toolkit",
+  "name": "home-assistant-assistant",
   "version": "0.1.0",
   "description": "Natural language management of Home Assistant configurations - create automations, scripts, and scenes through conversation",
   "author": {

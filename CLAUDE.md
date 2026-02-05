@@ -11,14 +11,13 @@ This is a Claude Code plugin for Home Assistant. It allows users to manage Home 
 ## Repository Structure
 
 ```
-ha-toolkit/                    # Primary plugin implementation (61-item merge complete)
-home-assistant-assistant/      # Legacy implementation (content merged into ha-toolkit)
+home-assistant-assistant/      # The plugin (load with --plugin-dir)
 merge-plan/                    # Merge documentation and progress tracking
 references/                    # Shared reference documentation
 modules/                       # Shared procedures (resolver, editor, validator)
 ```
 
-**Status:** The 61-item merge plan is complete. The `ha-toolkit/` folder contains the consolidated, safety-hardened implementation. The `home-assistant-assistant/` folder is retained for reference but `ha-toolkit/` is the active codebase.
+**Status:** The 61-item merge plan is complete. The `home-assistant-assistant/` folder contains the consolidated, safety-hardened implementation.
 
 ## Safety Invariants
 
@@ -33,22 +32,23 @@ All generated YAML and commands enforce these invariants:
 
 ## Plugin Architecture
 
-Each plugin implementation follows Claude Code's plugin structure:
+The plugin follows Claude Code's plugin structure:
 
 ```
-.claude-plugin-*/
-  plugin*.json              # Plugin manifest - metadata, component discovery
-skills-*/
-  */SKILL*.md               # Domain knowledge (automations, scripts, scenes, config, etc.)
-agents-*/
-  *.md                      # Subagents with specialized prompts (entity-resolver,
-                            # config-validator, log-analyzer, naming-analyzer)
-commands-*/
-  *.md                      # Slash commands (legacy - should migrate to skills)
-hooks-*/
-  hooks*.json               # Event-driven automation (YAML validation on file edits)
-templates-*/
-  *.md                      # Reference templates for generated configs
+home-assistant-assistant/
+  .claude-plugin/
+    plugin.json               # Plugin manifest - metadata, component discovery
+  skills/
+    */SKILL*.md               # Domain knowledge (automations, scripts, scenes, config, etc.)
+  agents/
+    *.md                      # Subagents with specialized prompts (entity-resolver,
+                              # config-validator, log-analyzer, naming-analyzer)
+  commands/
+    *.md                      # Slash commands (legacy - should migrate to skills)
+  hooks/
+    hooks.json                # Event-driven automation (YAML validation on file edits)
+  templates/
+    *.md                      # Reference templates for generated configs
 ```
 
 **Key architectural note**: Per Anthropic documentation, `commands/` is legacy. Skills with `user-invocable: true` frontmatter are the unified mechanism. The merged plugin should migrate all commands to skills.
@@ -59,10 +59,10 @@ No automated tests exist. Manual testing approach:
 
 ```bash
 # Load plugin for testing
-claude --plugin-dir "C:\Users\blewis\dev\home-assistant-assistant\ha-toolkit"
+claude --plugin-dir "C:\Users\blewis\dev\home-assistant-assistant\home-assistant-assistant"
 ```
 
-See `ha-toolkit/TEST_PLAN-ha-toolkit.md` for the manual test plan covering:
+See `home-assistant-assistant/TEST_PLAN.md` for the manual test plan covering:
 - Plugin loading verification
 - Command testing procedures
 - Skill trigger testing
@@ -111,7 +111,7 @@ export HASS_TOKEN="your-long-lived-access-token"
 - `modules/intent-classifier.md` - Inactivity vs delay classification
 
 **Testing:**
-- `ha-toolkit/TEST_PLAN-ha-toolkit.md` - Manual test plan with safety invariant tests
+- `home-assistant-assistant/TEST_PLAN.md` - Manual test plan with safety invariant tests
 
 **References:**
 - `references/yaml-syntax.md` - HA 2024+ YAML schema (triggers/conditions/actions)

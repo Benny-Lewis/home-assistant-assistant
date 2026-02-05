@@ -23,17 +23,17 @@ It records:
 - ✅ Skills:
   - `skills/ha-automations/SKILL.md` + `references/common-patterns.md` + `references/yaml-syntax.md`
   - `skills/ha-conventions/SKILL.md`
-  - `skills/ha-scenes/SKILL.md` + `references/yaml-syntax.md` (uploaded as `yaml-syntax-sceenes-haa.md`)
-  - `skills/ha-scripts/SKILL.md` + `references/yaml-syntax.md` (uploaded as `yaml-scripts-syntax-haa.md`)
+  - `skills/ha-scenes/SKILL.md` + `references/yaml-syntax.md` (uploaded as `yaml-syntax-sceenes.md`)
+  - `skills/ha-scripts/SKILL.md` + `references/yaml-syntax.md` (uploaded as `yaml-scripts-syntax.md`)
   - `skills/ha-troubleshooting/SKILL.md` + `references/log-patterns.md`
 
 ### Ingested: ha-toolkit (plugin 1)
 - ✅ `plugin-ha-toolkit.json` (manifest)
-- ✅ `hooks/hooks.json` (uploaded as `hooks-ha-toolkit.json`)
+- ✅ `hooks/hooks.json` (uploaded as `hooks.json`)
 - ✅ Commands: `commands/generate.md`, `commands/setup.md`, `commands/onboard.md`, `commands/new-device.md`, `commands/plan-naming.md`, `commands/apply-naming.md`, `commands/validate.md`, `commands/deploy.md`, `commands/analyze.md`, `commands/audit-naming.md`
 - ✅ Agents: `agents/device-advisor.md`, `agents/naming-analyzer.md`, `agents/config-debugger.md`
 - ✅ Skills: `skills/ha-automation/SKILL.md`, `skills/ha-config/SKILL.md`, `skills/ha-devices/SKILL.md`, `skills/ha-jinja/SKILL.md`, `skills/ha-lovelace/SKILL.md`
-- ✅ Skills: `skills/ha-naming/SKILL.md` (uploaded as `SKILLnaming-ha-toolkit.md`)
+- ✅ Skills: `skills/ha-naming/SKILL.md` (uploaded as `SKILLnaming.md`)
 
 ### 0.2 Plugin manifest diff notes
 **ha-toolkit (`plugin-ha-toolkit.json`)**
@@ -280,9 +280,9 @@ But the official docs still draw a useful distinction we can exploit:
 **Problem:** we currently have *multiple* YAML “syntax reference” docs across the plugins, and they don’t agree. Several still teach legacy keys like `trigger:`/`condition:`/`action:` with `platform:`/`service:`.
 
 **Files implicated (current uploads):**
-- `skills/ha-automations/references/yaml-syntax.md` (uploaded as `yaml-syntax-haa-ha-toolkit.md`)
-- `skills/ha-scenes/references/yaml-syntax.md` (uploaded as `yaml-syntax-sceenes-haa.md`)
-- `skills/ha-scripts/references/yaml-syntax.md` (uploaded as `yaml-scripts-syntax-haa.md`)
+- `skills/ha-automations/references/yaml-syntax.md` (uploaded as `yaml-syntax.md`)
+- `skills/ha-scenes/references/yaml-syntax.md` (uploaded as `yaml-syntax-sceenes.md`)
+- `skills/ha-scripts/references/yaml-syntax.md` (uploaded as `yaml-scripts-syntax.md`)
 
 **Merge fixes (single source of truth):**
 1) **Automations:** update to current Home Assistant YAML docs (plural top-level keys):
@@ -321,7 +321,7 @@ But the official docs still draw a useful distinction we can exploit:
 ---
 
 ### 1.15 `/ha-rollback` is useful, but must be safer-by-default
-**New evidence:** `commands/ha-rollback.md` (uploaded as `ha-rollback-haa.md`).
+**New evidence:** `commands/ha-rollback.md` (uploaded as `ha-rollback.md`).
 
 **Issues:**
 - It does a `git push` by default (high-risk, and violates “never do side effects unless asked”).
@@ -338,7 +338,7 @@ But the official docs still draw a useful distinction we can exploit:
 **Tool scoping (recommended):** `Read`, `Bash`, `AskUserQuestion` only.
 
 ### 1.16 `ha-conventions` skill is high leverage but currently inconsistent
-**New evidence:** `skills/ha-conventions/SKILL.md` (uploaded as `SKILL-haconventions-haa.md`).
+**New evidence:** `skills/ha-conventions/SKILL.md` (uploaded as `SKILL-haconventions.md`).
 
 **Issues:**
 1) It references `.claude/home-assistant-assistant.md`, but your repo tree doesn’t show that file (and relying on it breaks portability).
@@ -359,7 +359,7 @@ But the official docs still draw a useful distinction we can exploit:
 ### 2.1 Capability blind spot (unsupported attributes)
 **Observed:** scene included `color_temp` on a brightness-only lamp.
 
-**Current file evidence:** `ha-toolkit/agents/device-advisor.md` has a solid “device onboarding” flow, but it never requires *capability discovery* before suggesting automations/scenes/cards; it jumps straight from identification → naming → suggestions.
+**Current file evidence:** `home-assistant-assistant/agents/device-advisor.md` has a solid “device onboarding” flow, but it never requires *capability discovery* before suggesting automations/scenes/cards; it jumps straight from identification → naming → suggestions.
 
 **Where likely to fix:**
 - `agents/device-advisor.md` (make capability checks mandatory before emitting YAML)
@@ -386,7 +386,7 @@ But the official docs still draw a useful distinction we can exploit:
 ### 2.3 Missing semantic safety defaults
 **Observed:** arrival trigger lacked `from: not_home` gating.
 
-**New evidence:** `ha-toolkit/skills/ha-automation/skill.md` is currently a *general tutorial* skill and it does not enforce state-transition gating rules as defaults (e.g., "to home" triggers should usually specify a `from` to avoid re-fires / startup edge cases).
+**New evidence:** `home-assistant-assistant/skills/ha-automation/skill.md` is currently a *general tutorial* skill and it does not enforce state-transition gating rules as defaults (e.g., "to home" triggers should usually specify a `from` to avoid re-fires / startup edge cases).
 
 **Fix design:**
 - Add a **default gating table** to the skill (and the generator contract):
@@ -395,7 +395,7 @@ But the official docs still draw a useful distinction we can exploit:
   - Motion inactivity: prefer `to: off` with `for:` rather than timer substitution.
 
 **Where to implement:**
-- `ha-toolkit/skills/ha-automation/skill.md` (policy + templates)
+- `home-assistant-assistant/skills/ha-automation/skill.md` (policy + templates)
 - the merged generator skill (`skills/ha-automations/`) to guarantee the rule is applied even if a user never reads the tutorial.
 
 ### 2.4 Edit fragility and weaker traceability
@@ -408,9 +408,9 @@ But the official docs still draw a useful distinction we can exploit:
 ---
 
 ### 2.5 `/ha:generate` entrypoint is schema-inconsistent + too write-happy
-**Observed:** `ha-toolkit/commands/generate.md` is the main generator entrypoint, but its embedded YAML patterns still use legacy keys like `trigger:`/`action:`/`condition:` with `platform:`/`service:`.
+**Observed:** `home-assistant-assistant/commands/generate.md` is the main generator entrypoint, but its embedded YAML patterns still use legacy keys like `trigger:`/`action:`/`condition:` with `platform:`/`service:`.
 
-**New evidence:** `ha-toolkit/skills/ha-automation/skill.md` is also written in this older syntax (and even includes a top-level `automation:` block), which conflicts with Home Assistant’s current *plural* YAML schema (`triggers`/`conditions`/`actions`) and the “automations.yaml must be a list” rule.
+**New evidence:** `home-assistant-assistant/skills/ha-automation/skill.md` is also written in this older syntax (and even includes a top-level `automation:` block), which conflicts with Home Assistant’s current *plural* YAML schema (`triggers`/`conditions`/`actions`) and the “automations.yaml must be a list” rule.
 
 **Why this matters:**
 - Mixed schemas cause subtle validation failures and makes AST editing harder.
@@ -424,7 +424,7 @@ But the official docs still draw a useful distinction we can exploit:
 ---
 
 ### 2.6 `/ha:setup` settings management is inconsistent with `/ha-connect` and is not safe-by-default
-**File evidence:** `ha-toolkit/commands/setup.md` uses a project-local markdown settings file `.claude/ha-toolkit.local.md` and stores **ha_url**/**ha_token** there.  It also enables `Write`/`Edit`/`Bash` by default.
+**File evidence:** `home-assistant-assistant/commands/setup.md` uses a project-local markdown settings file `.claude/ha-toolkit.local.md` and stores **ha_url**/**ha_token** there.  It also enables `Write`/`Edit`/`Bash` by default.
 
 **Issues:**
 1) **Settings format divergence**: ha-toolkit uses `.claude/ha-toolkit.local.md`  while home-assistant-assistant is moving toward `.claude/settings.local.json` (and/or standard `hass-cli` config). Divergence makes the merged plugin brittle.
@@ -447,7 +447,7 @@ But the official docs still draw a useful distinction we can exploit:
 ---
 
 ### 2.7 Naming contract exists but needs to become enforceable and merge-safe
-**File evidence:** `ha-toolkit/skills/ha-naming/skill.md` is a strong baseline naming guide (entity_id rules, recommended patterns, domain-specific examples, anti-patterns, migration steps).
+**File evidence:** `home-assistant-assistant/skills/ha-naming/skill.md` is a strong baseline naming guide (entity_id rules, recommended patterns, domain-specific examples, anti-patterns, migration steps).
 
 **Issues (merge impact):**
 1) **Skill metadata hygiene:** frontmatter `name:` should be lowercase hyphenated for reliable selection (no spaces / caps).
@@ -468,7 +468,7 @@ But the official docs still draw a useful distinction we can exploit:
 ---
 
 ### 2.8 Naming analyzer agent is strong but needs tighter guarantees and better integration
-**File evidence:** `ha-toolkit/agents/naming-analyzer.md` defines a structured audit process (data collection → pattern detection → inconsistency identification → dependency mapping) and a report format that quantifies issues and shows exact locations.
+**File evidence:** `home-assistant-assistant/agents/naming-analyzer.md` defines a structured audit process (data collection → pattern detection → inconsistency identification → dependency mapping) and a report format that quantifies issues and shows exact locations.
 
 **Strengths to keep:**
 - Clear responsibilities and report schema.
@@ -495,7 +495,7 @@ But the official docs still draw a useful distinction we can exploit:
 ---
 
 ### 2.9 `/ha:apply-naming` is the right direction; enforce dry-run + dependency safety
-**New evidence:** `commands/apply-naming.md` (uploaded as `apply-naming-ha-toolkit.md`).
+**New evidence:** `commands/apply-naming.md` (uploaded as `apply-naming.md`).
 
 **What’s good:**
 - It already frames rename as a **multi-phase** operation: parse mapping → backup → apply renames → update references → validate.
@@ -512,7 +512,7 @@ But the official docs still draw a useful distinction we can exploit:
 5) Validation must be evidence-based (never claim success without showing what ran).
 
 ### 2.10 `config-debugger` agent should be wired into the evidence-first troubleshooting spine
-**New evidence:** `agents/config-debugger.md` (uploaded as `config-debugger-ha-toolkit.md`).
+**New evidence:** `agents/config-debugger.md` (uploaded as `config-debugger.md`).
 
 **Merge recommendation:**
 - Keep it as a **read-only diagnostic subagent** and route to it from `ha-troubleshooting` when failures look like YAML/schema/structure problems.
@@ -524,7 +524,7 @@ But the official docs still draw a useful distinction we can exploit:
 **Tool scoping:** `Read`, `Grep`, `Glob`, optional `Bash` for `hass-cli` only.
 
 ### 2.11 ha-toolkit `hooks.json` is directionally better than HAA’s, but needs merge-hardening
-**New evidence:** `hooks/hooks.json` (uploaded as `hooks-ha-toolkit.json`).
+**New evidence:** `hooks/hooks.json` (uploaded as `hooks.json`).
 
 **What it does today**
 - **PreToolUse (Edit/Write):** if editing `automations.yaml`, `scripts.yaml`, or `scenes.yaml`, it reminds the user to run `/ha-deploy` afterward.
@@ -550,7 +550,7 @@ But the official docs still draw a useful distinction we can exploit:
 - If `hass-cli` is available, optionally offer a *single* explicit “run real validation now?” step—never auto-run.
 
 ### 2.12 `/ha:validate` is a good skeleton but currently over-promises; make it evidence-first and HA-backed
-**New evidence:** `commands/validate.md` (uploaded as `validate-ha-toolkit.md`).
+**New evidence:** `commands/validate.md` (uploaded as `validate.md`).
 
 **What it gets right (keep)**
 - Separates **local lint** vs **HA-backed** validation.
@@ -578,7 +578,7 @@ But the official docs still draw a useful distinction we can exploit:
 - Never print secrets; when flagging “possible secret,” show file + line number + key name only.
 
 ### 2.13 `/ha:deploy` has the right UX shape, but violates safety invariants unless re-scoped
-**New evidence:** `commands/deploy.md` (uploaded as `ha-deploy-ha-toolkit.md`).
+**New evidence:** `commands/deploy.md` (uploaded as `ha-deploy.md`).
 
 **What it does today**
 - Forces a **pre-deploy validation** step (delegated to a config validator agent).
@@ -612,7 +612,7 @@ But the official docs still draw a useful distinction we can exploit:
 - Unify settings in `.claude/settings.local.json` (or a small `.claude/ha.conventions.json`) and remove `.claude/home-assistant-assistant.md` references.
 
 ### 2.14 `/ha:analyze` is valuable, but must not hallucinate metrics; treat as advisory + evidence-backed
-**New evidence:** `commands/analyze.md` (uploaded as `analyze-ha-toolkit.md`).
+**New evidence:** `commands/analyze.md` (uploaded as `analyze.md`).
 
 **What it gets right (keep)**
 - The “focus-area” argument pattern is good (`automations`, `energy`, `security`, `presence`, `performance`).
@@ -638,7 +638,7 @@ But the official docs still draw a useful distinction we can exploit:
 - The Analyzer skill should reuse the Resolver + Convention artifact so its suggestions speak the repo’s language.
 
 ### 2.15 `/ha:audit-naming` should be an analyzer-only entrypoint (no edits)
-**New evidence:** `commands/audit-naming.md` (uploaded as `audit-naming-ha-toolkit.md`).
+**New evidence:** `commands/audit-naming.md` (uploaded as `audit-naming.md`).
 
 **What it should do (merged)**
 - Route to the `naming-analyzer` agent.
@@ -653,7 +653,7 @@ But the official docs still draw a useful distinction we can exploit:
 - Any “counts” or “coverage” claims must cite the exact command/data source used.
 
 ### 2.16 `/ha:onboard` overlaps with `/ha:setup` + `/ha-connect`; merge into one secret-safe, portable connection wizard
-**New evidence:** `commands/onboard.md` (uploaded as `onboard-ha-toolkit.md`).
+**New evidence:** `commands/onboard.md` (uploaded as `onboard.md`).
 
 **What it gets right (keep)**
 - Wizard-shaped flow: environment check → HA connection → repo setup → verify.
@@ -670,7 +670,7 @@ But the official docs still draw a useful distinction we can exploit:
 - It writes/updates the single settings artifact, runs one read-only connectivity check, then prints a “what ran vs skipped” table.
 
 ### 2.17 `/ha:new-device` should become a capability-checked, naming-aware planner (not an auto-writer)
-**New evidence:** `commands/new-device.md` (uploaded as `new-device-ha-toolkit.md`).
+**New evidence:** `commands/new-device.md` (uploaded as `new-device.md`).
 
 **What it gets right (keep)**
 - Good mental model: device identification → naming → automations → dashboard → relationships → testing.
@@ -694,7 +694,7 @@ But the official docs still draw a useful distinction we can exploit:
 - Then it asks: “Do you want me to apply any of these changes?” and routes to the appropriate apply command.
 
 ### 2.18 ha-toolkit `ha-config` skill — merge notes + required fixes
-**New evidence:** `skills/ha-config/SKILL.md` (uploaded as `SKILL-haconfig-ha-toolkit.md`).
+**New evidence:** `skills/ha-config/SKILL.md` (uploaded as `SKILL-haconfig.md`).
 
 **What’s good (keep)**
 - Clear guidance on splitting config (`!include*` patterns), `packages/`, and where secrets belong.
@@ -714,7 +714,7 @@ But the official docs still draw a useful distinction we can exploit:
 - Use this skill’s patterns to drive the merged “Editor” module’s file targeting logic.
 
 ## 2.19 ha-toolkit `ha-devices` skill — merge notes + required fixes
-**New evidence:** `skills/ha-devices/SKILL.md` (uploaded as `SKILL-devices-ha-toolkit.md`).
+**New evidence:** `skills/ha-devices/SKILL.md` (uploaded as `SKILL-devices.md`).
 
 **What’s good (keep)**
 - Strong conceptual “device vs entity vs integration” primer.
@@ -738,7 +738,7 @@ But the official docs still draw a useful distinction we can exploit:
   - Apply/Deploy (explicit confirmation)
 
 ## 2.20 ha-toolkit `ha-jinja` skill — merge notes + required fixes
-**New evidence:** `skills/ha-jinja/SKILL.md` (uploaded as `SKILLjijna-ha-toolkit.md`).
+**New evidence:** `skills/ha-jinja/SKILL.md` (uploaded as `SKILLjijna.md`).
 
 **What’s good (keep)**
 - Practical template patterns: `states()`, `state_attr()`, `is_state()`, defaults, type conversions.
@@ -755,7 +755,7 @@ But the official docs still draw a useful distinction we can exploit:
 - Any “template validation” in `/ha:validate` must be HA-backed or labeled best-effort.
 
 ## 2.21 ha-toolkit `ha-lovelace` skill — merge notes + required fixes
-**New evidence:** `skills/ha-lovelace/SKILL.md` (uploaded as `SKILLlovelace-ha-toolkit.md`).
+**New evidence:** `skills/ha-lovelace/SKILL.md` (uploaded as `SKILLlovelace.md`).
 
 **What’s good (keep)**
 - Good coverage of baseline card vocabulary (entities/button/grid/stacks/conditional/history-graph).
@@ -772,7 +772,7 @@ But the official docs still draw a useful distinction we can exploit:
 - `/ha:new-device` can offer 1–2 card YAML options, but should default to “snippet only,” and route any writes to an apply step.
 
 ## 2.22 ha-toolkit `ha-naming` skill — merge notes + required fixes
-**New evidence:** `skills/ha-naming/SKILL.md` (uploaded as `SKILLnaming-ha-toolkit.md`).
+**New evidence:** `skills/ha-naming/SKILL.md` (uploaded as `SKILLnaming.md`).
 
 **What’s good (keep)**
 - Clear breakdown of **entity_id vs friendly_name**, plus concrete patterns and anti-patterns.

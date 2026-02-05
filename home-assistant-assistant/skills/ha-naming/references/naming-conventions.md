@@ -1,6 +1,6 @@
 # Naming Conventions Reference
 
-Detailed tables and examples for entity naming. See `SKILL-naming-ha-toolkit.md` for overview.
+Detailed tables and examples for entity naming. See `SKILL-naming.md` for overview.
 
 ## Area Abbreviations
 

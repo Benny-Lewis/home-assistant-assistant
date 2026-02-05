@@ -1,6 +1,6 @@
 # HA Toolkit Test Plan
 
-Comprehensive testing checklist for the ha-toolkit plugin.
+Comprehensive testing checklist for the home-assistant-assistant plugin.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ Before testing, ensure:
 
 **Test command:**
 ```bash
-claude --plugin-dir "C:\Users\blewis\dev\haa-2\ha-toolkit"
+claude --plugin-dir "C:\Users\blewis\dev\haa-2\home-assistant-assistant"
 ```
 
 ---
@@ -19,7 +19,7 @@ claude --plugin-dir "C:\Users\blewis\dev\haa-2\ha-toolkit"
 
 ### 1.1 Plugin Discovery
 - [ ] Plugin appears in `/plugins` or plugin list
-- [ ] No errors on startup related to ha-toolkit
+- [ ] No errors on startup related to home-assistant-assistant
 
 ### 1.2 Command Registration
 - [ ] `/ha:` shows autocomplete options

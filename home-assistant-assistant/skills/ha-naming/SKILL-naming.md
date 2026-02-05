@@ -9,7 +9,7 @@ allowed-tools: Read, Grep, Glob
 
 This skill provides guidance on consistent naming for Home Assistant entities, devices, and configurations.
 
-**Detailed reference tables:** `references-ha-toolkit/naming-conventions.md`
+**Detailed reference tables:** `references-home-assistant-assistant/naming-conventions.md`
 
 ## Why Naming Matters
 
@@ -92,5 +92,5 @@ When renaming existing entities:
 
 ## References
 
-- `references-ha-toolkit/naming-conventions.md` - Complete tables for areas, devices, domains
+- `references-home-assistant-assistant/naming-conventions.md` - Complete tables for areas, devices, domains
 - `ha-conventions` skill - Detect naming patterns from your existing config
