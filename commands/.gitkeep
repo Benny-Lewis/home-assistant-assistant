@@ -1,3 +1,0 @@
-# Commands directory (legacy)
-# Per Anthropic docs, commands are merged into skills
-# This directory contains thin entrypoints that delegate to skills
