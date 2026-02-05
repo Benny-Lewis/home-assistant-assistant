@@ -2,6 +2,9 @@
 
 Shared procedure for verifying Home Assistant connectivity. Used by /ha-connect, /ha:setup, /ha:onboard, and any command that needs HA access.
 
+> **Safety Invariant #4:** No secret material printed (no token prefixes).
+> See `references/safety-invariants.md` for full details.
+
 ## Purpose
 
 Provide a single, reusable connection verification that:

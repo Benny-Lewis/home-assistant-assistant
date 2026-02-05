@@ -2,7 +2,7 @@
 
 > **Last updated:** 2026-02-05 by Claude
 > **Current phase:** 3 - Safety Invariants Implementation
-> **Overall:** 15/61 items complete
+> **Overall:** 16/61 items complete
 
 This file tracks incremental progress on merging the two plugin implementations. Each checkbox represents one commit-sized unit of work. See `ha_plugins_merge_fix_plan-v4.md` for detailed context on each item.
 
@@ -32,13 +32,13 @@ This file tracks incremental progress on merging the two plugin implementations.
 
 ---
 
-## Phase 3: Safety Invariants Implementation (3/6)
+## Phase 3: Safety Invariants Implementation (4/6)
 *From merge plan section 0 (North-star invariants)*
 
 - [x] **3.1** Add capability snapshot requirement before emitting YAML attributes
 - [x] **3.2** Add semantic classifier (inactivity vs pure delay) to prevent timer substitution
 - [x] **3.3** Replace brittle string edits with AST editing calls
-- [ ] **3.4** Add secret handling rules (never echo tokens/prefixes)
+- [x] **3.4** Add secret handling rules (never echo tokens/prefixes)
 - [ ] **3.5** Add "never deploy unless requested" guards to all side-effectful commands
 - [ ] **3.6** Add "what ran vs skipped" evidence tables to all validation outputs
 
