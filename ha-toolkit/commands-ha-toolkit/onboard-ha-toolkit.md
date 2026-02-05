@@ -1,4 +1,5 @@
 ---
+name: ha:onboard
 description: First-time setup wizard for Home Assistant toolkit
 allowed-tools: Read, Write, Edit, Bash, AskUserQuestion, Glob, Grep
 ---

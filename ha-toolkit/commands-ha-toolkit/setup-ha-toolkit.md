@@ -1,4 +1,5 @@
 ---
+name: ha:setup
 description: Reconfigure HA Toolkit settings (URL, token, paths)
 allowed-tools: Read, Write, Edit, Bash, AskUserQuestion
 argument-hint: [setting-name]

@@ -1,4 +1,5 @@
 ---
+name: ha:apply-naming
 description: Execute the naming plan to rename entities and update references
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 argument-hint: [--dry-run | --phase N]

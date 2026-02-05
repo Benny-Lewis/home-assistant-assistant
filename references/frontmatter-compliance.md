@@ -27,6 +27,32 @@ Audit date: 2026-02-05
 | ha-toolkit/skills-ha-toolkit/ha-lovelace-ha-toolkit/SKILLlovelace-ha-toolkit.md | `Home Assistant Lovelace Dashboards` | `ha-lovelace` |
 | ha-toolkit/skills-ha-toolkit/ha-naming-ha-toolkit/SKILLnaming-ha-toolkit.md | `Home Assistant Naming Conventions` | `ha-naming` |
 
+## Commands Audit
+
+### Already Compliant (had name field)
+| File | name |
+|------|------|
+| ha-toolkit/commands-ha-toolkit/ha-connect-ha-toolkit.md | `ha-connect` |
+| ha-toolkit/commands-ha-toolkit/ha-deploy-ha-toolkit.md | `ha-deploy` |
+| ha-toolkit/commands-ha-toolkit/ha-rollback-ha-toolkit.md | `ha-rollback` |
+| home-assistant-assistant/commands-haa/ha-connect-haa.md | `ha-connect` |
+| home-assistant-assistant/commands-haa/ha-deploy-haa.md | `ha-deploy` |
+| home-assistant-assistant/commands-haa/ha-rollback-haa.md | `ha-rollback` |
+
+### Fixed (added missing name field)
+| File | Added name |
+|------|------------|
+| ha-toolkit/commands-ha-toolkit/analyze-ha-toolkit.md | `ha:analyze` |
+| ha-toolkit/commands-ha-toolkit/apply-naming-ha-toolkit.md | `ha:apply-naming` |
+| ha-toolkit/commands-ha-toolkit/audit-naming-ha-toolkit.md | `ha:audit-naming` |
+| ha-toolkit/commands-ha-toolkit/deploy-ha-toolkit.md | `ha:deploy` |
+| ha-toolkit/commands-ha-toolkit/generate-ha-toolkit.md | `ha:generate` |
+| ha-toolkit/commands-ha-toolkit/new-device-ha-toolkit.md | `ha:new-device` |
+| ha-toolkit/commands-ha-toolkit/onboard-ha-toolkit.md | `ha:onboard` |
+| ha-toolkit/commands-ha-toolkit/plan-naming-ha-toolkit.md | `ha:plan-naming` |
+| ha-toolkit/commands-ha-toolkit/setup-ha-toolkit.md | `ha:setup` |
+| ha-toolkit/commands-ha-toolkit/validate-ha-toolkit.md | `ha:validate` |
+
 ## Rules Applied
 
 1. **name**: Must be lowercase-hyphenated (e.g., `ha-automations`)

@@ -1,4 +1,5 @@
 ---
+name: ha:generate
 description: Generate Home Assistant YAML configurations from descriptions
 allowed-tools: Read, Write, Edit, Bash, AskUserQuestion, Glob, Grep
 argument-hint: [type] [description]

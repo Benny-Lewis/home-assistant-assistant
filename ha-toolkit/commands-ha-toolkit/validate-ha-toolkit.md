@@ -1,4 +1,5 @@
 ---
+name: ha:validate
 description: Validate Home Assistant configuration for errors
 allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
 argument-hint: [file-or-directory]

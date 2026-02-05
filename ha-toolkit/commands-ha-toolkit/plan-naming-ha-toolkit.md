@@ -1,4 +1,5 @@
 ---
+name: ha:plan-naming
 description: Create a detailed plan for renaming entities and devices
 allowed-tools: Read, Write, Bash, Glob, Grep, AskUserQuestion
 argument-hint: [convention]

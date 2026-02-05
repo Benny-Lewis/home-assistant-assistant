@@ -1,4 +1,5 @@
 ---
+name: ha:deploy
 description: Push configuration changes to Home Assistant via git
 allowed-tools: Read, Write, Bash, AskUserQuestion, Glob
 ---

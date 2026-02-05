@@ -1,4 +1,5 @@
 ---
+name: ha:analyze
 description: Analyze Home Assistant setup and provide suggestions for improvements
 allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
 argument-hint: [focus-area]

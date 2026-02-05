@@ -1,4 +1,5 @@
 ---
+name: ha:new-device
 description: Workflow for adding and configuring a new device in Home Assistant
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Task
 ---

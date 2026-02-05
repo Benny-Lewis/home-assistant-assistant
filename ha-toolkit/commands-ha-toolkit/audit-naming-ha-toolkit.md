@@ -1,4 +1,5 @@
 ---
+name: ha:audit-naming
 description: Audit entity and device naming for consistency issues
 allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
 ---
