@@ -6,9 +6,5 @@
     "name": "Ben"
   },
   "homepage": "https://github.com/ben/home-assistant-assistant",
-  "keywords": ["home-assistant", "automation", "smart-home", "yaml", "iot"],
-  "commands": "./commands",
-  "agents": "./agents",
-  "skills": "./skills",
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["home-assistant", "automation", "smart-home", "yaml", "iot"]
 }

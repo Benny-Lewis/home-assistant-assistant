@@ -1,0 +1,24 @@
+{
+  "name": "local-dev",
+  "version": "1.0.0",
+  "description": "Local development marketplace for Home Assistant plugin",
+  "owner": {
+    "name": "Ben"
+  },
+  "plugins": [
+    {
+      "name": "home-assistant-assistant",
+      "version": "0.1.0",
+      "description": "Natural language management of Home Assistant configurations - create automations, scripts, and scenes through conversation",
+      "author": {
+        "name": "Ben"
+      },
+      "homepage": "https://github.com/ben/home-assistant-assistant",
+      "keywords": ["home-assistant", "automation", "smart-home", "yaml", "iot"],
+      "source": {
+        "type": "directory",
+        "path": "../"
+      }
+    }
+  ]
+}
