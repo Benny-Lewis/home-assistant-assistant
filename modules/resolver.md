@@ -2,6 +2,9 @@
 
 Shared procedures for entity resolution and capability discovery in Home Assistant.
 
+> **Safety Invariant #1:** No unsupported attributes written without explicit override.
+> See `references/safety-invariants.md` for full details.
+
 ## Purpose
 
 Before generating YAML that references entities, services, or device capabilities, **always resolve first**. This prevents:
