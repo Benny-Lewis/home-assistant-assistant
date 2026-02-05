@@ -1,27 +1,50 @@
 ---
 name: ha:onboard
 description: First-time setup wizard for Home Assistant toolkit
-allowed-tools: Read, Write, Edit, Bash, AskUserQuestion, Glob, Grep
+allowed-tools: Read, Bash, AskUserQuestion, Glob, Grep
 ---
 
 # Home Assistant Toolkit Onboarding
 
-Guide the user through setting up their environment to use the HA Toolkit plugin. This is an interactive, multi-step wizard with skippable sections.
+> **Connection setup uses `/ha-connect` shared procedure.**
+> Secret handling and cross-platform guidance are centralized there.
+
+Guide the user through setting up their environment to use the HA Toolkit plugin.
+
+## Wizard Overview
+
+| Step | Description | Shared Procedure |
+|------|-------------|------------------|
+| 1 | Environment detection | This command |
+| 2 | hass-cli installation | This command |
+| 3 | HA connection setup | → `/ha-connect` |
+| 4 | Git repository setup | This command |
+| 5 | HA-side Git Pull config | This command |
+| 6 | Verification tests | This command |
 
 ## Step 1: Environment Detection
 
 Detect the user's environment:
 
-- Operating System: Check platform (Windows, macOS, Linux)
-- Git: Check if git is installed (!`git --version 2>/dev/null || echo "NOT_INSTALLED"`)
-- hass-cli: Check if installed (!`hass-cli --version 2>/dev/null || echo "NOT_INSTALLED"`)
-- Python/pip: Check availability (!`python3 --version 2>/dev/null || python --version 2>/dev/null || echo "NOT_INSTALLED"`)
+```bash
+# Check OS
+uname -s 2>/dev/null || echo "Windows"
 
-Present findings to user and ask if they want to proceed with setup or skip (they already have everything configured).
+# Check git
+git --version 2>/dev/null || echo "NOT_INSTALLED"
+
+# Check hass-cli
+hass-cli --version 2>/dev/null || echo "NOT_INSTALLED"
+
+# Check Python
+python3 --version 2>/dev/null || python --version 2>/dev/null || echo "NOT_INSTALLED"
+```
+
+Present findings and ask if they want to proceed or skip to specific steps.
 
 ## Step 2: hass-cli Installation
 
-If hass-cli is not installed, guide the user through installation based on their OS:
+If hass-cli is not installed:
 
 **macOS:**
 ```bash
@@ -33,182 +56,118 @@ brew install homeassistant-cli
 pip install homeassistant-cli
 ```
 
-After installation, verify with `hass-cli --version`.
+Verify: `hass-cli --version`
 
-## Step 3: hass-cli Configuration
+## Step 3: HA Connection Setup
 
-Configure hass-cli to connect to the user's Home Assistant instance.
+**Delegate to `/ha-connect`.**
 
-Ask the user for:
-1. Home Assistant URL (e.g., `http://homeassistant.local:8123` or `https://ha.example.com`)
-2. Long-Lived Access Token (guide them to create one: Profile → Security → Long-Lived Access Tokens → Create Token)
+Do NOT duplicate token handling here. Say:
+"Now let's connect to your Home Assistant instance."
 
-Help them set environment variables. Create or update shell profile:
+Then invoke the `/ha-connect` shared procedure which handles:
+- Token creation guidance
+- Cross-platform env var setup (Bash, PowerShell, CMD)
+- Secret safety (presence check only, never print value)
+- Connection verification
 
-**For bash/zsh (~/.bashrc or ~/.zshrc):**
-```bash
-export HASS_SERVER="http://homeassistant.local:8123"
-export HASS_TOKEN="your-long-lived-access-token"
-```
-
-**For Windows (PowerShell profile or environment variables):**
-```powershell
-$env:HASS_SERVER = "http://homeassistant.local:8123"
-$env:HASS_TOKEN = "your-token"
-```
-
-Test the connection:
-```bash
-hass-cli state list --limit 1
-```
-
-If successful, proceed. If failed, troubleshoot:
-- Check URL is accessible
-- Verify token is valid
-- Check for network/firewall issues
+After `/ha-connect` completes, continue to Step 4.
 
 ## Step 4: Git Repository Setup
 
-Ask the user about their current git setup:
+Ask the user about their git setup:
 
 **Option A: Existing HA Config Repo**
 - Ask for the repository URL
-- Clone it locally if not already cloned
-- Verify structure looks like HA config (has configuration.yaml)
+- Clone if not already local
+- Verify has configuration.yaml
 
 **Option B: New Repository Needed**
-- Guide them to create a new repo (GitHub, GitLab, etc.)
-- Help export current HA config
-- Initialize git repo and push
+- Guide them to create repo (GitHub, GitLab)
+- Initialize and push current config
 
-**Option C: Skip Git Setup**
-- User doesn't want git-based config management
-- Document that some features (deploy, version control) won't work
+**Option C: Skip Git**
+- Document that deploy/version control won't work
+- Continue with limited functionality
 
-For SSH-based repos, verify SSH key setup:
+For SSH repos, verify key setup:
 ```bash
 ssh -T git@github.com 2>&1 | head -1
 ```
 
-## Step 5: Home Assistant Side Setup
+## Step 5: HA-Side Git Pull Setup
 
-Guide the user to configure their Home Assistant to pull from git:
+Guide the user to configure Home Assistant to pull from git.
 
-1. **Install Git Pull Add-on** (for HAOS/Supervised):
-   - Navigate to Settings → Add-ons → Add-on Store
-   - Search for "Git pull"
-   - Install and configure
-
-2. **Configure Git Pull Add-on:**
+**For HAOS/Supervised (Git Pull Add-on):**
+1. Settings → Add-ons → Add-on Store
+2. Search "Git pull" → Install
+3. Configure:
    ```yaml
    git_branch: main
    git_command: pull
-   git_remote: origin
    repository: git@github.com:username/ha-config.git
    auto_restart: true
-   repeat:
-     active: true
-     interval: 300
    ```
 
-3. **For non-HAOS installations:**
-   - Provide alternative: cron job with git pull
-   - Or manual pull workflow
+**For non-HAOS:** Provide cron job alternative.
 
-Ask user to confirm they've completed HA-side setup.
+Ask user to confirm HA-side setup is complete.
 
-## Step 6: Plugin Configuration
+## Step 6: Verification Tests
 
-Create the plugin settings file to store user's configuration:
+| Test | Command | Expected |
+|------|---------|----------|
+| Git connectivity | `git fetch origin` | No errors |
+| hass-cli | `hass-cli state list --limit 1` | Returns entity |
+| Config path | Check for configuration.yaml | File exists |
 
-Write to `.claude/ha-toolkit.local.md`:
-```yaml
----
-ha_url: "user-provided-url"
-config_repo_path: "/path/to/local/ha-config"
-config_repo_remote: "git@github.com:user/repo.git"
-setup_complete: true
-setup_date: "YYYY-MM-DD"
----
-
-# HA Toolkit Settings
-
-This file stores your Home Assistant toolkit configuration.
+Present results:
 ```
+## Onboarding Results
 
-Add `.claude/ha-toolkit.local.md` to `.gitignore` if not already present.
+| Component | Status |
+|-----------|--------|
+| Git | ✅ Connected to github.com/user/ha-config |
+| hass-cli | ✅ Connected to homeassistant.local |
+| Entities | ✅ 147 entities accessible |
+| Config path | ✅ Valid |
 
-## Step 7: Verification Tests
-
-Run verification tests to ensure everything works:
-
-### Test 1: Git Connectivity
-```bash
-cd /path/to/ha-config && git fetch origin
-```
-Expected: No errors
-
-### Test 2: hass-cli Connection
-```bash
-hass-cli state list --limit 1
-```
-Expected: Returns at least one entity
-
-### Test 3: Entity Access
-```bash
-hass-cli entity list | head -5
-```
-Expected: Lists entities
-
-### Test 4: Config Path Valid
-Check that the HA config path contains configuration.yaml
-
-### Test 5: Git Sync Round-Trip (Optional)
-- Create a test file
-- Commit and push
-- Wait for HA to pull (or trigger manually)
-- Verify file appears on HA
-- Delete test file and clean up
-
-Present results summary:
-```
-Onboarding Results:
-───────────────────
-✅ Git: Connected to github.com/user/ha-config
-✅ hass-cli: Connected to homeassistant.local:8123
-✅ Entities: 147 entities accessible
-✅ Config Path: Valid (/path/to/ha-config)
-⚠️  Git Sync: Skipped (optional)
-
-🎉 Setup complete! You're ready to use the HA Toolkit.
-
-Quick start commands:
-  /ha:generate automation "description"  - Generate automations
-  /ha:audit-naming                        - Check naming consistency
-  /ha:validate                            - Validate your config
-  /ha:analyze                             - Get suggestions
+🎉 Setup complete! Quick start:
+- `/ha:generate automation "description"` - Generate automations
+- `/ha:validate` - Validate your config
+- `/ha-deploy` - Deploy changes to HA
 ```
 
 ## Skip Behavior
 
-At any step, if the user says "skip" or indicates they already have something configured:
-- Accept their answer and move to the next step
-- Don't block on missing components
-- Note what was skipped in the final summary
-- Some features may not work without all components
+At any step, user can say "skip":
+- Accept and move to next step
+- Note in final summary
+- Some features may not work
 
-## Error Handling
+## Settings Storage
 
-If any step fails:
-- Explain what went wrong clearly
-- Offer troubleshooting suggestions
-- Allow user to retry or skip
-- Document partial setup state
+Save configuration to `.claude/settings.local.json`:
+```json
+{
+  "ha": {
+    "config_path": "/path/to/ha-config",
+    "git_remote": "git@github.com:user/repo.git",
+    "setup_complete": true,
+    "setup_date": "2026-02-05"
+  }
+}
+```
+
+Note: Connection settings (HASS_TOKEN, HASS_SERVER) are stored as
+environment variables, NOT in the settings file. See `/ha-connect`.
 
 ## Post-Onboarding
 
-After onboarding completes (or is skipped), inform the user:
-- What commands are available (`/ha:` prefix)
-- How to reconfigure settings (`/ha:setup`)
-- Where to get help
-- Suggest trying `/ha:analyze` to get started
+"Setup complete! Available commands:
+- `/ha:generate` - Generate automations, scripts, scenes
+- `/ha:validate` - Check configuration for errors
+- `/ha-deploy` - Deploy changes to Home Assistant
+- `/ha:setup` - Update individual settings
+- `/ha-connect` - Reconfigure HA connection"
