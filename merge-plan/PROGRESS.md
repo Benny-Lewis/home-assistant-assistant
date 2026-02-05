@@ -2,7 +2,7 @@
 
 > **Last updated:** 2026-02-05 by Claude
 > **Current phase:** 4 - Skills Consolidation
-> **Overall:** 40/61 items complete
+> **Overall:** 42/61 items complete
 
 This file tracks incremental progress on merging the two plugin implementations. Each checkbox represents one commit-sized unit of work. See `ha_plugins_merge_fix_plan-v4.md` for detailed context on each item.
 
@@ -65,7 +65,7 @@ This file tracks incremental progress on merging the two plugin implementations.
 
 ---
 
-## Phase 5: Commands Consolidation (7/15)
+## Phase 5: Commands Consolidation (9/15)
 *From merge plan sections 1.2-1.7, 2.5-2.16*
 
 - [x] **5.1** /ha-connect: Add secret safety (never print tokens), cross-platform guidance
@@ -75,8 +75,8 @@ This file tracks incremental progress on merging the two plugin implementations.
 - [x] **5.5** /ha-rollback: Add disable-model-invocation, dry-run default
 - [x] **5.6** /ha-validate: Make evidence-first, add "what ran vs skipped" table
 - [x] **5.7** /ha-validate: Route to HA-backed validation when available
-- [ ] **5.8** /ha:generate: Make thin router, move logic to skills
-- [ ] **5.9** /ha:generate: Update YAML schema (ban automation: root)
+- [x] **5.8** /ha:generate: Make thin router, move logic to skills
+- [x] **5.9** /ha:generate: Update YAML schema (ban automation: root)
 - [ ] **5.10** /ha:setup: Unify with /ha-connect shared procedure
 - [ ] **5.11** /ha:onboard: Merge into unified connection wizard
 - [ ] **5.12** /ha:new-device: Add capability checks, naming contract integration

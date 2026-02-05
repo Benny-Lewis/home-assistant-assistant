@@ -1,137 +1,105 @@
 ---
 name: ha:generate
 description: Generate Home Assistant YAML configurations from descriptions
-allowed-tools: Read, Write, Edit, Bash, AskUserQuestion, Glob, Grep
+allowed-tools: Read, Bash, AskUserQuestion, Glob, Grep
 argument-hint: [type] [description]
 ---
 
 # Generate Home Assistant Configuration
 
+> **This command is a thin router.** It identifies the generation type and
+> delegates to the appropriate skill. Do not duplicate YAML patterns here.
+
 Generate YAML configuration for Home Assistant based on natural language descriptions.
 
-## Supported Types
+## Supported Types and Routing
 
-- **automation** - Automations with triggers, conditions, actions
-- **script** - Scripts with sequences of actions
-- **scene** - Scenes that set entity states
-- **template** - Template sensors and binary sensors
-- **dashboard** - Lovelace dashboard cards and views
-- **helper** - Input helpers (input_boolean, input_number, etc.)
-
-## Usage Patterns
-
-```
-/ha:generate automation turn on kitchen lights when motion detected
-/ha:generate script good night routine that turns off all lights
-/ha:generate scene movie night with dim lights and TV on
-/ha:generate template sensor that shows average temperature
-/ha:generate dashboard climate control card for living room
-```
+| Type | Routes To | Example |
+|------|-----------|---------|
+| automation | `ha-automations` skill | `/ha:generate automation motion lights` |
+| script | `ha-scripts` skill | `/ha:generate script bedtime routine` |
+| scene | `ha-scenes` skill | `/ha:generate scene movie night` |
+| template | `ha-jinja` skill | `/ha:generate template average temp` |
+| dashboard | `ha-lovelace` skill | `/ha:generate dashboard climate card` |
+| helper | `ha-automations` skill | `/ha:generate helper motion timeout` |
 
 ## Process
 
-1. **Parse Request**: Identify the type ($1) and description ($2 onwards or $ARGUMENTS)
+### 1. Parse Request
 
-2. **Gather Context**:
-   - Read relevant existing config to match style
-   - Check for referenced entities (verify they exist if hass-cli available)
-   - Identify naming conventions in use
+Identify the type ($1) and description ($2 onwards or $ARGUMENTS).
 
-3. **Generate YAML**:
-   - Follow Home Assistant best practices
-   - Use consistent naming with existing config
-   - Include comments explaining the configuration
-   - Add appropriate entity_id, friendly_name, icon
+If type is missing or unclear, ask:
+"What would you like to generate?
+- automation (when X happens, do Y)
+- script (sequence of actions to run on demand)
+- scene (set devices to specific states)
+- template (computed sensor values)
+- dashboard (UI cards and views)
+- helper (input_boolean, input_number, timer)"
 
-4. **Present to User**:
-   - Show the generated YAML
-   - Explain what it does
-   - Note any assumptions made
-   - Ask if they want to write it to a file
+### 2. Route to Skill
 
-5. **Write Configuration** (if requested):
-   - Determine appropriate file location
-   - For automations: Add to automations.yaml or packages/
-   - For scripts: Add to scripts.yaml or packages/
-   - Preserve existing content, append new config
+Based on type, invoke the appropriate skill:
 
-## Type-Specific Patterns
+**automation** → Route to `ha-automations` skill
+- Skill handles: entity resolution, inactivity classification, capability checks
+- Uses `references/yaml-syntax.md` for current HA 2024+ schema
 
-### Automation
+**script** → Route to `ha-scripts` skill
+- Skill handles: sequence building, mode selection
+
+**scene** → Route to `ha-scenes` skill
+- Skill handles: capability snapshot, valid state options
+
+**template** → Route to `ha-jinja` skill
+- Skill handles: Jinja2 patterns, template sensor structure
+
+**dashboard** → Route to `ha-lovelace` skill
+- Skill handles: card types, templating limitations
+
+### 3. Schema Enforcement
+
+**All generated YAML must use HA 2024+ schema.**
+
+Ban these deprecated patterns:
 ```yaml
-alias: [Descriptive Name]
-description: [What this automation does]
-trigger:
-  - platform: [trigger_type]
-    # trigger configuration
-condition:
-  - condition: [condition_type]
-    # condition configuration (optional)
-action:
-  - service: [domain.service]
-    target:
-      entity_id: [target_entity]
-mode: single  # or queued, restart, parallel
+# ❌ WRONG - Old schema (ban these)
+automation:
+  - alias: "Name"
+    trigger:
+      platform: state
+
+# ✅ CORRECT - Current schema
+- id: automation_id
+  alias: "Name"
+  triggers:
+    - trigger: state
 ```
 
-### Script
-```yaml
-alias: [Script Name]
-description: [What this script does]
-sequence:
-  - service: [domain.service]
-    target:
-      entity_id: [target]
-  - delay:
-      seconds: 5
-  # more steps
-mode: single
-icon: mdi:script
-```
+Key schema rules:
+- File should be a list `[ - id: ... ]`, NOT have `automation:` root key
+- Use `triggers:` (plural), `conditions:` (plural), `actions:` (plural)
+- Use `trigger:` inside each trigger item, NOT `platform:`
+- Use `action:` for service calls, NOT `service:`
 
-### Scene
-```yaml
-- name: [Scene Name]
-  entities:
-    light.living_room:
-      state: on
-      brightness: 128
-    switch.tv:
-      state: on
-```
+See `references/yaml-syntax.md` for complete schema reference.
 
-### Template Sensor
-```yaml
-- sensor:
-    - name: [Sensor Name]
-      unique_id: [unique_id]
-      state: >
-        {{ states('sensor.source') | float }}
-      unit_of_measurement: "°F"
-      device_class: temperature
-```
+## No Direct YAML Generation
 
-## Entity Validation
+**This command MUST NOT contain YAML templates or examples.**
 
-If hass-cli is configured, validate referenced entities:
-```bash
-hass-cli entity list | grep -i "entity_name"
-```
+All YAML patterns live in:
+- `references/yaml-syntax.md` - Consolidated syntax reference
+- Individual skill files - Domain-specific patterns
 
-Warn if referenced entities don't exist and suggest alternatives.
+If you need to update YAML patterns, update the reference file, not this command.
 
-## Style Matching
+## After Generation
 
-Before generating, check existing configs to match:
-- Naming conventions (snake_case, areas prefix, etc.)
-- Comment style
-- Organization (packages vs single files)
-- Indentation (2 spaces standard)
-
-## Iteration
-
-After presenting generated config:
-- Ask if adjustments needed
-- Offer to add more triggers/conditions/actions
-- Suggest related configurations
-- Provide option to test (if automation, can trigger manually)
+Skills handle the full workflow including:
+1. Entity resolution
+2. Capability verification
+3. YAML generation
+4. Preview with explanations
+5. Offer to save (with Invariant #5 - ask before writing)
