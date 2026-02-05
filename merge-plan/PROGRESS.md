@@ -2,20 +2,20 @@
 
 > **Last updated:** 2026-02-05 by Claude
 > **Current phase:** 1 - Foundation & Structure
-> **Overall:** 4/61 items complete
+> **Overall:** 5/61 items complete
 
 This file tracks incremental progress on merging the two plugin implementations. Each checkbox represents one commit-sized unit of work. See `ha_plugins_merge_fix_plan-v4.md` for detailed context on each item.
 
 ---
 
-## Phase 1: Foundation & Structure (4/8)
+## Phase 1: Foundation & Structure (5/8)
 *From merge plan sections 0.2, 2.6, 2.11, 3.2.1*
 
 - [x] **1.1** Fix ha-toolkit manifest homepage (currently points to wrong repo)
 - [x] **1.2** Add explicit commands/agents/skills/hooks paths to HAA manifest
 - [x] **1.3** Establish final merged plugin directory layout
 - [x] **1.4** Unify settings storage → `.claude/settings.local.json`
-- [ ] **1.5** Merge hooks.json (post-edit lint + neutral deploy posture)
+- [x] **1.5** Merge hooks.json (post-edit lint + neutral deploy posture)
 - [ ] **1.6** Frontmatter compliance audit - all skills (name: lowercase-hyphenated)
 - [ ] **1.7** Frontmatter compliance audit - all commands
 - [ ] **1.8** Frontmatter compliance audit - all agents
