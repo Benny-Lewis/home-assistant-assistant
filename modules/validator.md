@@ -2,6 +2,12 @@
 
 Shared procedures for evidence-based validation of Home Assistant configurations.
 
+> **Safety Invariants:**
+> - **#1:** No unsupported attributes without verification (validation catches these)
+> - All validation outputs must include "what ran vs skipped" evidence tables
+>
+> See `references/safety-invariants.md` for full details.
+
 ## Purpose
 
 Validation must be **truthful**. Never claim "validation passed" without evidence. This module provides:

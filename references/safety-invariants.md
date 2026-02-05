@@ -191,6 +191,35 @@ You must follow these invariants:
 4. Never initiate deployment without user confirmation
 ```
 
+## Evidence Tables Requirement
+
+All validation, deployment, and diagnostic outputs must include a "what ran vs skipped" table:
+
+```markdown
+## What Ran vs Skipped
+
+| Check | Status | Result | Details |
+|-------|--------|--------|---------|
+| YAML Syntax | ✓ Ran | Passed | Valid YAML structure |
+| HA Schema | ✓ Ran | Passed | All fields recognized |
+| Entity Resolution | ✓ Ran | 3/3 found | All entities exist |
+| Service Validation | ⊘ Skipped | - | hass-cli unavailable |
+| HA Config Check | ⊘ Skipped | - | No HA connection |
+```
+
+**Why this matters:**
+- Prevents false confidence ("validation passed" when only syntax was checked)
+- Users can see exactly what protection they have
+- Makes gaps in validation visible and actionable
+
+**Required for:**
+- `/ha-validate` output
+- Pre-deploy validation in `/ha-deploy`
+- Post-generation validation in skills
+- Troubleshooting diagnostics
+
+---
+
 ## Violation Reporting
 
 If you detect an invariant violation in existing code, document it:
