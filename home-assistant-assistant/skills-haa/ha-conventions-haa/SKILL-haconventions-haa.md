@@ -10,7 +10,13 @@ allowed-tools: Read, Grep, Glob
 
 # Home Assistant Convention Discovery
 
+> **Safety Invariant #2:** Convention preferences cannot override semantic classification.
+> Timer "preference" detected here does NOT justify timer substitution for inactivity patterns.
+> See `modules/intent-classifier.md` for timer vs delay decisions.
+
 Detect naming patterns from your existing Home Assistant configuration and save them for consistent automation generation.
+
+**Output:** `.claude/ha.conventions.json`
 
 ## When to Use
 
@@ -26,7 +32,7 @@ Detect naming patterns from your existing Home Assistant configuration and save 
 First, check if conventions are already configured:
 
 ```bash
-cat .claude/home-assistant-assistant.md 2>/dev/null | grep -A 30 "conventions:"
+cat .claude/ha.conventions.json 2>/dev/null
 ```
 
 **If conventions exist**, ask the user:
@@ -109,30 +115,39 @@ Allow the user to:
 
 ### 7. Save Conventions
 
-Write the confirmed conventions to `.claude/home-assistant-assistant.md`:
+Write the confirmed conventions to `.claude/ha.conventions.json`:
 
-```yaml
-conventions:
-  separator: "_"
-  case: "snake_case"
-  area_position: "prefix"
-  condition_prefix: "if_"
-  automation_id_pattern: "<area>_<trigger>_[if_<condition>]_<action>"
-  automation_alias_pattern: "<Area>: <Trigger> [If <Condition>] → <Action>"
-  timer_naming: "<area>_<purpose>"
-  use_timer_helpers: true
-  timer_threshold_seconds: 30
-  default_automation_mode: "single"
-  enforce_conventions: false
-  detected_from_existing: true
-  last_detected: "2026-01-25"
-  confidence: "high"
-  examples:
-    - id: "kitchen_motion_light_on"
-      alias: "Kitchen: Motion → Light On"
-    - id: "backyard_door_open_if_dark_floodlight_on"
-      alias: "Backyard: Door Open If Dark → Floodlight On"
+```json
+{
+  "naming": {
+    "separator": "_",
+    "case": "snake_case",
+    "area_position": "prefix",
+    "condition_prefix": "if_",
+    "automation_id_pattern": "<area>_<trigger>_[if_<condition>]_<action>",
+    "automation_alias_pattern": "<Area>: <Trigger> [If <Condition>] → <Action>",
+    "timer_naming": "<area>_<purpose>"
+  },
+  "preferences": {
+    "default_automation_mode": "single"
+  },
+  "metadata": {
+    "detected_from_existing": true,
+    "last_detected": "2026-02-05",
+    "confidence": "high"
+  },
+  "examples": [
+    {
+      "id": "kitchen_motion_light_on",
+      "alias": "Kitchen: Motion → Light On"
+    }
+  ]
+}
 ```
+
+**Note:** Timer preference is NOT stored here. Timer vs delay decisions are made by
+the intent classifier at generation time based on semantic analysis, not convention
+preference. See `modules/intent-classifier.md`.
 
 ### 8. Confirmation
 
@@ -163,9 +178,12 @@ When re-detecting with existing conventions:
    ```
 4. Require explicit confirmation before overwriting
 
-## Settings File Format
+## File Locations
 
-Conventions are stored in `.claude/home-assistant-assistant.md` in the YAML frontmatter section. If the file doesn't exist, create it from the template.
+- **Conventions:** `.claude/ha.conventions.json` (this skill's output)
+- **Settings:** `.claude/settings.local.json` (connection settings, see `references/settings-schema.md`)
+
+These are separate concerns - conventions are about naming patterns, settings are about HA connection.
 
 ## Error Handling
 
