@@ -9,7 +9,7 @@ Settings are stored in `.claude/settings.local.json` in the user's Home Assistan
 **Important:**
 - This file is user-managed, not shipped with the plugin
 - Must be gitignored (add `.claude/` to `.gitignore`)
-- Created on first run of `/ha-connect` or `/ha:onboard`
+- Created on first run of `/ha:onboard`
 
 ## Schema
 

@@ -1,33 +1,30 @@
-﻿# Home Assistant Toolkit for Claude Code
+# Home Assistant Toolkit for Claude Code
 
 A comprehensive Claude Code plugin for Home Assistant end-users. Generate configurations, manage naming, deploy changes, and get smart suggestions for your smart home.
 
 ## Features
 
-### Commands
+### Skills (Slash Commands)
 
-| Command | Description |
-|---------|-------------|
-| `/ha:onboard` | First-time setup wizard - configure hass-cli, git sync, and verify connectivity |
-| `/ha:setup` | Reconfigure settings (URL, token, paths) |
-| `/ha:new-device` | Guided workflow when adding new devices |
-| `/ha:generate <type>` | Generate YAML configs (automation, dashboard, scene, script, template) |
-| `/ha:validate` | Check configuration for errors |
-| `/ha:deploy` | Push changes to Home Assistant via git |
-| `/ha:audit-naming` | Analyze naming consistency across entities |
-| `/ha:plan-naming` | Create a detailed rename plan |
-| `/ha:apply-naming` | Execute the naming plan |
+| Skill | Description |
+|-------|-------------|
+| `/ha:onboard` | First-time setup wizard - configure hass-cli, git sync, connection, and settings |
+| `/ha:validate` | Check configuration for errors with evidence tables |
+| `/ha:deploy` | Push changes to Home Assistant via git, or rollback |
 | `/ha:analyze` | Get analysis and improvement suggestions |
+| `/ha:apply-naming` | Execute a naming plan to rename entities |
 
-### Skills
-
-The plugin provides specialized knowledge in:
+The plugin also provides domain knowledge skills that activate automatically:
+- **ha-automations** - Automation triggers, conditions, actions
+- **ha-scripts** - Script sequences and modes
+- **ha-scenes** - Scene creation with capability checks
 - **ha-config** - Configuration structure, packages, secrets
-- **ha-automation** - Automation triggers, conditions, actions
 - **ha-lovelace** - Dashboard design, card types, layouts
 - **ha-jinja** - Template syntax and patterns
-- **ha-naming** - Naming conventions and best practices
-- **ha-devices** - Device types, integrations, entity management
+- **ha-naming** - Naming conventions, audit, and rename planning
+- **ha-devices** - Device types, integrations, new device workflow
+- **ha-troubleshooting** - Debugging and log analysis
+- **ha-resolver** - Entity resolution (used by agents)
 
 ### Agents
 
@@ -38,16 +35,16 @@ The plugin provides specialized knowledge in:
 ## Architecture
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    home-assistant-assistant Plugin                     â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚  YAML Configs (Git)      â”‚  Registry Ops (hass-cli)    â”‚
-â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€   â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€      â”‚
-â”‚  â€¢ Edit locally          â”‚  â€¢ Entity renaming          â”‚
-â”‚  â€¢ Git push to remote    â”‚  â€¢ Device management        â”‚
-â”‚  â€¢ HA Git Pull add-on    â”‚  â€¢ Area assignments         â”‚
-â”‚  â€¢ Auto-reload           â”‚  â€¢ State queries            â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
++----------------------------------------------------------+
+|                    home-assistant-assistant Plugin        |
++----------------------------------------------------------+
+|  YAML Configs (Git)      |  Registry Ops (hass-cli)     |
+|  ---------------------   |  ---------------------        |
+|  - Edit locally          |  - Entity renaming            |
+|  - Git push to remote    |  - Device management          |
+|  - HA Git Pull add-on    |  - Area assignments           |
+|  - Auto-reload           |  - State queries              |
++----------------------------------------------------------+
 ```
 
 ## Prerequisites
@@ -68,27 +65,18 @@ The plugin provides specialized knowledge in:
 1. Install the plugin
 2. Run `/ha:onboard` to set up your environment
 3. Try `/ha:analyze` to get suggestions for your setup
-4. Use `/ha:generate automation "your description"` to create automations
+4. Ask me to create automations, scripts, or scenes by describing what you want
 
 ## Configuration
 
-Settings are stored in `.claude/home-assistant-assistant.local.md` (gitignored).
-
-```yaml
----
-ha_url: "http://homeassistant.local:8123"
-config_repo_path: "/path/to/your/ha-config"
-config_repo_remote: "git@github.com:user/ha-config.git"
-setup_complete: true
----
-```
+Settings are stored in `.claude/settings.local.json` (gitignored).
 
 ## Workflow Examples
 
 ### Adding a New Device
 
 ```
-/ha:new-device motion sensor in kitchen
+Tell Claude: "I just added a motion sensor in the kitchen"
 ```
 
 The plugin will:
@@ -97,10 +85,10 @@ The plugin will:
 3. Offer dashboard integration
 4. Check for related devices
 
-### Generating an Automation
+### Creating an Automation
 
 ```
-/ha:generate automation turn on kitchen lights when motion detected after sunset
+Tell Claude: "Create an automation to turn on kitchen lights when motion is detected after sunset"
 ```
 
 ### Deploying Changes
@@ -114,8 +102,8 @@ Commits your changes, pushes to git, and Home Assistant pulls the updates.
 ### Fixing Naming Issues
 
 ```
-/ha:audit-naming        # See what's inconsistent
-/ha:plan-naming         # Create a rename plan
+/ha:naming audit        # See what's inconsistent
+/ha:naming plan         # Create a rename plan
 /ha:apply-naming        # Execute the plan
 ```
 

@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "home-assistant-assistant",
   "version": "0.1.0",
   "description": "Natural language management of Home Assistant configurations - create automations, scripts, and scenes through conversation",
@@ -6,9 +6,5 @@
     "name": "blewis"
   },
   "homepage": "https://github.com/Benny-Lewis/home-assistant-assistant",
-  "keywords": ["home-assistant", "automation", "smart-home", "yaml", "iot"],
-  "commands": "./commands",
-  "agents": "./agents",
-  "skills": "./skills",
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["home-assistant", "automation", "smart-home", "yaml", "iot"]
 }

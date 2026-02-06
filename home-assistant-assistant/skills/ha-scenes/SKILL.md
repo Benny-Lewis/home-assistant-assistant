@@ -47,7 +47,7 @@ Create presets that set multiple entities to specific states simultaneously. Cor
 6. **Preview** with inline comments explaining capability checks
 7. **Offer options** (Invariant #5 - never auto-deploy):
    - Save to scenes.yaml (local only)
-   - Save and deploy via /ha-deploy
+   - Save and deploy via /ha:deploy
    - Copy to clipboard for manual paste
 
 ## Common Mistakes

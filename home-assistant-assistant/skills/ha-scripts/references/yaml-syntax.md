@@ -8,7 +8,7 @@ script_name:
   description: "What this script does"
   mode: single
   sequence:
-    - service: domain.service
+    - action: domain.service
       target:
         entity_id: entity.id
 ```
@@ -29,15 +29,15 @@ movie_mode:
   alias: "Movie Mode"
   description: "Set up living room for movie watching"
   sequence:
-    - service: light.turn_off
+    - action: light.turn_off
       target:
         entity_id: light.living_room_main
-    - service: light.turn_on
+    - action: light.turn_on
       target:
         entity_id: light.living_room_accent
       data:
         brightness_pct: 20
-    - service: media_player.turn_on
+    - action: media_player.turn_on
       target:
         entity_id: media_player.tv
 ```
@@ -53,7 +53,7 @@ announce:
       description: "Message to announce"
       example: "Dinner is ready"
   sequence:
-    - service: tts.speak
+    - action: tts.speak
       target:
         entity_id: media_player.kitchen_speaker
       data:
@@ -67,19 +67,19 @@ gradual_wakeup:
   alias: "Gradual Wake Up"
   description: "Slowly increase light brightness"
   sequence:
-    - service: light.turn_on
+    - action: light.turn_on
       target:
         entity_id: light.bedroom
       data:
         brightness_pct: 10
     - delay: "00:05:00"
-    - service: light.turn_on
+    - action: light.turn_on
       target:
         entity_id: light.bedroom
       data:
         brightness_pct: 50
     - delay: "00:05:00"
-    - service: light.turn_on
+    - action: light.turn_on
       target:
         entity_id: light.bedroom
       data:
@@ -98,7 +98,7 @@ smart_lights:
             - condition: sun
               before: sunrise
           sequence:
-            - service: light.turn_on
+            - action: light.turn_on
               target:
                 entity_id: light.bedroom
               data:
@@ -107,13 +107,13 @@ smart_lights:
             - condition: sun
               after: sunset
           sequence:
-            - service: light.turn_on
+            - action: light.turn_on
               target:
                 entity_id: light.bedroom
               data:
                 brightness_pct: 80
       default:
-        - service: light.turn_on
+        - action: light.turn_on
           target:
             entity_id: light.bedroom
           data:
@@ -131,7 +131,7 @@ garage_check:
     - condition: state
       entity_id: cover.garage_door
       state: "open"
-    - service: cover.close_cover
+    - action: cover.close_cover
       target:
         entity_id: cover.garage_door
 ```

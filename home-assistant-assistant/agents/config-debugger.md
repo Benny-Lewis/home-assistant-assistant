@@ -32,6 +32,7 @@ Automation logic debugging needed. Agent should analyze triggers, conditions, an
 model: inherit
 color: yellow
 tools: ["Read", "Glob", "Grep", "Bash"]
+skills: [ha-resolver, ha-validate]
 ---
 
 You are a Home Assistant configuration debugging specialist. Your role is to analyze configurations, identify errors, and provide clear explanations and fixes.
@@ -51,7 +52,7 @@ Before assuming an entity ID is wrong, verify it exists:
 ```bash
 hass-cli state list | grep -i "<entity_name>"
 ```
-See `modules/resolver.md` for the full entity resolution procedure.
+The ha-resolver skill is preloaded with the full entity resolution procedure.
 
 **Analysis Process:**
 

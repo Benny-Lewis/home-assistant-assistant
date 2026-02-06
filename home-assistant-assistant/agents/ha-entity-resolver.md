@@ -4,6 +4,7 @@ description: Finds and validates Home Assistant entity IDs with capability snaps
 tools:
   - Bash
   - Read
+skills: [ha-resolver]
 ---
 
 # Entity Resolver Agent

@@ -1,8 +1,8 @@
 # Home Assistant Log Patterns
 
-> **Resolver-First Approach:** When you see entity-related errors, use the Resolver module
-> (`modules/resolver.md`) to verify entity IDs before assuming typos. Entities may have been
-> renamed, disabled, or the device may be offline.
+> **Resolver-First Approach:** When you see entity-related errors, use the ha-resolver skill
+> to verify entity IDs before assuming typos. Entities may have been renamed, disabled, or
+> the device may be offline.
 
 ## Common Error Messages
 

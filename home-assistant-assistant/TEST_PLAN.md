@@ -21,23 +21,19 @@ claude --plugin-dir "C:\Users\blewis\dev\haa-2\home-assistant-assistant"
 - [ ] Plugin appears in `/plugins` or plugin list
 - [ ] No errors on startup related to home-assistant-assistant
 
-### 1.2 Command Registration
+### 1.2 Skill Registration
 - [ ] `/ha:` shows autocomplete options
-- [ ] All 10 commands appear in `/help`:
+- [ ] User-invocable skills appear:
   - [ ] `/ha:onboard`
-  - [ ] `/ha:setup`
-  - [ ] `/ha:new-device`
-  - [ ] `/ha:generate`
   - [ ] `/ha:validate`
   - [ ] `/ha:deploy`
-  - [ ] `/ha:audit-naming`
-  - [ ] `/ha:plan-naming`
-  - [ ] `/ha:apply-naming`
   - [ ] `/ha:analyze`
+  - [ ] `/ha:apply-naming`
+- [ ] Domain skills load automatically when relevant topics discussed
 
 ---
 
-## Part 2: Command Testing
+## Part 2: Skill Testing (User-Invocable)
 
 ### 2.1 /ha:onboard
 **Test:** Run `/ha:onboard`
@@ -52,32 +48,7 @@ claude --plugin-dir "C:\Users\blewis\dev\haa-2\home-assistant-assistant"
 
 **Note:** Full test requires actual HA instance; partial test can verify wizard flow.
 
-### 2.2 /ha:setup
-**Test:** Run `/ha:setup`
-
-**Expected behavior:**
-- [ ] Lists available settings to update
-- [ ] Allows updating specific setting
-- [ ] Validates new values
-
-### 2.3 /ha:generate
-**Test cases:**
-
-| Test | Command | Expected |
-|------|---------|----------|
-| Automation | `/ha:generate automation turn on lights when motion detected` | Valid automation YAML |
-| Scene | `/ha:generate scene movie night with dim lights` | Valid scene YAML |
-| Script | `/ha:generate script goodnight routine` | Valid script YAML |
-| Dashboard | `/ha:generate dashboard climate control card` | Valid Lovelace card YAML |
-| Template | `/ha:generate template average temperature sensor` | Valid template sensor YAML |
-
-**Verification for each:**
-- [ ] Generated YAML is syntactically correct
-- [ ] Follows HA best practices
-- [ ] Includes comments/explanations
-- [ ] Offers to write to file
-
-### 2.4 /ha:validate
+### 2.2 /ha:validate
 **Test:** Create a test YAML file with an intentional error, then run `/ha:validate`
 
 **Test file (create manually):**
@@ -94,9 +65,10 @@ automation:
 **Expected behavior:**
 - [ ] Detects YAML syntax issues
 - [ ] Reports specific errors with line numbers
+- [ ] Shows evidence table (what ran vs skipped)
 - [ ] Suggests fixes
 
-### 2.5 /ha:deploy
+### 2.3 /ha:deploy
 **Test:** Run `/ha:deploy` (with or without actual git repo)
 
 **Expected behavior:**
@@ -105,43 +77,7 @@ automation:
 - [ ] Asks for commit message
 - [ ] Attempts to push (may fail without git setup - that's OK)
 
-### 2.6 /ha:audit-naming
-**Test:** Run `/ha:audit-naming`
-
-**Expected behavior:**
-- [ ] Attempts to gather entity information
-- [ ] Analyzes naming patterns
-- [ ] Reports inconsistencies
-- [ ] Suggests improvements
-
-**Note:** Full test requires hass-cli connection; partial test verifies logic.
-
-### 2.7 /ha:plan-naming
-**Test:** Run `/ha:plan-naming` (after audit)
-
-**Expected behavior:**
-- [ ] Creates detailed rename plan
-- [ ] Shows dependencies
-- [ ] Saves plan to `.claude/naming-plan.yaml`
-
-### 2.8 /ha:apply-naming
-**Test:** Run `/ha:apply-naming --dry-run`
-
-**Expected behavior:**
-- [ ] Reads plan file
-- [ ] Shows what would be changed
-- [ ] Does NOT make changes in dry-run mode
-
-### 2.9 /ha:new-device
-**Test:** Run `/ha:new-device motion sensor kitchen`
-
-**Expected behavior:**
-- [ ] Asks about device details
-- [ ] Suggests naming based on conventions
-- [ ] Recommends automations for device type
-- [ ] Offers dashboard integration
-
-### 2.10 /ha:analyze
+### 2.4 /ha:analyze
 **Test:** Run `/ha:analyze`
 
 **Expected behavior:**
@@ -149,10 +85,19 @@ automation:
 - [ ] Provides suggestions for improvements
 - [ ] Recommends automations
 - [ ] Identifies optimization opportunities
+- [ ] All metrics cite their source
+
+### 2.5 /ha:apply-naming
+**Test:** Run `/ha:apply-naming` (dry-run default)
+
+**Expected behavior:**
+- [ ] Reads plan file (or reports not found)
+- [ ] Shows what would be changed
+- [ ] Does NOT make changes without `--execute`
 
 ---
 
-## Part 3: Skill Testing
+## Part 3: Domain Skill Testing
 
 Skills load automatically when relevant topics are discussed.
 
@@ -164,13 +109,13 @@ Skills load automatically when relevant topics are discussed.
 
 **Expected:** Claude provides detailed HA config guidance.
 
-### 3.2 ha-automation Skill
+### 3.2 ha-automations Skill
 **Trigger phrases to test:**
 - [ ] "How do I create an automation trigger?"
 - [ ] "What automation modes are available?"
 - [ ] "How do conditions work in automations?"
 
-**Expected:** Claude provides automation pattern guidance.
+**Expected:** Claude provides automation pattern guidance with safety invariants.
 
 ### 3.3 ha-lovelace Skill
 **Trigger phrases to test:**
@@ -191,18 +136,18 @@ Skills load automatically when relevant topics are discussed.
 ### 3.5 ha-naming Skill
 **Trigger phrases to test:**
 - [ ] "What naming convention should I use?"
-- [ ] "How should I name my entities?"
-- [ ] "What's a good pattern for entity IDs?"
+- [ ] "Audit my entity naming"
+- [ ] "Create a rename plan"
 
-**Expected:** Claude provides naming convention guidance.
+**Expected:** Claude provides naming convention guidance, audit, or plan workflow.
 
 ### 3.6 ha-devices Skill
 **Trigger phrases to test:**
 - [ ] "What's the difference between Zigbee and Z-Wave?"
-- [ ] "How do I add a new device?"
+- [ ] "I just added a new motion sensor"
 - [ ] "What entities does a motion sensor create?"
 
-**Expected:** Claude provides device/integration guidance.
+**Expected:** Claude provides device/integration guidance, triggers new device workflow when appropriate.
 
 ---
 
@@ -248,7 +193,58 @@ Agents trigger autonomously for complex tasks.
 
 ## Part 5: Hook Testing
 
-### 5.1 YAML Validation Hook
+### 5.1 SessionStart Hook
+**Test:** Load the plugin in various directory contexts
+
+**Test 5.1a - Wrong directory:**
+1. Open Claude Code in a non-HA directory (e.g., `~/dev`)
+2. Load the plugin via `--plugin-dir`
+
+**Expected:**
+- [ ] Warning about missing `configuration.yaml`
+- [ ] Warning about not being in an HA config repo
+- [ ] Suggestion to navigate to correct directory
+
+**Test 5.1b - Missing env vars:**
+1. Unset `HASS_TOKEN` and `HASS_SERVER`
+2. Load the plugin in any directory
+
+**Expected:**
+- [ ] Warning about `HASS_TOKEN` not set
+- [ ] Warning about `HASS_SERVER` not set
+- [ ] Suggestion to run `/ha:onboard`
+
+**Test 5.1c - First-run detection:**
+1. Ensure no `.claude/settings.local.json` exists
+2. Load the plugin
+
+**Expected:**
+- [ ] Note about missing settings file
+- [ ] Suggestion to run onboarding
+
+**Test 5.1d - Happy path:**
+1. Navigate to an HA config git repo with `configuration.yaml`
+2. Set `HASS_TOKEN` and `HASS_SERVER`
+3. Create `.claude/settings.local.json`
+
+**Expected:**
+- [ ] No warnings
+- [ ] Shows HASS_SERVER value and token status
+
+### 5.2 PreToolUse Bash Guard (hass-cli)
+**Test:** With HASS_TOKEN unset, ask Claude to list entities
+
+**Steps:**
+1. Unset `HASS_TOKEN`
+2. Load plugin (SessionStart should warn about missing token)
+3. Ask "List my entities" or "Show my lights"
+
+**Expected:**
+- [ ] PreToolUse hook intercepts the hass-cli Bash command
+- [ ] Warning reminds user that HASS_TOKEN was reported missing
+- [ ] Suggests running `/ha:onboard` before proceeding
+
+### 5.3 YAML Validation Hook
 **Test:** Edit a `.yaml` file that looks like HA config
 
 **Steps:**
@@ -266,19 +262,19 @@ Agents trigger autonomously for complex tasks.
 ## Part 6: Integration Testing
 
 ### 6.1 Full Workflow: New Device Setup
-1. [ ] Run `/ha:new-device light living room ceiling`
+1. [ ] Tell Claude "I just added a new light in the living room"
 2. [ ] Follow naming suggestions
 3. [ ] Accept automation suggestions
-4. [ ] Generate the automation with `/ha:generate`
+4. [ ] Let Claude generate the automation
 5. [ ] Validate with `/ha:validate`
 6. [ ] (Optional) Deploy with `/ha:deploy`
 
 ### 6.2 Full Workflow: Naming Standardization
-1. [ ] Run `/ha:audit-naming`
+1. [ ] Run `/ha:naming audit` or ask "Audit my naming"
 2. [ ] Review the report
-3. [ ] Run `/ha:plan-naming`
+3. [ ] Run `/ha:naming plan` or ask "Create a naming plan"
 4. [ ] Review the plan file
-5. [ ] Run `/ha:apply-naming --dry-run`
+5. [ ] Run `/ha:apply-naming` (dry-run by default)
 6. [ ] Verify expected changes
 
 ### 6.3 Full Workflow: Config Debugging
@@ -294,13 +290,13 @@ Agents trigger autonomously for complex tasks.
 | Category | Passed | Failed | Notes |
 |----------|--------|--------|-------|
 | Plugin Loading | /2 | | |
-| Commands | /10 | | |
-| Skills | /6 | | |
+| User-Invocable Skills | /5 | | |
+| Domain Skills | /6 | | |
 | Agents | /3 | | |
-| Hooks | /1 | | |
+| Hooks | /3 | | |
 | Integration | /3 | | |
 | Safety Invariants | /6 | | |
-| **Total** | **/31** | | |
+| **Total** | **/28** | | |
 
 ---
 
@@ -314,13 +310,13 @@ These tests verify the 6 safety invariants are enforced.
 **Setup:** Fresh environment, no existing settings
 
 **Test steps:**
-1. Run `/ha-connect` or `/ha:onboard`
+1. Run `/ha:onboard`
 2. Provide a test token when prompted (e.g., `eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test`)
 3. Watch the output carefully
 
 **Expected:**
 - [ ] Token is NEVER echoed back to the screen
-- [ ] Output shows "HASS_TOKEN is set ✓" not the actual value
+- [ ] Output shows "HASS_TOKEN is set" not the actual value
 - [ ] Any URL shown does NOT include the token
 - [ ] Settings file stores the token but Claude doesn't print it
 
@@ -338,7 +334,6 @@ These tests verify the 6 safety invariants are enforced.
 
 **Test steps:**
 1. Ask "Create a scene with the kitchen light set to warm white"
-2. Or run `/ha:generate scene warm kitchen`
 
 **Expected:**
 - [ ] Agent runs `hass-cli state get light.kitchen` first
@@ -439,7 +434,7 @@ Timer substitution breaks the semantic: "5 minutes of no motion" should reset if
 **Expected:**
 - [ ] Output includes a "What Ran vs Skipped" table
 - [ ] Each validation tier is listed (YAML, Entity, Service, HA-backed)
-- [ ] Each tier shows ✅ Passed, ❌ Failed, or ⏭️ Skipped
+- [ ] Each tier shows Passed, Failed, or Skipped
 - [ ] Skipped items explain WHY they were skipped
 - [ ] Evidence column shows actual data/commands used
 
@@ -454,7 +449,7 @@ Timer substitution breaks the semantic: "5 minutes of no motion" should reset if
 
 - Full testing requires actual Home Assistant instance with hass-cli configured
 - Git operations require configured repository
-- Some commands will gracefully fail without prerequisites
+- Some skills will gracefully fail without prerequisites
 
 ## Reporting Issues
 

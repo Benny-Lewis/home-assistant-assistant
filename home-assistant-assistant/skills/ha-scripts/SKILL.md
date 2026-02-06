@@ -44,7 +44,7 @@ Create reusable action sequences that can be triggered manually or from automati
 5. **Preview** with inline comments explaining choices
 6. **Offer options** (Invariant #5 - never auto-deploy):
    - Save to scripts.yaml (local only)
-   - Save and deploy via /ha-deploy
+   - Save and deploy via /ha:deploy
    - Copy to clipboard for manual paste
 
 ## Common Mistakes

@@ -7,7 +7,7 @@ allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
 # Home Assistant Automations
 
 > **Safety Invariants:** #1 (capability check), #2 (no timer substitution), #5 (no implicit deploy)
-> See `references/safety-invariants.md` and `modules/intent-classifier.md`
+> See `references/safety-invariants.md` and `references/intent-classifier.md`
 
 ## Overview
 
@@ -40,19 +40,19 @@ Create Home Assistant automations from natural language descriptions. Core princ
 2. **Classify intent** - Is this inactivity detection or pure delay? (Invariant #2)
    - "After no motion for X" → Inactivity → Use `for:` in trigger, NOT timers
    - "Wait X then do Y" → Pure delay → `delay:` or timer acceptable
-   - See `modules/intent-classifier.md` for classification rules
+   - See `references/intent-classifier.md` for classification rules
 3. **Get capability snapshot** for devices being controlled
 4. **Check conflicts** for existing automations on same entities
 5. **Generate YAML** using `references/yaml-syntax.md` and `references/common-patterns.md`
 6. **Preview** with inline comments explaining choices
 7. **Offer options** (Invariant #5 - never auto-deploy):
    - Save to automations.yaml (local only)
-   - Save and deploy via /ha-deploy
+   - Save and deploy via /ha:deploy
    - Copy to clipboard for manual paste
 
 ## Inactivity vs Delay (Critical)
 
-**This is the #1 source of broken automations.** See `modules/intent-classifier.md`.
+**This is the #1 source of broken automations.** See `references/intent-classifier.md`.
 
 | User Says | Intent | Correct Pattern |
 |-----------|--------|-----------------|

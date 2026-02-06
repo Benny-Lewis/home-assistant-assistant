@@ -203,3 +203,13 @@ actions:
 | restart | Stop current run, start new |
 | queued | Queue new triggers, run sequentially |
 | parallel | Run multiple instances simultaneously |
+
+## Common Mistakes
+
+| Mistake | Correct |
+|---------|---------|
+| `platform: state` (old) | `trigger: state` (2024+) |
+| `service:` | `action:` (2024+) |
+| Using `delay:` for inactivity | Use `for:` in trigger |
+| Including `color_temp` on brightness-only light | Check `supported_color_modes` first |
+| `automation:` as root key in file | File should be list `- id: ...` |

@@ -13,11 +13,8 @@ This is a Claude Code plugin for Home Assistant. It allows users to manage Home 
 ```
 home-assistant-assistant/      # The plugin (load with --plugin-dir)
 merge-plan/                    # Merge documentation and progress tracking
-references/                    # Shared reference documentation
-modules/                       # Shared procedures (resolver, editor, validator)
+references/                    # Development references (yaml-syntax, frontmatter-compliance)
 ```
-
-**Status:** The 61-item merge plan is complete. The `home-assistant-assistant/` folder contains the consolidated, safety-hardened implementation.
 
 ## Safety Invariants
 
@@ -26,8 +23,8 @@ All generated YAML and commands enforce these invariants:
 1. **No unsupported attributes** - Always check `supported_features`/`supported_color_modes` before suggesting device attributes
 2. **No semantic substitution** - Never replace "after no motion" (inactivity) with raw timers
 3. **AST editing only** - No brittle string replacement; use Edit tool with precise old/new strings
-4. **No secrets printed** - Never echo tokens; show "TOKEN is set ✓" not the value
-5. **Never auto-deploy** - All side-effectful commands require explicit user request
+4. **No secrets printed** - Never echo tokens; show "TOKEN is set" not the value
+5. **Never auto-deploy** - All side-effectful skills require explicit user request
 6. **Evidence tables** - All validation outputs show "what ran vs skipped"
 
 ## Plugin Architecture
@@ -39,19 +36,35 @@ home-assistant-assistant/
   .claude-plugin/
     plugin.json               # Plugin manifest - metadata, component discovery
   skills/
-    */SKILL*.md               # Domain knowledge (automations, scripts, scenes, config, etc.)
+    ha-automations/           # Automation creation + domain knowledge (user-invocable)
+    ha-scripts/               # Script creation + domain knowledge (user-invocable)
+    ha-scenes/                # Scene creation + domain knowledge (user-invocable)
+    ha-config/                # Config organization knowledge (user-invocable)
+    ha-jinja/                 # Jinja templating knowledge (user-invocable)
+    ha-lovelace/              # Dashboard design knowledge (user-invocable)
+    ha-naming/                # Naming conventions + audit + plan (user-invocable)
+    ha-apply-naming/          # Naming execution (user-invocable, NO model invocation)
+    ha-devices/               # Device knowledge + new device workflow (user-invocable)
+    ha-troubleshooting/       # Debugging knowledge (user-invocable)
+    ha-onboard/               # Setup wizard + connection + settings (user-invocable)
+    ha-deploy/                # Deploy + rollback (user-invocable, NO model invocation)
+    ha-validate/              # Validation workflow + procedures (user-invocable, agent-preloadable)
+    ha-analyze/               # Setup analysis + recommendations (user-invocable)
+    ha-resolver/              # Entity resolution (NOT user-invocable, agent-preloaded)
   agents/
-    *.md                      # Subagents with specialized prompts (entity-resolver,
-                              # config-validator, log-analyzer, naming-analyzer)
-  commands/
-    *.md                      # Slash commands (legacy - should migrate to skills)
+    *.md                      # Subagents with specialized prompts (config-debugger,
+                              # ha-config-validator, device-advisor, naming-analyzer)
   hooks/
-    hooks.json                # Event-driven automation (YAML validation on file edits)
+    hooks.json                # Event-driven hooks (SessionStart, PreToolUse, PostToolUse)
+    session-check.sh          # SessionStart environment check script
+  references/
+    safety-invariants.md      # Core safety rules referenced by all skills
+    settings-schema.md        # Settings file schema
   templates/
     *.md                      # Reference templates for generated configs
 ```
 
-**Key architectural note**: Per Anthropic documentation, `commands/` is legacy. Skills with `user-invocable: true` frontmatter are the unified mechanism. The merged plugin should migrate all commands to skills.
+**15 skills total:** 13 user-invocable + 1 infrastructure (ha-resolver) + 1 user-invocable-and-agent-preloaded (ha-validate)
 
 ## Testing
 
@@ -64,10 +77,10 @@ claude --plugin-dir "C:\Users\blewis\dev\home-assistant-assistant\home-assistant
 
 See `home-assistant-assistant/TEST_PLAN.md` for the manual test plan covering:
 - Plugin loading verification
-- Command testing procedures
-- Skill trigger testing
+- Skill testing (user-invocable and domain)
 - Agent testing scenarios
 - Hook testing
+- Safety invariant regression tests
 
 ## Prerequisites for Plugin Users
 
@@ -85,17 +98,25 @@ export HASS_SERVER="http://homeassistant.local:8123"
 export HASS_TOKEN="your-long-lived-access-token"
 ```
 
-## Key Commands (Current)
+## Key Skills
 
-| Command | Description |
-|---------|-------------|
-| `/ha-connect` or `/ha:onboard` | First-time setup wizard |
-| `/ha:generate <type>` | Generate YAML (automation, scene, script, dashboard) |
-| `/ha:validate` | Check configuration for errors |
-| `/ha-deploy` or `/ha:deploy` | Push changes to Home Assistant via git |
-| `/ha-rollback` | Revert to previous configuration |
-| `/ha:audit-naming` | Analyze naming consistency |
-| `/ha:new-device` | Guided workflow for new devices |
+| Skill | Slash Command | Description |
+|-------|---------------|-------------|
+| ha-onboard | `/ha:onboard` | First-time setup wizard, connection, settings |
+| ha-validate | `/ha:validate` | Check configuration for errors with evidence tables |
+| ha-deploy | `/ha:deploy` | Deploy changes or rollback via git |
+| ha-analyze | `/ha:analyze` | Analyze setup and suggest improvements |
+| ha-naming | `/ha:naming` | Naming conventions, audit, rename planning |
+| ha-apply-naming | `/ha:apply-naming` | Execute a naming plan (dry-run default) |
+| ha-automations | (auto) | Create automations from descriptions |
+| ha-scripts | (auto) | Create scripts from descriptions |
+| ha-scenes | (auto) | Create scenes from descriptions |
+| ha-devices | (auto) | Device knowledge + new device workflow |
+| ha-config | (auto) | Configuration organization guidance |
+| ha-lovelace | (auto) | Dashboard design guidance |
+| ha-jinja | (auto) | Jinja templating guidance |
+| ha-troubleshooting | (auto) | Debugging and log analysis |
+| ha-resolver | (agent) | Entity resolution (preloaded by agents) |
 
 ## Key Files
 
@@ -104,23 +125,26 @@ export HASS_TOKEN="your-long-lived-access-token"
 - `merge-plan/ha_plugins_merge_fix_plan-v4.md` - Detailed merge strategy
 - `merge-plan/analysis-report.md` - Compliance review against Anthropic docs
 
-**Core modules:**
-- `modules/resolver.md` - Entity resolution and capability snapshots
-- `modules/editor.md` - YAML AST editing procedures
-- `modules/validator.md` - Evidence-based validation
-- `modules/intent-classifier.md` - Inactivity vs delay classification
+**Infrastructure skill (preloaded by agents):**
+- `skills/ha-resolver/SKILL.md` - Entity resolution and capability snapshots
+
+**Skill references (domain-specific):**
+- `skills/ha-automations/references/intent-classifier.md` - Inactivity vs delay classification
+- `skills/ha-naming/references/editor.md` - YAML AST editing procedures
 
 **Testing:**
 - `home-assistant-assistant/TEST_PLAN.md` - Manual test plan with safety invariant tests
 
-**References:**
+**Development references (repo root):**
 - `references/yaml-syntax.md` - HA 2024+ YAML schema (triggers/conditions/actions)
-- `references/log-patterns.md` - Common error patterns and fixes
+- `references/frontmatter-compliance.md` - Anthropic plugin spec compliance
 
 ## Development Notes
 
 - Settings stored in `.claude/settings.local.json` (gitignored)
 - Conventions stored in `.claude/ha.conventions.json` (user's naming patterns)
-- Hooks trigger on Edit/Write operations targeting `.yaml` files to remind users about deployment
+- SessionStart hook checks working directory, env vars, and onboarding status
+- PreToolUse hooks guard Edit/Write (deploy reminders) and Bash (hass-cli env var checks)
+- PostToolUse hooks validate YAML structure after file edits
 - The plugin uses hass-cli for HA API operations and git for configuration deployment
-- All commands with side effects have `disable-model-invocation: true` in frontmatter
+- Skills with side effects have `disable-model-invocation: true` in frontmatter

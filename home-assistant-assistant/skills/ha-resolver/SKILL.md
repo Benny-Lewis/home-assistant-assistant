@@ -1,3 +1,10 @@
+---
+name: ha-resolver
+description: Entity resolution and capability snapshot procedures for Home Assistant
+user-invocable: false
+allowed-tools: Bash(hass-cli:*)
+---
+
 # Resolver Module
 
 Shared procedures for entity resolution and capability discovery in Home Assistant.
@@ -116,9 +123,9 @@ When resolution completes, provide:
 
 | Requested | Found | Status |
 |-----------|-------|--------|
-| "kitchen light" | light.kitchen_main | ✓ Resolved |
-| "garage door" | cover.garage | ✓ Resolved |
-| "bedroom fan" | - | ✗ Not found |
+| "kitchen light" | light.kitchen_main | Resolved |
+| "garage door" | cover.garage | Resolved |
+| "bedroom fan" | - | Not found |
 
 ### Capabilities Snapshot
 
@@ -135,7 +142,7 @@ When resolution completes, provide:
 
 ## Integration Points
 
-- **ha-entity-resolver agent**: Calls this module for complex resolution
+- **ha-entity-resolver agent**: Calls this skill for complex resolution
 - **ha-automations skill**: Must resolve before generating
 - **ha-scenes skill**: Must snapshot capabilities before emitting
 - **ha-scripts skill**: Must verify services exist

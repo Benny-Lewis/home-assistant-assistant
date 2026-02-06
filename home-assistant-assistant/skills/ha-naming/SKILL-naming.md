@@ -1,8 +1,9 @@
 ---
 name: ha-naming
-description: This skill should be used when the user asks about "naming", "entity_id", "rename", "naming convention", "entity naming", "device naming", "consistent names", mentions organizing entities, standardizing names, or needs help with Home Assistant naming best practices.
-version: 0.1.0
-allowed-tools: Read, Grep, Glob
+description: Use when user asks about "naming", "entity_id", "rename", "naming convention", "audit naming", "plan naming", mentions organizing entities, standardizing names, or needs help with Home Assistant naming best practices, audits, or rename planning.
+user-invocable: true
+allowed-tools: Read, Write, Bash, Glob, Grep, AskUserQuestion
+argument-hint: [audit | plan [convention]]
 ---
 
 # Home Assistant Naming Conventions
@@ -74,9 +75,9 @@ Friendly names (displayed in UI) can include:
 
 When renaming existing entities:
 
-1. **Audit current naming**: Use `/ha:audit-naming`
+1. **Audit current naming**: Use `/ha:naming audit`
 2. **Choose convention**: Pick pattern that fits majority
-3. **Plan changes**: Document before executing
+3. **Plan changes**: Use `/ha:naming plan`
 4. **Update dependencies**: Find all references in automations/scripts
 5. **Execute carefully**: Use `/ha:apply-naming`
 6. **Test thoroughly**: Verify automations work
@@ -94,3 +95,299 @@ When renaming existing entities:
 
 - `references-home-assistant-assistant/naming-conventions.md` - Complete tables for areas, devices, domains
 - `ha-conventions` skill - Detect naming patterns from your existing config
+
+---
+
+## Audit Workflow
+
+> **This workflow is READ-ONLY.** It analyzes and reports, but does NOT modify.
+> To apply changes, use `/ha:apply-naming` after reviewing the audit.
+
+Scan all entities, devices, areas, automations, scripts, and scenes for naming inconsistencies.
+
+### Data Source Citation
+
+**Every finding must cite its source:**
+
+```
+Issue: light.light_1 has no descriptive name
+Source: hass-cli entity list | grep "light.light"
+```
+
+Do NOT report issues for entities you haven't verified exist.
+
+### What Gets Audited
+
+1. **Entity IDs** (`entity_id`) - Format: `domain.identifier`, lowercase, underscores only
+2. **Friendly Names** (`friendly_name`) - Consistent capitalization style
+3. **Device Names** - Consistent pattern across similar devices
+4. **Area Names** - Consistent naming style
+5. **Automation Names** (`alias`) - Descriptive, consistent pattern
+6. **Script Names** - Action-oriented naming
+7. **Scene Names** - Descriptive naming
+
+### Data Collection
+
+**From hass-cli (if available):**
+```bash
+hass-cli entity list --output json
+hass-cli area list --output json
+hass-cli device list --output json
+```
+
+**From local config files:**
+- Parse automations.yaml for automation names
+- Parse scripts.yaml for script names
+- Parse scenes.yaml for scene names
+- Scan packages/ for all entity definitions
+
+### Pattern Detection
+
+Identify existing naming patterns:
+- Area prefix: `living_room_light`, `bedroom_fan`
+- Device type suffix: `light_ceiling`, `sensor_temperature`
+- Function-based: `motion_sensor`, `door_lock`
+- Mixed patterns (inconsistent)
+
+### Inconsistency Types
+
+1. **Case Inconsistencies** - `Living Room` vs `living room` vs `LIVING ROOM`
+2. **Separator Inconsistencies** - `living_room` vs `living-room` vs `livingroom`
+3. **Pattern Inconsistencies** - `kitchen_light` but `light_bedroom`
+4. **Abbreviation Inconsistencies** - `temp` vs `temperature`
+5. **Missing Context** - Generic names: `light.light`, `switch.switch_1`
+
+### Audit Report Format
+
+```
+Naming Audit Report
+
+Entities Scanned: 147
+Issues Found: 23
+
+Pattern Analysis
+Primary pattern detected: {area}_{device_type}
+Coverage: 68% of entities follow this pattern
+
+Issues by Category
+
+Critical (blocking search/automation):
+  - light.light_1 - No descriptive name
+  - switch.switch - Duplicate generic name
+
+Inconsistent Naming:
+  - light.living_room_ceiling vs light.bedroom_light_ceiling
+    Suggested: light.bedroom_ceiling (match pattern)
+
+Missing Friendly Names:
+  - binary_sensor.motion_1 - No friendly_name set
+
+Style Suggestions:
+  - Automation "turn on lights" - suggest "Motion: Living Room Lights On"
+
+Summary
+  Critical issues: 2
+  Inconsistencies: 12
+  Missing names: 5
+  Style suggestions: 4
+
+Next Steps:
+  1. Run /ha:naming plan to create a rename plan
+  2. Review and adjust the plan
+  3. Run /ha:apply-naming to execute renames
+```
+
+### Audit Recommendations
+
+Based on audit findings:
+1. **Suggest a naming convention** based on majority pattern
+2. **Prioritize fixes** by impact (critical -> style)
+3. **Group related changes** (all lights, all sensors, etc.)
+4. **Identify automation dependencies** that would break
+
+### Audit Options
+
+- `--json` - Output as JSON for programmatic use
+- `--brief` - Summary only, no details
+- `--domain [domain]` - Audit specific domain only (lights, switches, etc.)
+
+---
+
+## Plan Workflow
+
+Based on audit results, create a detailed plan for renaming entities, devices, and other named items.
+
+### Input
+
+If convention argument provided, use as the target naming convention:
+- `area_device` - {area}_{device_type} pattern
+- `device_area` - {device_type}_{area} pattern
+- `custom` - Ask user for custom pattern
+
+If no arguments, analyze existing patterns and suggest the most common one.
+
+### Planning Process
+
+#### Step 1: Load Audit Results
+
+Review findings from the most recent naming audit. If no audit has been run, suggest running `/ha:naming audit` first.
+
+#### Step 2: Define Target Convention
+
+Work with user to establish the naming convention:
+
+**Entity IDs:**
+- Pattern: `{domain}.{area}_{device_type}_{qualifier}`
+- Example: `light.living_room_ceiling_main`
+
+**Friendly Names:**
+- Pattern: `{Area} {Device Type} {Qualifier}`
+- Example: `Living Room Ceiling Main`
+
+**Automations:**
+- Pattern: `{Trigger}: {Area} {Action}`
+- Example: `Motion: Living Room Lights On`
+
+**Scripts:**
+- Pattern: `{Action} {Target}`
+- Example: `Turn Off All Lights`
+
+**Scenes:**
+- Pattern: `{Descriptive Name}`
+- Example: `Movie Night`, `Good Morning`
+
+#### Step 3: Generate Rename Mappings
+
+For each item that needs renaming, create a mapping:
+
+```yaml
+entity_renames:
+  - current: light.light_1
+    new_id: light.living_room_ceiling
+    new_friendly: "Living Room Ceiling"
+    reason: "Generic name -> descriptive"
+
+automation_renames:
+  - current: "turn on lights"
+    new_name: "Motion: Living Room Lights On"
+    reason: "Add context and trigger type"
+
+device_renames:
+  - current: "Hue Bulb 1"
+    new_name: "Living Room Ceiling Light"
+    reason: "Replace device name with location"
+```
+
+#### Step 4: Dependency Analysis
+
+For each rename, identify dependencies:
+
+```yaml
+- rename: light.light_1 -> light.living_room_ceiling
+  dependencies:
+    automations:
+      - "Motion lights automation" (line 45)
+      - "Goodnight routine" (line 12)
+    scripts:
+      - "flash_lights" (line 8)
+    dashboards:
+      - "main.yaml" (line 156)
+    scenes:
+      - "Movie Night" (entity list)
+  impact: HIGH - 5 references need updating
+```
+
+#### Step 5: Create Execution Plan
+
+Order renames to minimize disruption:
+
+```yaml
+execution_plan:
+  phase_1_preparation:
+    - Create backup of current config
+    - Document current state
+
+  phase_2_entity_renames:
+    batch_1:  # Independent entities
+      - light.light_1 -> light.living_room_ceiling
+      - light.light_2 -> light.living_room_lamp
+    batch_2:  # After batch_1 dependencies updated
+      - switch.switch_1 -> switch.living_room_fan
+
+  phase_3_automation_updates:
+    - Update all automation entity references
+    - Update automation names
+
+  phase_4_config_updates:
+    - Update dashboard references
+    - Update script references
+    - Update scene entity lists
+
+  phase_5_verification:
+    - Validate all configs
+    - Test key automations
+    - Verify dashboard displays
+```
+
+#### Step 6: Write Plan File
+
+Save the plan to `.claude/naming-plan.yaml`:
+
+```yaml
+# HA Toolkit Naming Plan
+# Generated: YYYY-MM-DD
+# Convention: {area}_{device_type}
+
+convention:
+  entity_id: "{area}_{device_type}_{qualifier}"
+  friendly_name: "{Area} {Device Type} {Qualifier}"
+  automation: "{Trigger}: {Area} {Action}"
+
+renames:
+  entities:
+    - from: light.light_1
+      to_id: light.living_room_ceiling
+      to_name: "Living Room Ceiling"
+      dependencies: [automation.motion_lights]
+  # ... more renames
+
+execution:
+  estimated_changes: 47
+  high_risk_items: 3
+  phases: 5
+
+status: pending
+```
+
+### User Review Points
+
+Ask user to confirm:
+1. Is the naming convention acceptable?
+2. Any entities to exclude from renaming?
+3. Priority order for renames
+4. Acceptable to update all dependencies?
+
+### Plan Output
+
+```
+Naming Plan Created
+
+Convention: {area}_{device_type}
+
+Planned Changes:
+  Entity renames: 23
+  Automation updates: 15
+  Script updates: 8
+  Dashboard updates: 12
+  Scene updates: 5
+
+High-Risk Changes (require careful testing):
+  - light.living_room_main (used in 12 automations)
+  - switch.garage_door (security-related)
+
+Plan saved to: .claude/naming-plan.yaml
+
+To review: Read .claude/naming-plan.yaml
+To execute: /ha:apply-naming
+To modify: Edit the plan file or re-run /ha:naming plan
+```

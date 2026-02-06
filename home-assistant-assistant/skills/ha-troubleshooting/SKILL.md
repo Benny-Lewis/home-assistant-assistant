@@ -8,7 +8,7 @@ allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
 
 > **This skill is READ-ONLY.** It diagnoses issues but does not fix them.
 > To apply fixes, use the appropriate generator skill (ha-automations, ha-scripts, ha-scenes)
-> with proper safety guards. See `modules/resolver.md` for entity verification.
+> with proper safety guards. See the ha-resolver skill for entity verification.
 
 ## Overview
 

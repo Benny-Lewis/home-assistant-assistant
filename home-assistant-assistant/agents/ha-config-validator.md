@@ -5,6 +5,7 @@ tools:
   - Bash
   - Read
   - Grep
+skills: [ha-validate]
 ---
 
 # Config Validator Agent

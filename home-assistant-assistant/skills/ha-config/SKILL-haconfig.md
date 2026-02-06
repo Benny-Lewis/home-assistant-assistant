@@ -428,4 +428,4 @@ packages/
 
 ### Required Reading
 
-For hass-cli commands and git sync setup, ensure the user has completed `/ha:onboard` or `/ha:setup` to configure the connection to their Home Assistant instance.
+For hass-cli commands and git sync setup, ensure the user has completed `/ha:onboard` to configure the connection to their Home Assistant instance.

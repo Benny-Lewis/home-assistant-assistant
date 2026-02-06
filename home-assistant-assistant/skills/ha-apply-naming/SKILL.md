@@ -1,6 +1,7 @@
 ---
-name: ha:apply-naming
-description: Execute the naming plan to rename entities and update references
+name: ha-apply-naming
+description: Execute a naming plan to rename entities and update all references
+user-invocable: true
 disable-model-invocation: true
 allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
 argument-hint: [--execute | --phase N]
@@ -13,11 +14,11 @@ argument-hint: [--execute | --phase N]
 >
 > Default mode is DRY-RUN. Use `--execute` to apply changes.
 
-Execute the naming plan created by `/ha:plan-naming` to rename entities, devices, and update all references.
+Execute the naming plan created by `/ha:naming` (plan workflow) to rename entities, devices, and update all references.
 
 ## Dry-Run Default
 
-**By default, this command shows what WOULD change without modifying anything.**
+**By default, this skill shows what WOULD change without modifying anything.**
 
 To actually apply changes, user must explicitly add `--execute`:
 ```
@@ -61,7 +62,7 @@ Before any changes, create a backup:
 - Template strings: `{{ states('light.light_1') }}`
 - Service targets: `target: { entity_id: light.light_1 }`
 
-Use the Editor module (`modules/editor.md`) for safe YAML modifications.
+Use the Editor reference (`skills/ha-naming/references/editor.md`) for safe YAML modifications.
 
 ### Phased Execution
 If `--phase N` in arguments:
@@ -91,8 +92,8 @@ hass-cli entity rename old_entity_id new_entity_id
 Track progress:
 ```yaml
 renames_completed:
-  - light.light_1 → light.living_room_ceiling ✓
-  - light.light_2 → light.living_room_lamp ✓
+  - light.light_1 -> light.living_room_ceiling
+  - light.light_2 -> light.living_room_lamp
 ```
 
 ### Phase 3: Friendly Name Updates
@@ -165,16 +166,15 @@ Show progress during execution:
 
 ```
 Applying Naming Plan
-════════════════════
 
 Phase 1: Preparation
-  ✓ Backup created (commit: def5678)
-  ✓ Plan validated
+  Backup created (commit: def5678)
+  Plan validated
 
 Phase 2: Entity Renames (8 of 23)
-  ✓ light.light_1 → light.living_room_ceiling
-  ✓ light.light_2 → light.living_room_lamp
-  ⏳ switch.switch_1 → switch.living_room_fan
+  light.light_1 -> light.living_room_ceiling
+  light.light_2 -> light.living_room_lamp
+  switch.switch_1 -> switch.living_room_fan (in progress)
   ...
 
 Phase 3: Friendly Names
@@ -190,7 +190,6 @@ Current: Renaming entities...
 
 ```
 Naming Plan Applied
-═══════════════════
 
 Summary:
   Entities renamed: 23/23
@@ -203,9 +202,9 @@ Git Commits:
   Post-rename changes: def5678
 
 Validation:
-  ✓ All configs valid
-  ✓ All entities accessible
-  ⚠ 2 automations need manual testing
+  All configs valid
+  All entities accessible
+  2 automations need manual testing
 
 Recommended Next Steps:
   1. Test critical automations manually
@@ -215,7 +214,6 @@ Recommended Next Steps:
 
 Rollback available:
   git revert def5678 abc1234
-  Or contact support with plan ID: naming-2024-01-15
 ```
 
 ## Error Handling

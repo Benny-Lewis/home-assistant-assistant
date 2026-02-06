@@ -1,6 +1,7 @@
 ---
-name: ha:analyze
-description: Analyze Home Assistant setup and provide suggestions for improvements
+name: ha-analyze
+description: Analyze Home Assistant setup and provide improvement suggestions. Use when user asks for "analysis", "suggestions", "improvements", "optimization", or "review my setup".
+user-invocable: true
 allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
 argument-hint: [focus-area]
 ---
@@ -170,7 +171,6 @@ benefit: "Easier troubleshooting and maintenance"
 
 ```
 Home Assistant Analysis Report
-══════════════════════════════
 
 Overview:
   Entities: 147
@@ -178,30 +178,27 @@ Overview:
   Areas: 8
   Devices: 45
 
-🎯 Top Recommendations
+Top Recommendations
 
 1. HIGH IMPACT: Add motion-triggered lights
    Devices: living_room_light, kitchen_light
    Motion sensors available: living_room_motion, kitchen_motion
    Potential: Reduce manual switching, energy savings
-   [Generate with: /ha:generate automation motion lights]
 
 2. MEDIUM IMPACT: Create light groups
    5 ungrouped lights in living room
    Benefit: Easier control, scene creation
-   [Generate with: /ha:generate helper light group]
 
 3. QUICK WIN: Add away mode
    Presence detection available but unused
    Suggestion: Turn off lights/adjust HVAC when away
-   [Generate with: /ha:generate automation away mode]
 
-📊 Detailed Analysis
+Detailed Analysis
 
 Automations:
-  ✓ Good coverage: Lighting (80%)
-  ⚠ Gap: Climate control (20%)
-  ✗ Missing: Security notifications
+  Good coverage: Lighting (80%)
+  Gap: Climate control (20%)
+  Missing: Security notifications
 
 Energy:
   Monitored devices: 12/45
@@ -212,11 +209,11 @@ Security:
   Gap: No notification automations
 
 Performance:
-  ✓ Config is efficient
+  Config is efficient
   Note: 3 template sensors could be simplified
 
 Next Steps:
-  1. Run /ha:generate for suggested automations
+  1. Ask me to create any suggested automation
   2. Review and customize generated configs
   3. Run /ha:deploy to apply changes
 ```
