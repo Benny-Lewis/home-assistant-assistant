@@ -56,7 +56,6 @@ home-assistant-assistant/
                               # ha-config-validator, device-advisor, naming-analyzer)
   hooks/
     hooks.json                # Event-driven hooks (SessionStart, PreToolUse, PostToolUse)
-    session-check.sh          # SessionStart environment check script
   references/
     safety-invariants.md      # Core safety rules referenced by all skills
     settings-schema.md        # Settings file schema
@@ -143,8 +142,8 @@ export HASS_TOKEN="your-long-lived-access-token"
 
 - Settings stored in `.claude/settings.local.json` (gitignored)
 - Conventions stored in `.claude/ha.conventions.json` (user's naming patterns)
-- SessionStart hook checks working directory, env vars, and onboarding status
-- PreToolUse hooks guard Edit/Write (deploy reminders) and Bash (hass-cli env var checks)
+- SessionStart async hook runs env check via node (HASS_TOKEN, HASS_SERVER, configuration.yaml, settings)
+- PreToolUse Edit|Write prompt hook reminds about /ha:deploy after config changes
 - PostToolUse hooks validate YAML structure after file edits
 - The plugin uses hass-cli for HA API operations and git for configuration deployment
 - Skills with side effects have `disable-model-invocation: true` in frontmatter

@@ -5,7 +5,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-check.sh\""
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-check.js\"",
+            "async": true,
+            "timeout": 10
           }
         ]
       }
@@ -19,15 +21,6 @@
             "prompt": "If editing automations.yaml, scripts.yaml, or scenes.yaml: After making changes, remind the user to run /ha:deploy to validate and deploy, or mention they can continue making more changes first."
           }
         ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "If this Bash command involves hass-cli: check whether HASS_TOKEN/HASS_SERVER were reported as missing at session start. If so, warn the user and suggest /ha:onboard first."
-          }
-        ]
       }
     ],
     "PostToolUse": [
@@ -37,7 +30,7 @@
           {
             "type": "prompt",
             "prompt": "If the file just written/edited has a .yaml extension AND appears to be a Home Assistant configuration file (contains automation:, script:, scene:, light:, sensor:, or similar HA domains), briefly validate the YAML structure. Check for: 1) Proper indentation (2 spaces), 2) Valid boolean values (true/false not True/False), 3) Valid entity_id format (domain.name). If issues found, warn the user. If the file is not an HA config file, do nothing.",
-            "timeout": 10000
+            "timeout": 30
           }
         ]
       }
