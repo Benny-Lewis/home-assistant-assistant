@@ -22,28 +22,30 @@ When the wizard starts, give a brief high-level summary (2-3 sentences max) of w
 
 Before starting the wizard, check multiple environment signals to determine where the user left off.
 
-**Run this as a single script. Wait for the results before deciding which step to present. Do NOT run any step content until resume detection is complete.**
+**Run this script exactly as written (multi-line, not reformatted). Wait for the results before deciding which step to present. Do NOT run any step content until resume detection is complete.**
 
 ```bash
 # Check all environment signals
 [ -f "configuration.yaml" ] && echo "HAS_CONFIG" || echo "NO_CONFIG"
-git remote -v 2>/dev/null | head -1 || echo "NO_GIT_REMOTE"
+REMOTE=$(git remote -v 2>/dev/null | head -1)
+echo "${REMOTE:-NO_GIT_REMOTE}"
 hass-cli --version 2>/dev/null || echo "NO_HASS_CLI"
-[ -n "$HASS_TOKEN" ] && echo "HAS_TOKEN" || echo "NO_TOKEN"
-[ -n "$HASS_SERVER" ] && echo "HAS_SERVER" || echo "NO_SERVER"
+TLEN=$(printf '%s' "$HASS_TOKEN" | wc -c); echo "TOKEN_LEN=$TLEN"
+echo "SERVER=${HASS_SERVER:-UNSET}"
 ```
 
 Use this decision table to skip to the right step:
 
 | Signal | Meaning | Skip to |
 |--------|---------|---------|
-| No `configuration.yaml` + no hass-cli + no token | Fresh start | Step 1 |
-| No `configuration.yaml` + hass-cli or token present | Wrong directory (setup already started) | Ask user for their config path, verify it contains `configuration.yaml`, then tell them to restart Claude Code from that directory (Step 4 logic) |
-| `configuration.yaml` + no git remote | Config dir but no git setup | Step 2 |
-| `configuration.yaml` + git remote + no hass-cli | Git done, need CLI tools | Step 5 |
-| `configuration.yaml` + git remote + hass-cli + no token/server | Need connection setup | Step 6 |
-| `configuration.yaml` + git remote + hass-cli + token + server | Need Git Pull or verify | Step 7 |
-| All present | Run verification | Step 8 |
+| `NO_CONFIG` + `NO_HASS_CLI` + `TOKEN_LEN=0` | Fresh start | Step 1 |
+| `NO_CONFIG` + hass-cli or `TOKEN_LEN>0` | Wrong directory | Ask user for config path (see below) |
+| `HAS_CONFIG` + no git remote | Config dir, no git | Step 2 |
+| `HAS_CONFIG` + git remote + `NO_HASS_CLI` | Git done, need CLI | Step 5 |
+| `HAS_CONFIG` + git remote + hass-cli + `TOKEN_LEN=0` or `SERVER=UNSET` | Need connection | Step 6 |
+| `HAS_CONFIG` + git remote + hass-cli + `TOKEN_LEN>0` + server set | All local setup done | Step 7 |
+
+**Wrong-directory handling:** Do NOT run Step 1 checks (OS, git, Python detection) — the user's tools are already installed. Ask: "I see you have [hass-cli / a token / both] set up, but there's no `configuration.yaml` here. Do you have your HA config cloned somewhere else?" If YES → ask for the path, verify it contains `configuration.yaml`, then tell them to restart Claude Code from that directory (Step 4 logic). If NO → start at Step 2 (Git Setup on Home Assistant) since they need to clone their config first.
 
 **Note:** The Git Pull add-on runs on the HA appliance and can't be detected from the local machine. If all other signals are present, skip to Step 7 and ask the user whether they've already configured it. If yes, proceed to Step 8.
 
@@ -193,21 +195,30 @@ Tell the user:
 
 ## Step 5: hass-cli Installation
 
-If hass-cli is not installed:
+If hass-cli is not installed, offer to install it:
 
-**macOS:**
+"You'll need hass-cli to communicate with Home Assistant. I can install it for you now — okay to proceed?"
+
+If user agrees, install based on platform:
+
+**macOS (if Homebrew available):**
 ```bash
 brew install homeassistant-cli
 ```
 
-**Linux/Windows (via pip):**
+**All platforms (pip fallback):**
 ```bash
 pip install homeassistant-cli
 ```
 
-Verify: `hass-cli --version`
+Verify after install:
+```bash
+hass-cli --version
+```
 
-**→ Wait for user to confirm hass-cli is installed before proceeding to Step 6.**
+If the install fails, show the error and suggest the user troubleshoot their Python/pip setup.
+
+**→ Proceed to Step 6 after successful install.**
 
 ## Step 6: HA Connection Setup
 
@@ -217,8 +228,9 @@ Check if HASS_TOKEN is already set (presence only, NOT value):
 
 **Bash/Git Bash:**
 ```bash
-[ -n "$HASS_TOKEN" ] && echo "HASS_TOKEN is set" || echo "HASS_TOKEN is not set"
+TLEN=$(printf '%s' "$HASS_TOKEN" | wc -c); echo "TOKEN_LEN=$TLEN"
 ```
+If `TOKEN_LEN>0`, the token is set.
 
 **PowerShell:**
 ```powershell
@@ -301,7 +313,8 @@ If set, ask: "Found existing HASS_TOKEN. Do you want to reconfigure?"
    - Is the token valid (not expired)?
 
    Check token is set (but don't show it!):
-   `[ -n "$HASS_TOKEN" ] && echo "Token set" || echo "Token not set"`"
+   `TLEN=$(printf '%s' "$HASS_TOKEN" | wc -c); echo "TOKEN_LEN=$TLEN"`
+   (TOKEN_LEN>0 means it's set)"
 
 ### Environment Variables Reference
 
