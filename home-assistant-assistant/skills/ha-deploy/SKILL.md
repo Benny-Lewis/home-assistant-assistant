@@ -2,15 +2,17 @@
 name: ha-deploy
 description: Deploy or roll back Home Assistant configuration changes via git
 user-invocable: true
-disable-model-invocation: true
 allowed-tools: Read, Write, Bash, AskUserQuestion, Glob
 ---
 
 # Deploy & Rollback Home Assistant Configuration
 
+> **CRITICAL:** This skill has side effects (git commit, git push, HA service calls).
+> - NEVER invoke this skill unless the user explicitly asks to deploy, push, or rollback
+> - ALWAYS show a summary of changes and get explicit user confirmation before each destructive step
+> - Use AskUserQuestion to get confirmation at commit, push, and reload steps
+
 > **Safety Invariant #5:** Never deploy unless explicitly requested.
-> This skill has side effects (git push, service calls).
-> Only invoke when user explicitly requests deployment or rollback.
 
 Push local configuration changes to the git repository, triggering Home Assistant to pull and reload. Also handles rollback to previous states.
 
@@ -60,7 +62,7 @@ MSYS_NO_PATHCONV=1 hass-cli raw get /api/hassio/addons 2>/dev/null | grep -i "gi
 
   Cache the answer in `.claude/settings.local.json` under `deploy.pull_method` so we don't ask every time.
 
-### Step 3: Review Changes
+### Step 3: Review Changes — MANDATORY CONFIRMATION
 
 Show the user what will be deployed:
 ```bash
@@ -71,17 +73,12 @@ git diff --stat
 
 For each changed file, show a brief summary of what changed.
 
-Ask user to confirm they want to deploy these changes:
+Then use AskUserQuestion with options:
+- "Deploy" — proceed with commit + push + reload
+- "Edit commit message" — let user customize the message
+- "Abort" — cancel deployment
 
-"Ready to deploy these changes to Home Assistant.
-
-**What will happen:**
-1. Commit changes to git
-2. Push to remote (if configured)
-3. Reload automations/scripts/scenes in HA
-4. Verify entities exist
-
-**Proceed with deployment?** [Yes / Edit commit message / Go back / Abort]"
+**Do NOT proceed without explicit user selection.**
 
 ### Step 4: Commit Changes
 

@@ -47,7 +47,7 @@ home-assistant-assistant/
     ha-devices/               # Device knowledge + new device workflow (user-invocable)
     ha-troubleshooting/       # Debugging knowledge (user-invocable)
     ha-onboard/               # Setup wizard + connection + settings (user-invocable)
-    ha-deploy/                # Deploy + rollback (user-invocable, NO model invocation)
+    ha-deploy/                # Deploy + rollback (user-invocable, in-skill confirmation gates)
     ha-validate/              # Validation workflow + procedures (user-invocable, agent-preloadable)
     ha-analyze/               # Setup analysis + recommendations (user-invocable)
     ha-resolver/              # Entity resolution (NOT user-invocable, agent-preloaded)
@@ -63,7 +63,7 @@ home-assistant-assistant/
     *.md                      # Reference templates for generated configs
 ```
 
-**15 skills total:** 13 user-invocable + 1 infrastructure (ha-resolver) + 1 user-invocable-and-agent-preloaded (ha-validate)
+**15 skills total:** 14 user-invocable + 1 infrastructure (ha-resolver). ha-validate is both user-invocable and agent-preloadable.
 
 ## Testing
 
@@ -101,12 +101,12 @@ export HASS_TOKEN="your-long-lived-access-token"
 
 | Skill | Slash Command | Description |
 |-------|---------------|-------------|
-| ha-onboard | `/ha:onboard` | First-time setup wizard, connection, settings |
-| ha-validate | `/ha:validate` | Check configuration for errors with evidence tables |
-| ha-deploy | `/ha:deploy` | Deploy changes or rollback via git |
-| ha-analyze | `/ha:analyze` | Analyze setup and suggest improvements |
-| ha-naming | `/ha:naming` | Naming conventions, audit, rename planning |
-| ha-apply-naming | `/ha:apply-naming` | Execute a naming plan (dry-run default) |
+| ha-onboard | `/ha-onboard` | First-time setup wizard, connection, settings |
+| ha-validate | `/ha-validate` | Check configuration for errors with evidence tables |
+| ha-deploy | `/ha-deploy` | Deploy changes or rollback via git |
+| ha-analyze | `/ha-analyze` | Analyze setup and suggest improvements |
+| ha-naming | `/ha-naming` | Naming conventions, audit, rename planning |
+| ha-apply-naming | `/ha-apply-naming` | Execute a naming plan (dry-run default) |
 | ha-automations | (auto) | Create automations from descriptions |
 | ha-scripts | (auto) | Create scripts from descriptions |
 | ha-scenes | (auto) | Create scenes from descriptions |
@@ -131,6 +131,9 @@ export HASS_TOKEN="your-long-lived-access-token"
 - `skills/ha-automations/references/intent-classifier.md` - Inactivity vs delay classification
 - `skills/ha-naming/references/editor.md` - YAML AST editing procedures
 
+**Backlog:**
+- `BACKLOG.md` - Ideas, optimizations, and future considerations
+
 **Testing:**
 - `home-assistant-assistant/TEST_PLAN.md` - Manual test plan with safety invariant tests
 
@@ -143,7 +146,7 @@ export HASS_TOKEN="your-long-lived-access-token"
 - Settings stored in `.claude/settings.local.json` (gitignored)
 - Conventions stored in `.claude/ha.conventions.json` (user's naming patterns)
 - SessionStart async hook runs env check via node (HASS_TOKEN, HASS_SERVER, configuration.yaml, settings)
-- PreToolUse Edit|Write prompt hook reminds about /ha:deploy after config changes
+- PreToolUse Edit|Write prompt hook reminds about /ha-deploy after config changes
 - PostToolUse hooks validate YAML structure after file edits
 - The plugin uses hass-cli for HA API operations and git for configuration deployment
-- Skills with side effects have `disable-model-invocation: true` in frontmatter
+- ha-apply-naming uses `disable-model-invocation: true`; ha-deploy uses in-skill confirmation gates instead

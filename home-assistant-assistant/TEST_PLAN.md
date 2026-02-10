@@ -10,7 +10,7 @@ Before testing, ensure:
 
 **Test command:**
 ```bash
-claude --plugin-dir "C:\Users\blewis\dev\haa-2\home-assistant-assistant"
+claude --plugin-dir "C:\Users\Ben\dev\home-assistant-assistant\home-assistant-assistant"
 ```
 
 ---
@@ -22,21 +22,22 @@ claude --plugin-dir "C:\Users\blewis\dev\haa-2\home-assistant-assistant"
 - [ ] No errors on startup related to home-assistant-assistant
 
 ### 1.2 Skill Registration
-- [ ] `/ha:` shows autocomplete options
-- [ ] User-invocable skills appear:
-  - [ ] `/ha:onboard`
-  - [ ] `/ha:validate`
-  - [ ] `/ha:deploy`
-  - [ ] `/ha:analyze`
-  - [ ] `/ha:apply-naming`
+- [ ] `/ha` shows autocomplete options
+- [ ] All 14 user-invocable skills appear (hyphen separator, e.g., `/ha-onboard`):
+  - [ ] `/ha-onboard`
+  - [ ] `/ha-validate`
+  - [ ] `/ha-deploy`
+  - [ ] `/ha-analyze`
+  - [ ] `/ha-apply-naming`
+  - [ ] `/ha-naming`
 - [ ] Domain skills load automatically when relevant topics discussed
 
 ---
 
 ## Part 2: Skill Testing (User-Invocable)
 
-### 2.1 /ha:onboard
-**Test:** Run `/ha:onboard`
+### 2.1 /ha-onboard
+**Test:** Run `/ha-onboard`
 
 **Expected behavior:**
 - [ ] Detects operating system
@@ -48,8 +49,8 @@ claude --plugin-dir "C:\Users\blewis\dev\haa-2\home-assistant-assistant"
 
 **Note:** Full test requires actual HA instance; partial test can verify wizard flow.
 
-### 2.2 /ha:validate
-**Test:** Create a test YAML file with an intentional error, then run `/ha:validate`
+### 2.2 /ha-validate
+**Test:** Create a test YAML file with an intentional error, then run `/ha-validate`
 
 **Test file (create manually):**
 ```yaml
@@ -68,8 +69,8 @@ automation:
 - [ ] Shows evidence table (what ran vs skipped)
 - [ ] Suggests fixes
 
-### 2.3 /ha:deploy
-**Test:** Run `/ha:deploy` (with or without actual git repo)
+### 2.3 /ha-deploy
+**Test:** Run `/ha-deploy` (with or without actual git repo)
 
 **Expected behavior:**
 - [ ] Checks for uncommitted changes
@@ -77,8 +78,8 @@ automation:
 - [ ] Asks for commit message
 - [ ] Attempts to push (may fail without git setup - that's OK)
 
-### 2.4 /ha:analyze
-**Test:** Run `/ha:analyze`
+### 2.4 /ha-analyze
+**Test:** Run `/ha-analyze`
 
 **Expected behavior:**
 - [ ] Analyzes available information
@@ -87,8 +88,8 @@ automation:
 - [ ] Identifies optimization opportunities
 - [ ] All metrics cite their source
 
-### 2.5 /ha:apply-naming
-**Test:** Run `/ha:apply-naming` (dry-run default)
+### 2.5 /ha-apply-naming
+**Test:** Run `/ha-apply-naming` (dry-run default)
 
 **Expected behavior:**
 - [ ] Reads plan file (or reports not found)
@@ -212,7 +213,7 @@ Agents trigger autonomously for complex tasks.
 **Expected:**
 - [ ] Warning about `HASS_TOKEN` not set
 - [ ] Warning about `HASS_SERVER` not set
-- [ ] Suggestion to run `/ha:onboard`
+- [ ] Suggestion to run `/ha-onboard`
 
 **Test 5.1c - First-run detection:**
 1. Ensure no `.claude/settings.local.json` exists
@@ -242,7 +243,7 @@ Agents trigger autonomously for complex tasks.
 **Expected:**
 - [ ] PreToolUse hook intercepts the hass-cli Bash command
 - [ ] Warning reminds user that HASS_TOKEN was reported missing
-- [ ] Suggests running `/ha:onboard` before proceeding
+- [ ] Suggests running `/ha-onboard` before proceeding
 
 ### 5.3 YAML Validation Hook
 **Test:** Edit a `.yaml` file that looks like HA config
@@ -266,15 +267,15 @@ Agents trigger autonomously for complex tasks.
 2. [ ] Follow naming suggestions
 3. [ ] Accept automation suggestions
 4. [ ] Let Claude generate the automation
-5. [ ] Validate with `/ha:validate`
-6. [ ] (Optional) Deploy with `/ha:deploy`
+5. [ ] Validate with `/ha-validate`
+6. [ ] (Optional) Deploy with `/ha-deploy`
 
 ### 6.2 Full Workflow: Naming Standardization
-1. [ ] Run `/ha:naming audit` or ask "Audit my naming"
+1. [ ] Run `/ha-naming audit` or ask "Audit my naming"
 2. [ ] Review the report
-3. [ ] Run `/ha:naming plan` or ask "Create a naming plan"
+3. [ ] Run `/ha-naming plan` or ask "Create a naming plan"
 4. [ ] Review the plan file
-5. [ ] Run `/ha:apply-naming` (dry-run by default)
+5. [ ] Run `/ha-apply-naming` (dry-run by default)
 6. [ ] Verify expected changes
 
 ### 6.3 Full Workflow: Config Debugging
@@ -310,7 +311,7 @@ These tests verify the 6 safety invariants are enforced.
 **Setup:** Fresh environment, no existing settings
 
 **Test steps:**
-1. Run `/ha:onboard`
+1. Run `/ha-onboard`
 2. Provide a test token when prompted (e.g., `eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test`)
 3. Watch the output carefully
 
@@ -428,7 +429,7 @@ Timer substitution breaks the semantic: "5 minutes of no motion" should reset if
 **Setup:** Run validation on any YAML file
 
 **Test steps:**
-1. Run `/ha:validate` on a config file
+1. Run `/ha-validate` on a config file
 2. Check the output format
 
 **Expected:**

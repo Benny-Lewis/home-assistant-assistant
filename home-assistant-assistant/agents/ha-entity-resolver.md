@@ -14,6 +14,8 @@ Find Home Assistant entities matching user descriptions, validate they exist, an
 > **Safety Invariant #1:** Always capture capability snapshots before suggesting attributes.
 > Never assume features exist - verify via `supported_features` or mode lists.
 
+> **hass-cli:** Use `hass-cli -o json state get <entity_id>` for full attribute output (includes `supported_features`, `supported_color_modes`, etc.). Default tabular output only shows entity, description, state, and changed columns — not enough for capability snapshots.
+
 ## Task
 
 Given a description (e.g., "hallway motion sensor", "kitchen lights"), find the actual entity IDs and capture their capabilities.

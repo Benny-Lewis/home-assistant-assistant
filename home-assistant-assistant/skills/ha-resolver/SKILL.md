@@ -49,12 +49,14 @@ Before using an entity_id in generated YAML:
 
 ## Capability Snapshot Procedure
 
-Before emitting YAML attributes for a device, capture its actual capabilities:
+Before emitting YAML attributes for a device, capture its actual capabilities.
+
+> **Use `-o json` for full attributes.** Default tabular output omits attributes like `supported_features` and `supported_color_modes`.
 
 ### For Lights
 
 ```bash
-hass-cli state get light.example_light
+hass-cli -o json state get light.example_light
 ```
 
 Check `supported_features` and `supported_color_modes` in attributes:
@@ -67,7 +69,7 @@ Check `supported_features` and `supported_color_modes` in attributes:
 ### For Climate
 
 ```bash
-hass-cli state get climate.example_thermostat
+hass-cli -o json state get climate.example_thermostat
 ```
 
 Check `hvac_modes` and `supported_features`:
@@ -77,7 +79,7 @@ Check `hvac_modes` and `supported_features`:
 ### For Media Players
 
 ```bash
-hass-cli state get media_player.example
+hass-cli -o json state get media_player.example
 ```
 
 Check `supported_features` bitmask for:

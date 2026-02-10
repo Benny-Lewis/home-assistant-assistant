@@ -12,13 +12,14 @@
         ]
       }
     ],
-    "PreToolUse": [
+    "PostToolUse": [
       {
         "matcher": "Edit|Write",
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "If editing automations.yaml, scripts.yaml, or scenes.yaml: After making changes, remind the user to run /ha:deploy to validate and deploy, or mention they can continue making more changes first."
+            "type": "command",
+            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PostToolUse',additionalContext:'You just edited an HA config file. Remind the user they can run /ha-deploy to validate and deploy when ready, or continue making more changes first.'}}))\"",
+            "timeout": 5
           }
         ]
       }

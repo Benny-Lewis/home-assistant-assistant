@@ -2,7 +2,7 @@
 name: ha-scenes
 description: Use when user wants device presets, mentions "scene", "mood", "setting", or describes setting multiple devices to specific states like "movie mode" or "goodnight".
 user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
+allowed-tools: Read, Grep, Glob, Edit, Bash(hass-cli:*), AskUserQuestion
 ---
 
 # Home Assistant Scenes
@@ -48,10 +48,11 @@ Create presets that set multiple entities to specific states simultaneously. Cor
 6. **Preview** with inline comments explaining capability checks
 7. **Save and offer deployment** (Invariant #5 - never auto-deploy):
    - Save to scenes.yaml
-   - Ask: "Saved. Ready to deploy to Home Assistant?"
-   - If yes → invoke /ha:deploy (which has its own confirmation)
-   - If no → "OK, you can deploy later with /ha:deploy"
-   - **Never suggest manual file transfer (scp, rsync, manual copy). Always use /ha:deploy.**
+   - **MANDATORY: Call the AskUserQuestion tool** (do NOT just print text) with:
+     - Question: "Saved to scenes.yaml. What would you like to do next?"
+     - Option 1: "Deploy now" → invoke ha-deploy skill
+     - Option 2: "Keep editing" → ready for more changes
+   - **Never suggest manual file transfer (scp, rsync, manual copy). Always use ha-deploy.**
 
 ## Common Mistakes
 

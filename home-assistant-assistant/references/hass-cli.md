@@ -22,13 +22,19 @@
 
 | Flag | Description |
 |------|-------------|
+| `-o json` / `-o yaml` / `-o table` | Output format (short flag only: `-o json`, not `--output json`) |
 | `--no-headers` | Suppress column headers in tabular output |
 | `--columns <cols>` | Select specific columns (comma-separated) |
 
-### Flags That Do NOT Exist
+### JSON Output for Full Attributes
 
-- `--output json` — **Does not exist.** Output is always tabular text.
-- `--format` — Not supported.
+Default tabular output only shows entity, description, state, and changed columns. Use `-o json` to get full attributes including `supported_features`, `supported_color_modes`, etc.:
+
+```bash
+hass-cli -o json state get light.living_room
+```
+
+> **Note:** Use the short flag `-o json`, not `--output json` (long form may not work in all versions).
 
 ## MINGW / Git Bash Note
 
@@ -63,7 +69,7 @@ hass-cli entity list --no-headers | awk -F'.' '{print $1}' | sort | uniq -c | so
 
 ## Common Pitfalls
 
-1. **No JSON output** — Don't use `--output json`. Parse tabular text instead.
+1. **JSON output** — Use `-o json` (short flag) for full attributes. The long flag `--output json` may not work.
 2. **MINGW path mangling** — Use `MSYS_NO_PATHCONV=1` for `raw get/post` commands.
 3. **Service call arguments** — Use `--arguments` flag with key=value pairs.
 4. **Entity rename** — Only changes the registry ID, not the device itself.
