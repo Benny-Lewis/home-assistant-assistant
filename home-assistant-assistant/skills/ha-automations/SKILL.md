@@ -46,10 +46,12 @@ Create Home Assistant automations from natural language descriptions. Core princ
 4. **Check conflicts** for existing automations on same entities
 5. **Generate YAML** using `references/yaml-syntax.md` and `references/common-patterns.md`
 6. **Preview** with inline comments explaining choices
-7. **Offer options** (Invariant #5 - never auto-deploy):
-   - Save to automations.yaml (local only)
-   - Save and deploy via /ha:deploy
-   - Copy to clipboard for manual paste
+7. **Save and offer deployment** (Invariant #5 - never auto-deploy):
+   - Save to automations.yaml
+   - Ask: "Saved. Ready to deploy to Home Assistant?"
+   - If yes → invoke /ha:deploy (which has its own confirmation)
+   - If no → "OK, you can deploy later with /ha:deploy"
+   - **Never suggest manual file transfer (scp, rsync, manual copy). Always use /ha:deploy.**
 
 ## Inactivity vs Delay (Critical)
 

@@ -21,7 +21,10 @@ Settings are stored in `.claude/settings.local.json` in the user's Home Assistan
   "auto_deploy": "boolean (default: false) - auto-deploy after generate",
   "auto_commit": "boolean (default: false) - auto-commit after changes",
   "git_remote": "string (optional) - git remote for push",
-  "git_branch": "string (optional) - git branch for commits"
+  "git_branch": "string (optional) - git branch for commits",
+  "deploy": {
+    "pull_method": "string (optional) - how HA gets config updates: 'git_pull_addon' | 'ssh' | 'manual'"
+  }
 }
 ```
 
@@ -33,7 +36,10 @@ Settings are stored in `.claude/settings.local.json` in the user's Home Assistan
   "ha_token_env": "HASS_TOKEN",
   "config_path": "/config",
   "auto_deploy": false,
-  "auto_commit": false
+  "auto_commit": false,
+  "deploy": {
+    "pull_method": "git_pull_addon"
+  }
 }
 ```
 

@@ -43,10 +43,12 @@ Create reusable action sequences that can be triggered manually or from automati
 3. **Get capability snapshot** - For each device, verify supported services/attributes
 4. **Generate YAML** using `references/yaml-syntax.md`
 5. **Preview** with inline comments explaining choices
-6. **Offer options** (Invariant #5 - never auto-deploy):
-   - Save to scripts.yaml (local only)
-   - Save and deploy via /ha:deploy
-   - Copy to clipboard for manual paste
+6. **Save and offer deployment** (Invariant #5 - never auto-deploy):
+   - Save to scripts.yaml
+   - Ask: "Saved. Ready to deploy to Home Assistant?"
+   - If yes → invoke /ha:deploy (which has its own confirmation)
+   - If no → "OK, you can deploy later with /ha:deploy"
+   - **Never suggest manual file transfer (scp, rsync, manual copy). Always use /ha:deploy.**
 
 ## Common Mistakes
 

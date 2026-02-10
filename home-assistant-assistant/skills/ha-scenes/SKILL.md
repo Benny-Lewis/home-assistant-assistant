@@ -46,10 +46,12 @@ Create presets that set multiple entities to specific states simultaneously. Cor
 4. **Determine states** - Only use supported attributes from snapshot
 5. **Generate YAML** using `references/yaml-syntax.md`
 6. **Preview** with inline comments explaining capability checks
-7. **Offer options** (Invariant #5 - never auto-deploy):
-   - Save to scenes.yaml (local only)
-   - Save and deploy via /ha:deploy
-   - Copy to clipboard for manual paste
+7. **Save and offer deployment** (Invariant #5 - never auto-deploy):
+   - Save to scenes.yaml
+   - Ask: "Saved. Ready to deploy to Home Assistant?"
+   - If yes → invoke /ha:deploy (which has its own confirmation)
+   - If no → "OK, you can deploy later with /ha:deploy"
+   - **Never suggest manual file transfer (scp, rsync, manual copy). Always use /ha:deploy.**
 
 ## Common Mistakes
 

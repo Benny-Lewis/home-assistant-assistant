@@ -41,6 +41,25 @@ a) Fix issues (describe what to change)
 b) Go back to editing
 c) Abort deploy
 
+### Step 2.5: Verify HA Can Pull
+
+Check if `deploy.pull_method` is cached in `.claude/settings.local.json`. If cached, use that method and skip this step.
+
+If not cached, check if Git Pull add-on is available:
+```bash
+MSYS_NO_PATHCONV=1 hass-cli raw get /api/hassio/addons 2>/dev/null | grep -i "git"
+```
+
+- **If found** → proceed with auto-pull workflow, cache `"deploy": { "pull_method": "git_pull_addon" }` in settings.
+- **If not found or API unavailable** → ask user:
+
+  "How does your HA instance get config updates?"
+  1. **Git Pull add-on** — offer to help set it up
+  2. **SSH access** — use `ssh <host> 'cd /config && git pull'`
+  3. **Manual** — provide instructions to pull on HA side
+
+  Cache the answer in `.claude/settings.local.json` under `deploy.pull_method` so we don't ask every time.
+
 ### Step 3: Review Changes
 
 Show the user what will be deployed:
