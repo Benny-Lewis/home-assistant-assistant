@@ -50,7 +50,7 @@ if (status.length > 0) {
 if (warnings.length > 0) {
   context += '\nWarnings:\n';
   warnings.forEach(w => { context += `  - ${w}\n`; });
-  const missingEnv = warnings.some(w => w.includes('HASS_TOKEN') || w.includes('HASS_SERVER') || w.includes('settings file'));
+  const missingEnv = warnings.some(w => w.includes('HASS_TOKEN') || w.includes('HASS_SERVER'));
   const missingConfig = warnings.some(w => w.includes('configuration.yaml'));
   if (missingEnv) {
     context += '\nACTION REQUIRED: Setup is incomplete. Before handling the user\'s request, you MUST invoke the /ha:onboard skill to walk them through setup. Acknowledge the user\'s request, explain that setup needs to be completed first, then launch /ha:onboard.';
