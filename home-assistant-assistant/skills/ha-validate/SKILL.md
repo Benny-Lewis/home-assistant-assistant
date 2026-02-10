@@ -3,19 +3,25 @@ name: ha-validate
 description: Validate Home Assistant configuration files for errors. Use when user says "validate", "check config", "is this correct", or before deployment.
 user-invocable: true
 allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
-argument-hint: [file-or-directory]
 ---
 
 # Validate Home Assistant Configuration
 
+> **Safety Invariant #4 — CRITICAL:** NEVER echo, print, or expand token/secret values.
+> To check token presence, use: `TLEN=$(printf '%s' "$HASS_TOKEN" | wc -c); echo "TOKEN_LEN=$TLEN"`
+> NEVER use `$HASS_TOKEN` in any echo, printf, or string interpolation that could output its value.
+>
 > **Evidence-First Approach:** Always show what checks ran vs. were skipped.
 > Users need to know what was validated, not just what passed.
 >
 > **Safety Invariants:**
 > - **#1:** No unsupported attributes without verification (validation catches these)
+> - **#4:** Never echo tokens or secret values — check presence only
 > - **#6:** All validation outputs must include "what ran vs skipped" evidence tables
 >
 > See `references/safety-invariants.md` for full details.
+>
+> **MINGW/Git Bash:** All `hass-cli` commands with URL paths must be prefixed with `MSYS_NO_PATHCONV=1` to prevent path mangling (e.g., `/api/...` being converted to `C:/Program Files/Git/api/...`).
 
 Check Home Assistant configuration files for errors and issues. This skill provides both the user-facing validation workflow and the shared validation procedures used by agents (config-debugger, ha-config-validator).
 
@@ -48,7 +54,7 @@ Basic YAML parsing - catches structural errors.
 
 ```bash
 # Preferred: HA-backed validation includes YAML check
-hass-cli raw post /api/config/core/check_config
+MSYS_NO_PATHCONV=1 hass-cli raw post /api/config/core/check_config
 
 # Fallback if HA not connected: use yq if available
 yq eval '.' automations.yaml > /dev/null 2>&1 && echo "Valid" || echo "Invalid"
@@ -106,7 +112,7 @@ hass-cli state get light.kitchen_main
 hass-cli service list | grep "light.turn_on"
 
 # Full config check (requires HA access)
-hass-cli raw post /api/config/core/check_config
+MSYS_NO_PATHCONV=1 hass-cli raw post /api/config/core/check_config
 ```
 
 **What it catches:**
@@ -125,12 +131,13 @@ hass-cli raw post /api/config/core/check_config
 ## Routing to HA-Backed Validation
 
 ```bash
-[ -n "$HASS_TOKEN" ] && [ -n "$HASS_SERVER" ] && echo "Connected" || echo "Not connected"
+TLEN=$(printf '%s' "$HASS_TOKEN" | wc -c)
+[ "$TLEN" -gt 0 ] && [ -n "$HASS_SERVER" ] && echo "Connected" || echo "Not connected"
 ```
 
 **If connected**, prefer HA-backed validation:
 ```bash
-hass-cli service call homeassistant.check_config
+MSYS_NO_PATHCONV=1 hass-cli service call homeassistant.check_config
 ```
 
 **If not connected**, run local validation only and note limitation:

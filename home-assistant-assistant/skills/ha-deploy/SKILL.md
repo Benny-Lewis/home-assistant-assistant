@@ -323,7 +323,7 @@ git revert <rollback-commit-hash>
 
 1. Check HA logs:
    ```bash
-   hass-cli raw get /api/error_log | tail -20
+   MSYS_NO_PATHCONV=1 hass-cli raw get /api/error_log | tail -20
    ```
 
 2. Offer rollback option:

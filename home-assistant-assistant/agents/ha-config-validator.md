@@ -28,7 +28,7 @@ Validation progresses through tiers, stopping if any tier fails:
 Use hass-cli's built-in YAML parsing or read-and-parse:
 ```bash
 # Preferred: HA-backed validation includes YAML check
-hass-cli raw post /api/config/core/check_config
+MSYS_NO_PATHCONV=1 hass-cli raw post /api/config/core/check_config
 
 # Fallback if HA not connected: use yq if available
 yq eval '.' automations.yaml > /dev/null 2>&1 && echo "Valid" || echo "Invalid"
@@ -55,7 +55,7 @@ hass-cli service list | grep "<domain>.<service>"
 ### Tier 4: HA-Backed Validation (most authoritative)
 Use Home Assistant's built-in validation:
 ```bash
-hass-cli raw post /api/config/core/check_config
+MSYS_NO_PATHCONV=1 hass-cli raw post /api/config/core/check_config
 ```
 
 ## Output Format (with Evidence Table)

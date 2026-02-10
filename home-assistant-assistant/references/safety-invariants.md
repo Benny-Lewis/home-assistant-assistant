@@ -112,13 +112,13 @@ When handling credentials:
 
 **Example:**
 ```bash
-# BAD
+# BAD - leaks the token value
 echo "Token: $HASS_TOKEN"
 echo "Token prefix: ${HASS_TOKEN:0:10}..."
+echo "Token set: ${HASS_TOKEN:+yes}${HASS_TOKEN:-no}"  # :-no expands to value when set!
 
-# GOOD
-echo "HASS_TOKEN: ${HASS_TOKEN:+configured}"
-echo "HASS_TOKEN: $([ -n "$HASS_TOKEN" ] && echo "set (${#HASS_TOKEN} chars)" || echo "not set")"
+# GOOD - reports presence without revealing value
+TLEN=$(printf '%s' "$HASS_TOKEN" | wc -c); echo "TOKEN_LEN=$TLEN"
 ```
 
 ### 5. Never Deploy Unless Requested

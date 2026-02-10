@@ -34,9 +34,9 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
 | Command | Purpose |
 |---------|---------|
 | `hass-cli state get automation.name` | Check if automation enabled |
-| `hass-cli raw get /api/error_log` | Get error logs |
-| `hass-cli raw get /api/trace/automation.name` | Get automation trace |
-| `hass-cli raw get "/api/history/period?filter_entity_id=X"` | Entity history |
+| `MSYS_NO_PATHCONV=1 hass-cli raw get /api/error_log` | Get error logs |
+| `MSYS_NO_PATHCONV=1 hass-cli raw get /api/trace/automation.name` | Get automation trace |
+| `MSYS_NO_PATHCONV=1 hass-cli raw get "/api/history/period?filter_entity_id=X"` | Entity history |
 
 ## Process
 

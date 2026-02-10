@@ -89,7 +89,7 @@ Traces show exactly what happened during automation execution.
 **Get trace via API:**
 ```bash
 # Note: Replace automation.name with actual automation ID
-hass-cli raw get /api/trace/automation.name
+MSYS_NO_PATHCONV=1 hass-cli raw get /api/trace/automation.name
 ```
 
 **What traces show:**
@@ -113,7 +113,7 @@ Look for `state: on`
 ### 2. Did trigger entity reach trigger state?
 ```bash
 # Check recent history
-hass-cli raw get "/api/history/period?filter_entity_id=binary_sensor.motion"
+MSYS_NO_PATHCONV=1 hass-cli raw get "/api/history/period?filter_entity_id=binary_sensor.motion"
 ```
 
 ### 3. Were conditions met at trigger time?
@@ -126,7 +126,7 @@ hass-cli raw get "/api/history/period?filter_entity_id=binary_sensor.motion"
 
 ### 5. Any errors in logs?
 ```bash
-hass-cli raw get /api/error_log
+MSYS_NO_PATHCONV=1 hass-cli raw get /api/error_log
 ```
 
 ## Time-Based Issues

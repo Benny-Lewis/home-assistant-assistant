@@ -179,6 +179,32 @@ SERVER=http://homeassistant.local:8123
 
 ---
 
+## /ha-validate (Test Plan 2.2)
+
+**Setup:** `~/dev/ha` (valid HA config), hass-cli working, HASS_TOKEN + HASS_SERVER set
+
+**Agent behavior:**
+- [x] Ran HA-backed config check (`hass-cli raw post /api/config/core/check_config`) — returned `result: valid`
+- [x] Checked for tab characters in YAML files
+- [x] Scanned for hardcoded passwords/tokens (found all use `!secret`)
+- [x] Verified all 9 included YAML files exist
+- [x] Caught missing `themes/` directory referenced in configuration.yaml
+- [x] Produced evidence table (what ran vs skipped) — **Safety Invariant #6 satisfied**
+- [x] Self-corrected Git Bash path mangling (`MSYS_NO_PATHCONV=1`)
+
+**Safety Invariant #4 VIOLATION — Token leaked:**
+Agent ran: `echo "HASS_TOKEN set: ${HASS_TOKEN:+yes}${HASS_TOKEN:-no}"`
+The `${HASS_TOKEN:-no}` expansion outputs the full token value when it IS set (the `:-` default only fires when empty). Full JWT was printed in output. The validate skill itself doesn't contain this command — the agent improvised it during its tool availability check. Need to strengthen the safety reminder in ha-validate or add a hook guard.
+
+**Git Bash path mangling:**
+`hass-cli raw post /api/config/core/check_config` failed because MINGW converted `/api/...` to a Windows path. Agent self-corrected with `MSYS_NO_PATHCONV=1`. This is a recurring MINGW issue — should document `MSYS_NO_PATHCONV=1` as required prefix for hass-cli commands with API paths.
+
+**Bugs found:**
+- Token leak via improvised bash expansion (Safety Invariant #4)
+- Git Bash path mangling on hass-cli API paths (MINGW environment issue)
+
+---
+
 ## Plugin Loading (Test Plan 1.1-1.2)
 
 **Skill registration:** `/ha` autocomplete showed 9 of 14 expected user-invocable skills.
@@ -202,3 +228,6 @@ SERVER=http://homeassistant.local:8123
 | 3 | `unset` in terminal doesn't affect Claude Code bash (profile re-sources) | Test setup issue (not a code bug) | Test 1 Branch 1 | N/A |
 | 4 | 5 skills used non-standard filenames (`SKILL-*.md` instead of `SKILL.md`) | Medium | Plugin loading | **Fixed** — renamed all to `SKILL.md` |
 | 5 | 7 skills missing `user-invocable: true` in frontmatter | Low | Plugin loading | **Fixed** — added to all 14 user-invocable skills |
+| 6 | Token leaked via `${HASS_TOKEN:-no}` expansion in improvised bash | **Critical** | /ha-validate | Open — need fix |
+| 7 | Git Bash path mangling on hass-cli API paths (MINGW converts `/api/...`) | Medium | /ha-validate | Open — need `MSYS_NO_PATHCONV=1` |
+| 8 | `argument-hint` in frontmatter causes fully qualified slash command names | Low | Plugin loading | **Fixed** — removed from ha-devices, ha-naming |

@@ -38,17 +38,17 @@ hass-cli state get automation.<name>
 
 **Get automation trace (if available)**
 ```bash
-hass-cli raw get /api/trace/automation.<name>
+MSYS_NO_PATHCONV=1 hass-cli raw get /api/trace/automation.<name>
 ```
 
 **Get entity history**
 ```bash
-hass-cli raw get "/api/history/period?filter_entity_id=<entity_id>"
+MSYS_NO_PATHCONV=1 hass-cli raw get "/api/history/period?filter_entity_id=<entity_id>"
 ```
 
 **Get error logs**
 ```bash
-hass-cli raw get /api/error_log
+MSYS_NO_PATHCONV=1 hass-cli raw get /api/error_log
 ```
 
 ### 3. Analyze
