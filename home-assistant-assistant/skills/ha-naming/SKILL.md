@@ -125,14 +125,25 @@ Do NOT report issues for entities you haven't verified exist.
 6. **Script Names** - Action-oriented naming
 7. **Scene Names** - Descriptive naming
 
+### Existing Conventions Check
+
+Before collecting entity data, scan for existing naming specs:
+
+Glob patterns: `**/naming*`, `**/convention*`, `**/*style*guide*`
+Also check: `.claude/ha.conventions.json`
+
+If found, read them and report: "Found existing naming conventions at {path}. Incorporating into audit."
+
 ### Data Collection
 
 **From hass-cli (if available):**
 ```bash
-hass-cli entity list --output json
-hass-cli area list --output json
-hass-cli device list --output json
+hass-cli entity list
+hass-cli area list
+hass-cli device list
 ```
+
+> Output is tabular text, not JSON. See `references/hass-cli.md` for parsing patterns.
 
 **From local config files:**
 - Parse automations.yaml for automation names

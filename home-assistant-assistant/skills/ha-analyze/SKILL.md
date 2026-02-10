@@ -3,7 +3,6 @@ name: ha-analyze
 description: Analyze Home Assistant setup and provide improvement suggestions. Use when user asks for "analysis", "suggestions", "improvements", "optimization", or "review my setup".
 user-invocable: true
 allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
-argument-hint: [focus-area]
 ---
 
 # Analyze Home Assistant Setup
@@ -44,17 +43,19 @@ If no arguments, analyze all areas.
 ### From hass-cli (if available):
 ```bash
 # Entity inventory
-hass-cli entity list --output json
+hass-cli entity list
 
 # State history (for pattern detection)
 hass-cli state history --entity light.* --since "7 days ago"
 
 # Device list
-hass-cli device list --output json
+hass-cli device list
 
 # Area list
-hass-cli area list --output json
+hass-cli area list
 ```
+
+> Output is tabular text, not JSON. See `references/hass-cli.md` for parsing patterns.
 
 ### From local config:
 - Read automations.yaml for existing automations

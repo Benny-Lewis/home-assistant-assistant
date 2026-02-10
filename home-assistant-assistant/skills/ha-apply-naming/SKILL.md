@@ -4,7 +4,6 @@ description: Execute a naming plan to rename entities and update all references
 user-invocable: true
 disable-model-invocation: true
 allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
-argument-hint: [--execute | --phase N]
 ---
 
 # Apply Naming Plan
@@ -45,7 +44,11 @@ Run with `--execute` to apply these changes.
 
 ## Prerequisites
 
-- Naming plan exists at `.claude/naming-plan.yaml`
+- **Naming plan** — search in order:
+  1. `.claude/naming-plan.yaml` (canonical)
+  2. Glob for `**/naming-plan*` or `**/rename-plan*`
+  3. `.claude/ha.conventions.json` (conventions only, no rename mappings)
+- If nothing found: "No naming plan found. Run `/ha:naming plan` first."
 - hass-cli configured for entity renames
 - Git configured for config file updates
 

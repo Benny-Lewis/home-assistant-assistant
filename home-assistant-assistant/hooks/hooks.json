@@ -22,18 +22,6 @@
           }
         ]
       }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "If the file just written/edited has a .yaml extension AND appears to be a Home Assistant configuration file (contains automation:, script:, scene:, light:, sensor:, or similar HA domains), briefly validate the YAML structure. Check for: 1) Proper indentation (2 spaces), 2) Valid boolean values (true/false not True/False), 3) Valid entity_id format (domain.name). If issues found, warn the user. If the file is not an HA config file, do nothing.",
-            "timeout": 30
-          }
-        ]
-      }
     ]
   }
 }
