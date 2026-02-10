@@ -3,7 +3,6 @@ name: ha-devices
 description: Use when user asks about "device", "integration", "entity", "add device", "new device", "just added", "device setup", "Zigbee", "Z-Wave", "WiFi devices", mentions device types, integration configuration, or needs help understanding Home Assistant device and integration concepts.
 user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash, AskUserQuestion, Task
-argument-hint: [device-type] [location]
 ---
 
 # Home Assistant Devices and Integrations
