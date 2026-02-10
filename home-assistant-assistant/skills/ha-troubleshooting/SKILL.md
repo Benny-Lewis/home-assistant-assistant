@@ -1,6 +1,7 @@
 ---
 name: ha-troubleshooting
 description: Use when user asks "why didn't X work", "not working", "debug", "check logs", mentions something "stopped working", or needs to diagnose Home Assistant issues.
+user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
 ---
 

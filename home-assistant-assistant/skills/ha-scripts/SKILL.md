@@ -1,6 +1,7 @@
 ---
 name: ha-scripts
 description: Use when user wants reusable action sequences, mentions "script", "sequence of actions", or needs to chain multiple commands that can be triggered manually or from automations.
+user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
 ---
 

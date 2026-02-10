@@ -1,6 +1,7 @@
 ---
 name: ha-automations
 description: Use when user mentions Home Assistant automations, describes "when X happens do Y" patterns, asks about triggers/conditions/actions, or wants to automate smart home devices.
+user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
 ---
 

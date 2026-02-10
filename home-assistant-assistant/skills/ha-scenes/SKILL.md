@@ -1,6 +1,7 @@
 ---
 name: ha-scenes
 description: Use when user wants device presets, mentions "scene", "mood", "setting", or describes setting multiple devices to specific states like "movie mode" or "goodnight".
+user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
 ---
 

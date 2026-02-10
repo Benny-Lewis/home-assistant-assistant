@@ -179,6 +179,20 @@ SERVER=http://homeassistant.local:8123
 
 ---
 
+## Plugin Loading (Test Plan 1.1-1.2)
+
+**Skill registration:** `/ha` autocomplete showed 9 of 14 expected user-invocable skills.
+
+**Missing skills — two root causes found:**
+1. **Non-standard filenames:** ha-devices (`SKILL-devices.md`), ha-naming (`SKILL-naming.md`), ha-config (`SKILL-haconfig.md`), ha-jinja (`SKILL-jinja.md`), ha-lovelace (`SKILL-lovelace.md`) — Claude Code expects `SKILL.md`
+2. **Missing `user-invocable: true`:** ha-config, ha-jinja, ha-lovelace, ha-automations, ha-scenes, ha-scripts, ha-troubleshooting had no `user-invocable` field (Claude Code defaulted to true for some, but not all)
+
+**Fix applied:** Renamed all to `SKILL.md`, added `user-invocable: true` to all 14 skills (except ha-resolver which is `false`).
+
+**Needs re-test:** Reload plugin and verify all 14 skills appear in `/ha` autocomplete.
+
+---
+
 ## Summary of bugs
 
 | # | Bug | Severity | Seen in | Status |
@@ -186,3 +200,5 @@ SERVER=http://homeassistant.local:8123
 | 1 | `${#HASS_TOKEN}` fails when script is semicolon-joined (MINGW `#` parsing) | High | Test 1 Branch 1, Test 3 Run 1 | **Fixed** — replaced with `printf '%s' \| wc -c` |
 | 2 | `NO_GIT_REMOTE` never prints (`head -1` returns 0 on empty input) | Medium | Test 1 All runs | **Fixed** — variable capture + `${REMOTE:-NO_GIT_REMOTE}` |
 | 3 | `unset` in terminal doesn't affect Claude Code bash (profile re-sources) | Test setup issue (not a code bug) | Test 1 Branch 1 | N/A |
+| 4 | 5 skills used non-standard filenames (`SKILL-*.md` instead of `SKILL.md`) | Medium | Plugin loading | **Fixed** — renamed all to `SKILL.md` |
+| 5 | 7 skills missing `user-invocable: true` in frontmatter | Low | Plugin loading | **Fixed** — added to all 14 user-invocable skills |
