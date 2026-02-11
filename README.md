@@ -71,35 +71,41 @@ Shows a diff of what changed, asks for confirmation, commits, pushes, and trigge
 
 ```mermaid
 flowchart LR
-    A["<b>You</b><br/>Describe what you want"] --> B
-    B(["<b>skill: ha-resolver</b><br/>Resolve entities + check capabilities"]) --> C
-    C(["<b>skill: ha-automations / ha-scripts / ha-scenes</b><br/>Generate YAML + write config files"]) --> D
-    D(["<b>skill: ha-validate</b><br/>Validate syntax, schema, entities"]) --> E2
+    A[You describe what you want] --> B
 
-    B <-.-> AG1{{"<b>subagents:</b> ha-entity-resolver"}}
-    C <-.-> AG2{{"<b>subagents:</b> device-advisor · config-debugger · naming-analyzer"}}
-    D <-.-> AG3{{"<b>subagents:</b> ha-config-validator · ha-log-analyzer"}}
-
-    subgraph deploy ["<b>skill: ha-deploy</b>"]
+    subgraph gen [skill: ha-automations / ha-scripts / ha-scenes]
         direction LR
-        E2(["Validate"]) --> F(["Commit"]) --> G(["Push"]) --> H(["Reload HA"])
+        B([Resolve entities]) --> C([Generate YAML])
     end
 
+    C --> D{Deploy?}
+    D -- Yes --> E2
+    D -- No --> I[Keep editing]
+
+    subgraph deploy [skill: ha-deploy]
+        direction LR
+        E2([skill: ha-validate]) --> F([Commit]) --> G([Push]) --> H([Reload HA])
+    end
+
+    B <-.-> AG1{{subagent: ha-entity-resolver}}
+    E2 <-.-> AG2{{subagent: ha-config-validator}}
+
     style A fill:#6c757d,color:#fff,stroke:#6c757d
+    style I fill:#6c757d,color:#fff,stroke:#6c757d
     style B fill:#4a9eff,color:#fff,stroke:#3a7fcf
     style C fill:#4a9eff,color:#fff,stroke:#3a7fcf
-    style D fill:#4a9eff,color:#fff,stroke:#3a7fcf
+    style D fill:#6c757d,color:#fff,stroke:#6c757d
     style E2 fill:#ff9800,color:#fff,stroke:#cc7a00
     style F fill:#ff9800,color:#fff,stroke:#cc7a00
     style G fill:#ff9800,color:#fff,stroke:#cc7a00
     style H fill:#ff9800,color:#fff,stroke:#cc7a00
+    style gen fill:none,stroke:#4a9eff,stroke-width:2px,stroke-dasharray:5 5
     style deploy fill:none,stroke:#ff9800,stroke-width:2px,stroke-dasharray:5 5
     style AG1 fill:#7c4dff,color:#fff,stroke:#6a3de0
     style AG2 fill:#7c4dff,color:#fff,stroke:#6a3de0
-    style AG3 fill:#7c4dff,color:#fff,stroke:#6a3de0
 ```
 
-**Blue** = skills &nbsp;&nbsp; **Purple** = subagents (spawned as needed) &nbsp;&nbsp; **Orange** = deploy (confirmation-gated) &nbsp;&nbsp; **Gray** = you
+**Blue** = skills &nbsp;&nbsp; **Purple** = subagents &nbsp;&nbsp; **Orange** = deploy / side-effectful &nbsp;&nbsp; **Gray** = user / output
 
 Each step includes guardrails: entities are verified against your real HA instance, device capabilities are checked before generating attributes, and deployment requires explicit confirmation.
 
@@ -107,14 +113,22 @@ Each step includes guardrails: entities are verified against your real HA instan
 
 ```mermaid
 flowchart LR
-    A["<b>You</b><br/>Audit my entity names"] --> B
-    B(["<b>skill: ha-naming</b><br/>Scan entities, detect inconsistencies"]) --> C
-    C(["<b>skill: ha-naming</b><br/>Generate rename plan"]) --> D["Review plan"]
-    D --> E(["<b>skill: ha-apply-naming</b><br/>Dry-run preview"])
-    E --> F(["<b>skill: ha-apply-naming --execute</b><br/>Rename entities + update YAML refs"])
+    A[Audit my entity names] --> B
 
-    B <-.-> AG1{{"<b>subagent:</b> naming-analyzer"}}
-    B <-.-> AG2{{"<b>subagent:</b> ha-entity-resolver"}}
+    subgraph naming [skill: ha-naming]
+        direction LR
+        B([Scan + detect issues]) --> C([Generate rename plan])
+    end
+
+    C --> D[Review plan]
+    D --> E
+
+    subgraph apply [skill: ha-apply-naming]
+        direction LR
+        E([Dry-run preview]) --> F([Execute renames])
+    end
+
+    B <-.-> AG1{{subagent: naming-analyzer}}
 
     style A fill:#6c757d,color:#fff,stroke:#6c757d
     style D fill:#6c757d,color:#fff,stroke:#6c757d
@@ -122,46 +136,44 @@ flowchart LR
     style C fill:#4a9eff,color:#fff,stroke:#3a7fcf
     style E fill:#ff9800,color:#fff,stroke:#cc7a00
     style F fill:#ff9800,color:#fff,stroke:#cc7a00
+    style naming fill:none,stroke:#4a9eff,stroke-width:2px,stroke-dasharray:5 5
+    style apply fill:none,stroke:#ff9800,stroke-width:2px,stroke-dasharray:5 5
     style AG1 fill:#7c4dff,color:#fff,stroke:#6a3de0
-    style AG2 fill:#7c4dff,color:#fff,stroke:#6a3de0
 ```
 
 ### Troubleshooting
 
 ```mermaid
 flowchart LR
-    A["<b>You</b><br/>My automation is not working"] --> B
-    B(["<b>skill: ha-troubleshooting</b><br/>Check state, traces, logs, history"]) --> C
-    C["Evidence table<br/>what ran vs. skipped"] --> D
-    D(["<b>skill: ha-automations / ha-scripts / ha-scenes</b><br/>Apply fix"])
+    A[My automation is not working] --> B
 
-    B <-.-> AG1{{"<b>subagent:</b> config-debugger"}}
-    B <-.-> AG2{{"<b>subagent:</b> ha-log-analyzer"}}
+    subgraph ts [skill: ha-troubleshooting]
+        direction LR
+        B([Gather state + traces + logs]) --> C[Evidence table]
+    end
+
+    C --> D([skill: ha-automations / ha-scripts / ha-scenes])
+
+    B <-.-> AG1{{subagents: config-debugger + ha-log-analyzer}}
 
     style A fill:#6c757d,color:#fff,stroke:#6c757d
     style C fill:#6c757d,color:#fff,stroke:#6c757d
     style B fill:#4a9eff,color:#fff,stroke:#3a7fcf
     style D fill:#4a9eff,color:#fff,stroke:#3a7fcf
+    style ts fill:none,stroke:#4a9eff,stroke-width:2px,stroke-dasharray:5 5
     style AG1 fill:#7c4dff,color:#fff,stroke:#6a3de0
-    style AG2 fill:#7c4dff,color:#fff,stroke:#6a3de0
 ```
 
 ### Configuration Review
 
 ```mermaid
 flowchart LR
-    A["<b>You</b><br/>Review my setup"] --> B
-    B(["<b>skill: ha-analyze</b><br/>Scan entities, automations, config"]) --> C
-    C["Improvement report<br/>backed by evidence"] --> D
-    D(["<b>skill: ha-automations / ha-scripts / ha-scenes</b><br/>Implement suggestions"])
-
-    B <-.-> AG1{{"<b>subagent:</b> ha-entity-resolver"}}
+    A[Review my setup] --> B([skill: ha-analyze]) --> C[Improvement report] --> D([skill: ha-automations / ha-scripts / ha-scenes])
 
     style A fill:#6c757d,color:#fff,stroke:#6c757d
     style C fill:#6c757d,color:#fff,stroke:#6c757d
     style B fill:#4a9eff,color:#fff,stroke:#3a7fcf
     style D fill:#4a9eff,color:#fff,stroke:#3a7fcf
-    style AG1 fill:#7c4dff,color:#fff,stroke:#6a3de0
 ```
 
 ## Prerequisites
