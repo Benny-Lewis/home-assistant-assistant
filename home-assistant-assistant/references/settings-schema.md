@@ -9,24 +9,59 @@ Settings are stored in `.claude/settings.local.json` in the user's Home Assistan
 **Important:**
 - This file is user-managed, not shipped with the plugin
 - Must be gitignored (add `.claude/` to `.gitignore`)
-- Created on first run of `/ha:onboard`
+- Created on first run of `/ha-onboard`
 
 ## Schema
 
 ```json
 {
-  "ha_url": "string (required) - Home Assistant URL",
-  "ha_token_env": "string (default: HASS_TOKEN) - env var name containing token",
-  "config_path": "string (optional) - path to HA config directory",
-  "auto_deploy": "boolean (default: false) - auto-deploy after generate",
-  "auto_commit": "boolean (default: false) - auto-commit after changes",
-  "git_remote": "string (optional) - git remote for push",
-  "git_branch": "string (optional) - git branch for commits",
+  "permissions": {
+    "allow": ["string[] - tool permission rules auto-approved for this project"]
+  },
+  "ha": {
+    "config_path": "string (optional) - path to HA config directory",
+    "git_remote": "string (optional) - git remote for push",
+    "setup_complete": "boolean - whether onboarding finished",
+    "setup_date": "string - ISO date of last onboarding"
+  },
   "deploy": {
     "pull_method": "string (optional) - how HA gets config updates: 'git_pull_addon' | 'ssh' | 'manual'"
   }
 }
 ```
+
+### Permissions
+
+The `permissions.allow` array auto-approves plugin tools so the model can invoke them without per-use confirmation prompts. Onboarding writes the complete list:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Skill(ha-onboard)",
+      "Skill(ha-validate)",
+      "Skill(ha-deploy)",
+      "Skill(ha-analyze)",
+      "Skill(ha-naming)",
+      "Skill(ha-apply-naming)",
+      "Skill(ha-automations)",
+      "Skill(ha-scripts)",
+      "Skill(ha-scenes)",
+      "Skill(ha-devices)",
+      "Skill(ha-config)",
+      "Skill(ha-lovelace)",
+      "Skill(ha-jinja)",
+      "Skill(ha-troubleshooting)",
+      "Bash(hass-cli *)"
+    ]
+  }
+}
+```
+
+- Format: `Skill(skill-name)` for skills, `Bash(pattern)` for shell commands
+- `Bash(hass-cli *)` covers all hass-cli commands with a single wildcard rule
+- ha-resolver is excluded (agent-only, invoked via Task tool not Skill tool)
+- Without these entries, each skill invocation prompts for user approval, creating friction that makes the model prefer answering from context instead of invoking skills
 
 ## Example
 

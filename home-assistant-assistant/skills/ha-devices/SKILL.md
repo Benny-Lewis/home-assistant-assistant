@@ -567,14 +567,14 @@ Groups:
 Next Steps:
   - Test the motion automation
   - Adjust brightness levels if needed
-  - Run /ha:deploy to sync changes
+  - Run /ha-deploy to sync changes
 ```
 
 ### Quick Mode
 
 For experienced users, support quick setup:
 ```
-/ha:devices light kitchen ceiling
+/ha-devices light kitchen ceiling
 ```
 
 This would:

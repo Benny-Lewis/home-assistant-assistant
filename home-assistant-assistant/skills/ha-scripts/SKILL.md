@@ -41,10 +41,12 @@ Create reusable action sequences that can be triggered manually or from automati
 1. **Understand intent** - What sequence of actions?
 2. **Resolve entities** via ha-entity-resolver agent (Invariant #1)
 3. **Get capability snapshot** - For each device, verify supported services/attributes
+   - If user's request requires unsupported attributes, **STOP and use AskUserQuestion** to explain the mismatch and offer alternatives before proceeding.
 4. **Generate YAML** using `references/yaml-syntax.md`
 5. **Preview** with inline comments explaining choices
 6. **Save and offer deployment** (Invariant #5 - never auto-deploy):
    - Save to scripts.yaml
+   - When editing existing files, include enough surrounding context in `old_string` to be unique (e.g., include the scene name or automation alias above the edit point). If appending, use the last few lines of the file as the anchor.
    - **MANDATORY: Call the AskUserQuestion tool** (do NOT just print text) with:
      - Question: "Saved to scripts.yaml. What would you like to do next?"
      - Option 1: "Deploy now" → invoke ha-deploy skill

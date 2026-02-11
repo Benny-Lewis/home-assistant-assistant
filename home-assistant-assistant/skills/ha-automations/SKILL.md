@@ -43,11 +43,13 @@ Create Home Assistant automations from natural language descriptions. Core princ
    - "Wait X then do Y" → Pure delay → `delay:` or timer acceptable
    - See `references/intent-classifier.md` for classification rules
 3. **Get capability snapshot** for devices being controlled
+   - If user's request requires unsupported attributes, **STOP and use AskUserQuestion** to explain the mismatch and offer alternatives before proceeding.
 4. **Check conflicts** for existing automations on same entities
 5. **Generate YAML** using `references/yaml-syntax.md` and `references/common-patterns.md`
 6. **Preview** with inline comments explaining choices
 7. **Save and offer deployment** (Invariant #5 - never auto-deploy):
    - Save to automations.yaml
+   - When editing existing files, include enough surrounding context in `old_string` to be unique (e.g., include the scene name or automation alias above the edit point). If appending, use the last few lines of the file as the anchor.
    - **MANDATORY: Call the AskUserQuestion tool** (do NOT just print text) with:
      - Question: "Saved to automations.yaml. What would you like to do next?"
      - Option 1: "Deploy now" → invoke ha-deploy skill

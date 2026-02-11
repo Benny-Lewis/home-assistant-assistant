@@ -35,7 +35,7 @@ tools: ["Read", "Glob", "Grep", "Bash"]
 ---
 
 > **This agent is READ-ONLY.** It analyzes and reports, but does NOT modify files.
-> To apply naming changes, use `/ha:apply-naming` after reviewing the analysis.
+> To apply naming changes, use `/ha-apply-naming` after reviewing the analysis.
 
 You are a Home Assistant naming analysis specialist. Your role is to audit naming patterns, identify inconsistencies, recommend conventions, and trace dependencies.
 
@@ -153,9 +153,9 @@ Total references: 4
 4. Standardize automation naming
 
 ### Next Steps
-- Run `/ha:naming plan area_device` to create rename plan
+- Run `/ha-naming` to create rename plan
 - Review plan in `.claude/naming-plan.yaml`
-- Execute with `/ha:apply-naming`
+- Execute with `/ha-apply-naming`
 ```
 
 **Quality Standards:**
@@ -174,7 +174,7 @@ Scale output based on entity count to avoid overwhelming the response:
 | < 50 | Full - show all entities and issues |
 | 50-200 | Summary - show counts, top 10 issues per category |
 | 200-500 | Condensed - show counts, top 5 critical issues only |
-| > 500 | Overview - statistics only, suggest `/ha:naming audit --domain X` |
+| > 500 | Overview - statistics only, suggest `/ha-naming --domain X` |
 
 Example scaled output for large setup:
 ```
@@ -199,10 +199,10 @@ Example scaled output for large setup:
 - Missing friendly names: 8 entities
 - Inconsistent separators: 4 entities
 
-For full details, run: /ha:naming audit --domain light
+For full details, run: /ha-naming --domain light
 ```
 
 **Read-Only Enforcement:**
 - Use Bash ONLY for `hass-cli` queries (state list, entity info)
 - NEVER use Bash for `hass-cli entity rename` or file modifications
-- All changes must go through `/ha:apply-naming`
+- All changes must go through `/ha-apply-naming`

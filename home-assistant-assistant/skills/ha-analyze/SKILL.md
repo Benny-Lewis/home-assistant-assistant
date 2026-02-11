@@ -216,7 +216,7 @@ Performance:
 Next Steps:
   1. Ask me to create any suggested automation
   2. Review and customize generated configs
-  3. Run /ha:deploy to apply changes
+  3. Run /ha-deploy to apply changes
 ```
 
 ## Interactive Mode
@@ -231,6 +231,6 @@ After presenting analysis:
 
 Suggest running analysis periodically:
 ```
-Tip: Run /ha:analyze monthly to discover new optimization opportunities
+Tip: Run /ha-analyze monthly to discover new optimization opportunities
 as your setup evolves.
 ```

@@ -181,4 +181,4 @@ After editing, report:
 - **ha-automations skill**: Uses Editor for automation CRUD
 - **ha-scenes skill**: Uses Editor for scene updates
 - **ha-scripts skill**: Uses Editor for script modifications
-- **ha:apply-naming command**: Uses Editor for bulk renames
+- **ha-apply-naming skill**: Uses Editor for bulk renames

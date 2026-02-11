@@ -74,11 +74,11 @@ Friendly names (displayed in UI) can include:
 
 When renaming existing entities:
 
-1. **Audit current naming**: Use `/ha:naming audit`
+1. **Audit current naming**: Use `/ha-naming`
 2. **Choose convention**: Pick pattern that fits majority
-3. **Plan changes**: Use `/ha:naming plan`
+3. **Plan changes**: Use `/ha-naming`
 4. **Update dependencies**: Find all references in automations/scripts
-5. **Execute carefully**: Use `/ha:apply-naming`
+5. **Execute carefully**: Use `/ha-apply-naming`
 6. **Test thoroughly**: Verify automations work
 
 ## Best Practices
@@ -100,7 +100,7 @@ When renaming existing entities:
 ## Audit Workflow
 
 > **This workflow is READ-ONLY.** It analyzes and reports, but does NOT modify.
-> To apply changes, use `/ha:apply-naming` after reviewing the audit.
+> To apply changes, use `/ha-apply-naming` after reviewing the audit.
 
 Scan all entities, devices, areas, automations, scripts, and scenes for naming inconsistencies.
 
@@ -202,9 +202,9 @@ Summary
   Style suggestions: 4
 
 Next Steps:
-  1. Run /ha:naming plan to create a rename plan
+  1. Run /ha-naming to create a rename plan
   2. Review and adjust the plan
-  3. Run /ha:apply-naming to execute renames
+  3. Run /ha-apply-naming to execute renames
 ```
 
 ### Audit Recommendations
@@ -240,7 +240,7 @@ If no arguments, analyze existing patterns and suggest the most common one.
 
 #### Step 1: Load Audit Results
 
-Review findings from the most recent naming audit. If no audit has been run, suggest running `/ha:naming audit` first.
+Review findings from the most recent naming audit. If no audit has been run, suggest running `/ha-naming` first.
 
 #### Step 2: Define Target Convention
 
@@ -398,6 +398,6 @@ High-Risk Changes (require careful testing):
 Plan saved to: .claude/naming-plan.yaml
 
 To review: Read .claude/naming-plan.yaml
-To execute: /ha:apply-naming
-To modify: Edit the plan file or re-run /ha:naming plan
+To execute: /ha-apply-naming
+To modify: Edit the plan file or re-run /ha-naming
 ```

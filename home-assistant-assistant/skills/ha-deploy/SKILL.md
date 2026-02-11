@@ -18,7 +18,7 @@ Push local configuration changes to the git repository, triggering Home Assistan
 
 ## Prerequisites
 
-- Git repository configured (via `/ha:onboard`)
+- Git repository configured (via `/ha-onboard`)
 - Changes to commit (for deploy)
 - Git Pull add-on running on Home Assistant
 
@@ -152,7 +152,7 @@ Report verification result with evidence:
 **Status:** Enabled
 **Commit:** abc123
 
-Test it by triggering the automation, or run `/ha:validate` to verify."
+Test it by triggering the automation, or run `/ha-validate` to verify."
 
 ## Deploy Output Format
 

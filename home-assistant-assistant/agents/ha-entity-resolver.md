@@ -27,15 +27,15 @@ Given a description (e.g., "hallway motion sensor", "kitchen lights"), find the 
 hass-cli state list | grep -i "<search_term>"
 ```
 
-### 2. Filter by domain for multiple matches
+### 2. Filter by domain if needed
 ```bash
-hass-cli state list --entity-filter "light.*" | grep -i "<room>"
-hass-cli state list --entity-filter "binary_sensor.*" | grep -i "motion"
+hass-cli state list | grep "^light\." | grep -i "<room>"
+hass-cli state list | grep "^binary_sensor\." | grep -i "motion"
 ```
 
 ### 3. Get entity details with capability snapshot
 ```bash
-hass-cli state get <entity_id>
+hass-cli -o json state get <entity_id>
 ```
 
 ### 4. Capture capability snapshot (MANDATORY for devices)

@@ -172,7 +172,7 @@ Before writing:
 Add to command frontmatter:
 ```yaml
 ---
-name: ha:dangerous-command
+name: ha-dangerous-command
 disable-model-invocation: true  # Invariant 5
 allowed-tools: Read, Grep, Glob  # Minimize blast radius
 ---
@@ -213,8 +213,8 @@ All validation, deployment, and diagnostic outputs must include a "what ran vs s
 - Makes gaps in validation visible and actionable
 
 **Required for:**
-- `/ha:validate` output
-- Pre-deploy validation in `/ha:deploy`
+- `/ha-validate` output
+- Pre-deploy validation in `/ha-deploy`
 - Post-generation validation in skills
 - Troubleshooting diagnostics
 
@@ -229,6 +229,6 @@ If you detect an invariant violation in existing code, document it:
 
 **File:** skills/ha-scenes/SKILL.md
 **Invariant:** #5 (Never deploy unless requested)
-**Issue:** Step 7 says "Deploy via /ha:deploy" as default action
+**Issue:** Step 7 says "Deploy via /ha-deploy" as default action
 **Fix:** Change to "Optionally deploy if user explicitly requests"
 ```

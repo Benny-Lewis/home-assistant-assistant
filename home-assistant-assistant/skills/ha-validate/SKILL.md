@@ -36,8 +36,8 @@ Validation must be **truthful**. Never claim "validation passed" without evidenc
 
 If $ARGUMENTS provided:
 - Validate specific file or directory
-- Example: `/ha:validate automations.yaml`
-- Example: `/ha:validate packages/`
+- Example: `/ha-validate automations.yaml`
+- Example: `/ha-validate packages/`
 
 If no arguments:
 - Validate entire configuration directory
@@ -141,7 +141,7 @@ MSYS_NO_PATHCONV=1 hass-cli service call homeassistant.check_config
 ```
 
 **If not connected**, run local validation only and note limitation:
-"Note: Running local validation only. For complete validation, connect to HA with `/ha:onboard`."
+"Note: Running local validation only. For complete validation, connect to HA with `/ha-onboard`."
 
 ## Validation Procedure
 
@@ -278,7 +278,7 @@ The following checks were skipped because HA is not connected:
 - Template rendering validation
 - Integration-specific checks
 
-Run `/ha:onboard` to enable full validation.
+Run `/ha-onboard` to enable full validation.
 ```
 
 ## Error Reporting
@@ -349,7 +349,7 @@ Validation output must always include:
 
 ### Next Steps
 
-- [If passed] Ready for deployment via `/ha:deploy`
+- [If passed] Ready for deployment via `/ha-deploy`
 - [If failed] Fix issues above, then re-validate
 - [If incomplete] Consider connecting to HA for full validation
 ```
@@ -358,18 +358,18 @@ Validation output must always include:
 
 After validation passes:
 ```
-Configuration is valid! Run /ha:deploy to push changes to Home Assistant.
+Configuration is valid! Run /ha-deploy to push changes to Home Assistant.
 ```
 
 If HA-backed validation was skipped:
 ```
 Local validation passed, but full validation requires HA connection.
-You can deploy with /ha:deploy, but some issues may only appear after reload.
+You can deploy with /ha-deploy, but some issues may only appear after reload.
 ```
 
 ## Integration Points
 
-- **/ha:deploy skill**: Pre-deploy validation gate
+- **/ha-deploy skill**: Pre-deploy validation gate
 - **ha-automations skill**: Post-generation validation
 - **ha-config-validator agent**: Deep validation analysis (preloads this skill)
 - **config-debugger agent**: Debugging validation (preloads this skill)

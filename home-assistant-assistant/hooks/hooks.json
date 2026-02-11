@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PostToolUse',additionalContext:'You just edited an HA config file. Remind the user they can run /ha-deploy to validate and deploy when ready, or continue making more changes first.'}}))\"",
+            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PostToolUse',additionalContext:'You just edited an HA config file. If a skill is active, follow the skill\\'s next-step instructions (usually calling AskUserQuestion). Otherwise, mention /ha-deploy is available for validation and deployment.'}}))\"",
             "timeout": 5
           }
         ]

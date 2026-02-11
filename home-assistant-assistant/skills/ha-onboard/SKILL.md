@@ -189,7 +189,7 @@ Tell the user:
    ```
    claude --plugin-dir path/to/home-assistant-assistant
    ```
-4. Run `/ha:onboard` again — I'll detect the config and pick up where we left off (Step 5)."
+4. Run `/ha-onboard` again — I'll detect the config and pick up where we left off (Step 5)."
 
 **Do not proceed past this point.** The remaining steps require being in the config directory.
 
@@ -356,6 +356,27 @@ Ask user to confirm HA-side setup is complete.
 
 ## Step 8: Verification Tests
 
+### CLAUDE.md Conflict Check
+
+Before running verification tests, check for a `CLAUDE.md` in the HA config root:
+
+```bash
+[ -f "CLAUDE.md" ] && echo "HAS_CLAUDE_MD" || echo "NO_CLAUDE_MD"
+```
+
+If `HAS_CLAUDE_MD`: warn the user and present options via AskUserQuestion:
+
+"Found a `CLAUDE.md` file in your HA config directory. This file provides project-level instructions to Claude Code. If it contains workflow guidance (like deploy commands or rename procedures), it may take priority over this plugin's skills."
+
+Options:
+1. **Keep it** — your CLAUDE.md instructions will take priority; use `/ha-naming`, `/ha-deploy` etc. explicitly when you want plugin workflows
+2. **Remove or rename it** — plugin skills will auto-activate based on your questions
+3. **Review it now** — I can show you what's in it
+
+If `NO_CLAUDE_MD`: skip this check silently.
+
+### Core Verification Tests
+
 | Test | Command | Expected |
 |------|---------|----------|
 | Git connectivity | `git fetch origin` | No errors |
@@ -375,8 +396,8 @@ Present results:
 
 Setup complete! Quick start:
 - Ask me to create automations, scripts, or scenes
-- `/ha:validate` - Validate your config
-- `/ha:deploy` - Deploy changes to HA
+- `/ha-validate` - Validate your config
+- `/ha-deploy` - Deploy changes to HA
 ```
 
 ## Skip Behavior
@@ -393,6 +414,25 @@ At any step, user can say "skip":
 Save configuration to `.claude/settings.local.json`:
 ```json
 {
+  "permissions": {
+    "allow": [
+      "Skill(ha-onboard)",
+      "Skill(ha-validate)",
+      "Skill(ha-deploy)",
+      "Skill(ha-analyze)",
+      "Skill(ha-naming)",
+      "Skill(ha-apply-naming)",
+      "Skill(ha-automations)",
+      "Skill(ha-scripts)",
+      "Skill(ha-scenes)",
+      "Skill(ha-devices)",
+      "Skill(ha-config)",
+      "Skill(ha-lovelace)",
+      "Skill(ha-jinja)",
+      "Skill(ha-troubleshooting)",
+      "Bash(hass-cli *)"
+    ]
+  },
   "ha": {
     "config_path": "/path/to/ha-config",
     "git_remote": "https://github.com/user/repo.git",
@@ -401,6 +441,8 @@ Save configuration to `.claude/settings.local.json`:
   }
 }
 ```
+
+The `permissions.allow` array auto-approves all plugin skills and hass-cli commands, removing per-use permission prompts. Uses short skill names (e.g., `Skill(ha-naming)`) — this is the canonical format Claude Code expects for permission matching.
 
 Note: Connection settings (HASS_TOKEN, HASS_SERVER) are stored as
 environment variables, NOT in the settings file.
@@ -433,8 +475,8 @@ For returning users who want to update a specific setting without re-running onb
 ### Quick Update Mode
 
 ```
-/ha:onboard config_path /home/user/ha-config
-/ha:onboard git_remote https://github.com/user/repo.git
+/ha-onboard config_path /home/user/ha-config
+/ha-onboard git_remote https://github.com/user/repo.git
 ```
 
 Update the setting and confirm.
@@ -443,6 +485,6 @@ Update the setting and confirm.
 
 "Setup complete! You can now:
 - Ask me to create automations, scripts, or scenes
-- `/ha:validate` - Check configuration for errors
-- `/ha:deploy` - Deploy changes to Home Assistant
-- `/ha:onboard` - Reconfigure individual settings"
+- `/ha-validate` - Check configuration for errors
+- `/ha-deploy` - Deploy changes to Home Assistant
+- `/ha-onboard` - Reconfigure individual settings"

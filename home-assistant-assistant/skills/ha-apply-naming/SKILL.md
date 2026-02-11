@@ -2,7 +2,6 @@
 name: ha-apply-naming
 description: Execute a naming plan to rename entities and update all references
 user-invocable: true
-disable-model-invocation: true
 allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
 ---
 
@@ -13,7 +12,7 @@ allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
 >
 > Default mode is DRY-RUN. Use `--execute` to apply changes.
 
-Execute the naming plan created by `/ha:naming` (plan workflow) to rename entities, devices, and update all references.
+Execute the naming plan created by `/ha-naming` (plan workflow) to rename entities, devices, and update all references.
 
 ## Dry-Run Default
 
@@ -21,7 +20,7 @@ Execute the naming plan created by `/ha:naming` (plan workflow) to rename entiti
 
 To actually apply changes, user must explicitly add `--execute`:
 ```
-/ha:apply-naming --execute
+/ha-apply-naming --execute
 ```
 
 Without `--execute`, show preview:
@@ -42,13 +41,19 @@ Files that would be updated:
 Run with `--execute` to apply these changes.
 ```
 
+**After showing the dry-run preview, use AskUserQuestion:**
+- Question: "Dry-run complete. What would you like to do?"
+- Option 1: "Execute all phases" → proceed with `--execute` behavior
+- Option 2: "Execute Phase N only" → proceed with `--phase N --execute`
+- Option 3: "Done for now" → stop, user can return later
+
 ## Prerequisites
 
 - **Naming plan** — search in order:
   1. `.claude/naming-plan.yaml` (canonical)
   2. Glob for `**/naming-plan*` or `**/rename-plan*`
   3. `.claude/ha.conventions.json` (conventions only, no rename mappings)
-- If nothing found: "No naming plan found. Run `/ha:naming plan` first."
+- If nothing found: "No naming plan found. Run `/ha-naming` first."
 - hass-cli configured for entity renames
 - Git configured for config file updates
 
@@ -212,7 +217,7 @@ Validation:
 Recommended Next Steps:
   1. Test critical automations manually
   2. Check dashboards in HA UI
-  3. Run /ha:deploy to sync with HA
+  3. Run /ha-deploy to sync with HA
   4. Monitor logs for entity errors
 
 Rollback available:

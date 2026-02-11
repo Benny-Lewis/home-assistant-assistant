@@ -43,11 +43,21 @@ Create presets that set multiple entities to specific states simultaneously. Cor
    - Covers: check supported positions/tilt
    - Media players: check supported features
    - **Only include attributes the device actually supports!**
-4. **Determine states** - Only use supported attributes from snapshot
-5. **Generate YAML** using `references/yaml-syntax.md`
-6. **Preview** with inline comments explaining capability checks
-7. **Save and offer deployment** (Invariant #5 - never auto-deploy):
+4. **Check for capability mismatches** (Invariant #1 — STOP if mismatch):
+   - Compare what the user requested against the capability snapshot
+   - If ANY requested attribute is not supported (e.g., "warm white" on a brightness-only light):
+     - **STOP — do NOT silently substitute or downgrade**
+     - Use AskUserQuestion to explain the mismatch and offer alternatives:
+       - "Use brightness only" (if applicable)
+       - "Pick a different device"
+       - "Cancel"
+     - Wait for user response before proceeding
+5. **Determine states** - Only use supported attributes from snapshot
+6. **Generate YAML** using `references/yaml-syntax.md`
+7. **Preview** with inline comments explaining capability checks
+8. **Save and offer deployment** (Invariant #5 - never auto-deploy):
    - Save to scenes.yaml
+   - When editing existing files, include enough surrounding context in `old_string` to be unique (e.g., include the scene name or automation alias above the edit point). If appending, use the last few lines of the file as the anchor.
    - **MANDATORY: Call the AskUserQuestion tool** (do NOT just print text) with:
      - Question: "Saved to scenes.yaml. What would you like to do next?"
      - Option 1: "Deploy now" → invoke ha-deploy skill
@@ -60,6 +70,7 @@ Create presets that set multiple entities to specific states simultaneously. Cor
 |---------|-----|
 | Using scene for sequences | Scenes set states instantly; use scripts for timed sequences |
 | Unsupported attributes | Get capability snapshot first - only use supported modes |
+| Silently downgrading attributes | STOP and ask the user — never substitute without confirmation |
 | Including non-stateful entities | Only include entities that have controllable states |
 | Forgetting all relevant devices | Ask user to confirm all devices they want included |
 | Wrong state values | Check entity for valid state options (brightness 0-255, etc.) |
