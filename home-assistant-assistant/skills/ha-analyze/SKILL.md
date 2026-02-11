@@ -42,8 +42,8 @@ If no arguments, analyze all areas.
 
 ### From hass-cli (if available):
 ```bash
-# Entity inventory
-hass-cli entity list
+# Entity inventory (state list is faster than entity list for large setups)
+hass-cli state list
 
 # State history (for pattern detection)
 hass-cli state history --entity light.* --since "7 days ago"
@@ -54,6 +54,8 @@ hass-cli device list
 # Area list
 hass-cli area list
 ```
+
+> **Performance:** For setups with >500 entities, use Bash tool with `timeout: 60000` if commands are slow. See `references/hass-cli.md` Performance Notes.
 
 > Output is tabular text, not JSON. See `references/hass-cli.md` for parsing patterns.
 

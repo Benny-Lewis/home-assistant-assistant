@@ -333,9 +333,22 @@ If set, ask: "Found existing HASS_TOKEN. Do you want to reconfigure?"
 
 ## Step 7: Git Pull Add-on Configuration
 
-Guide the user to configure Home Assistant to auto-pull from their GitHub repo.
+First, check if the Git Pull add-on is already installed:
+```bash
+MSYS_NO_PATHCONV=1 hass-cli raw get /api/hassio/addons 2>/dev/null | grep -qi "git"
+```
 
-**For HAOS/Supervised (Git Pull Add-on):**
+**If add-on detected:** "Git Pull add-on is already installed. Is it configured to pull from your repo?" If yes → skip to Step 8. If no → show configuration instructions below.
+
+**If add-on NOT detected or API unavailable:** Ask the user how they want HA to receive config updates, using AskUserQuestion:
+1. **Git Pull add-on** (Recommended) — guide installation below
+2. **SSH access** — user will manually pull or use `ssh <host> 'cd /config && git pull'`
+3. **Manual** — user pulls on the HA side themselves
+
+Cache the answer in `.claude/settings.local.json` under `deploy.pull_method`.
+
+**Git Pull add-on installation (if needed):**
+
 1. Settings > Add-ons > Add-on Store
 2. Search "Git pull" > Install
 3. Configure:
@@ -352,7 +365,7 @@ The repository URL should use HTTPS to match the setup from Step 2.
 
 Ask user to confirm HA-side setup is complete.
 
-**→ Wait for user to confirm Git Pull add-on is configured before proceeding to Step 8.**
+**→ Wait for user to confirm before proceeding to Step 8.**
 
 ## Step 8: Verification Tests
 

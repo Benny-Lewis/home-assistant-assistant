@@ -3,8 +3,8 @@
 **Date:** 2026-02-05 – ongoing
 **Starting commit:** `24a49e5`
 **Latest fix commits:** `d0c4268` (bug fixes), `fbc55dc` (UX improvements), `18010ee` (Group A/B fixes), uncommitted (Bug #18 partial, Bug #19 fix)
-**Bugs:** 22 total — 17 fixed (15 verified, 2 unverified #10 #18), 2 reclassified (#12 not-a-bug, #20 model behavior), 4 open (#16 #17 #21 #22)
-**UX items:** 11 total — 7 fixed (5 verified: #1 #3 #4 #6 #6-scenes, 3 unverified: #2 #5 #10), 4 open (#7 #8 #9 #11)
+**Bugs:** 24 total — 19 fixed (18 verified, 1 unverified: #21), 2 reclassified (#12 not-a-bug, #20 model behavior), 1 N/A (#3), 2 open (#23 #24)
+**UX items:** 12 total — 11 fixed (11 verified: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11), 1 open (#12)
 
 ## Remaining Test Plan
 
@@ -13,7 +13,7 @@
 | **A: Fix Verification** | A1–A5 all pass — **done** | 1 | A5 (/ha-analyze) tested, passed with Bug #10 noted |
 | **B: Safety Invariants** | B1 pass (re-test), B2 pass (re-test), B3 pass — **done** | 2 | Bug #14 fixed (partial), Bug #15 fixed (verified) |
 | **C: Domain Skills** | C1–C6 all pass — **done** | 3 | All 6 domain skills delivered correct guidance |
-| **D: Integration** | D1 pass, D2 pass (full pipeline), D3 remaining | 4 | Bugs #16–#22 found (#19 fixed). UX #8–#11 found. |
+| **D: Integration** | D1 pass, D2 pass (full pipeline), D3 pass — **done** | 4 | Bugs #16–#24 found. UX #8–#12 found. All groups complete. |
 | **N/A** | Test 5.3 (YAML Validation Hook) | — | PostToolUse hook removed (Bug #11 fix); validation now via `/ha-deploy` |
 | **N/A** | Test 2 (fresh start, nothing installed) | — | Requires removing HASS_TOKEN from shell profile — risky in primary env |
 
@@ -430,6 +430,53 @@ All tests run from `~/dev/ha` with plugin loaded. Each test in a fresh session.
 - UX #8: Model asks bare questions without diagnostic context
 - UX #9: Naming pipeline must check ALL reference locations (`.storage/`, Lovelace, Jinja, Node-RED, etc.) — partially addressed by Explore agent scanning `.storage/` but no Lovelace dashboards found to test
 
+### D3: Config Debugging — Intentionally Broken Automation
+
+**Setup:** `~/dev/ha`, fresh session. Planted broken automation `"Kitchen: Motion → Light On"` (id `1758160200441`) with 3 bugs: non-existent trigger entity (`binary_sensor.kitchen_motion_sensor`), `color_temp: 350` on dimmer-only light, wrong target light (bathroom instead of kitchen).
+
+**Prompt:** "My kitchen motion light automation isn't triggering. Can you figure out why?"
+
+**Result: PASS** (with notes)
+
+**Skill loading:**
+- [x] ha-troubleshooting skill loaded (4 tools allowed)
+- [x] Started parallel investigation: config file search + hass-cli state queries
+
+**Entity resolution:**
+- [x] Searched for automation in HA — `automation.kitchen_motion_light_on` not found (not loaded)
+- [x] Searched for `binary_sensor.kitchen_motion_sensor` — doesn't exist
+- [x] Listed all motion sensors and kitchen entities to find alternatives
+- [x] Identified `light.kitchen_island` and `switch.kitchen_lights_virtual` as actual kitchen lights
+
+**Diagnosis (3 of 3 bugs found):**
+- [x] Bug 1: `binary_sensor.kitchen_motion_sensor` doesn't exist — no kitchen motion sensor in HA
+- [x] Bug 2: Action targets `light.downstairs_bathroom` (bathroom, not kitchen)
+- [x] Bug 3: Automation never loaded into HA (entity not registered)
+- [x] Bonus: Flagged Kitchen Dimmer (node_12) as dead — good peripheral awareness
+
+**Diagnosis NOT found:**
+- [ ] `color_temp: 350` on dimmer-only `light.downstairs_bathroom` — Safety Invariant #1 not checked. Model caught "wrong light" first and stopped; never queried `supported_color_modes` for the target light.
+
+**Evidence table:**
+- [x] Structured findings with "what was checked / result" format
+- [ ] Not a formal ran-vs-skipped table per Safety Invariant #6 — informal but informative
+
+**Process gaps:**
+- [ ] Never attempted `/api/trace` for automation traces
+- [ ] Never attempted `/api/error_log` (Bug #21 fallback not exercised)
+- [ ] No config-debugger or ha-log-analyzer agent spawned (same as D1 — troubleshooting handles inline)
+
+**Read-only compliance:**
+- [x] Diagnosed only, did NOT auto-fix
+- [x] Offered to fix via ha-automations skill — correct routing
+
+**Bugs found:**
+- Bug #23: ha-troubleshooting never spawns config-debugger/ha-log-analyzer agents — handles everything inline. Consistent across D1 and D3. Agent descriptions may need stronger triggers, or this is acceptable behavior.
+- Bug #24: Troubleshooting skips trace and error log checks — goes straight to config file analysis + entity state queries. Missing the `/api/trace` and `/api/error_log` steps documented in the skill's own Process section.
+- UX #12: Evidence table is informal "findings list" rather than formal ran-vs-skipped table (Safety Invariant #6 partial compliance)
+
+**Performance:** ~1 minute total. 10 tool calls (4 Bash, 4 Grep, 2 Read).
+
 ---
 
 ## Test 1: Wrong directory + hass-cli installed, no config
@@ -682,15 +729,16 @@ SERVER=http://homeassistant.local:8123
 | # | Feedback | Status | Source |
 |---|----------|--------|--------|
 | 1 | Step 5 should auto-install hass-cli | Fixed (ask permission, then install) | Test 3 Run 1 |
-| 2 | ha-apply-naming and ha-naming should scan for existing naming specs/conventions — not just `.claude/naming-plan.yaml`. User may have `naming.md`, `naming/reference/`, etc. anywhere in the project tree. Should glob for `**/naming*` patterns before declaring "no plan found." | **Fixed** (unverified) — added glob scan + multi-location search | /ha-apply-naming |
+| 2 | ha-apply-naming and ha-naming should scan for existing naming specs/conventions — not just `.claude/naming-plan.yaml`. User may have `naming.md`, `naming/reference/`, etc. anywhere in the project tree. Should glob for `**/naming*` patterns before declaring "no plan found." | **Fixed** (verified) — added glob scan + multi-location search. Verified: audit test ran `Search(**/*naming*)`, `Search(**/*convention*)`, `Search(**/*style*guide*)`, `Search(.claude/ha.conventions.json)` before starting analysis. | /ha-apply-naming |
 | 3 | After generating an automation/script/scene, don't offer "append to file" vs "copy it yourself". Just show the YAML, then ask "Ready to deploy?" — the file mechanics should be invisible to the user. | **Fixed** (verified A3) — replaced with save + "Ready to deploy?" | ha-automations |
 | 4 | After writing config, agent suggested `scp` for deploy instead of `/ha-deploy`. Should always point to the git-based deploy workflow. | **Fixed** (verified A3) — added "Never suggest manual file transfer" rule | ha-automations |
-| 5 | `/ha-deploy` should check whether Git Pull add-on (or equivalent auto-pull) is configured on HA before promising "HA pulls via Git Pull add-on" in the deploy steps. If not configured, offer alternatives (manual pull, scp, or guide to set it up). | **Fixed** (unverified) — added Step 2.5 with pull_method detection + caching | ha-deploy |
-| 7 | ha-onboard Step 7 asks user "Have you configured Git Pull add-on?" — should auto-check via Supervisor API (`hass-cli raw get /api/hassio/addons/core_git_pull/info`) instead of relying on user answer. Same check could be shared with ha-deploy (UX #5). | **Open** | B3 (ha-onboard) |
-| 8 | When asking user to identify ambiguous devices, model should: (a) gather diagnostic info first (node status, alive/dead, last seen, friendly names) and present it WITH the question — not ask bare, get "I don't know", then investigate; and (b) **follow up** after investigating — D2 model investigated Node 4 (lock, alive, last seen Feb 6) and Node 3 (dead) but never circled back with findings. Silently marked Phase 5 as "BLOCKED" instead of presenting what it found and asking a more informed follow-up question. | **Open** | D2 (naming plan) |
-| 9 | Naming pipeline must check ALL possible reference locations before executing renames — not just YAML config files in the git repo. Must also check: `.storage/` (UI-created automations, scenes, scripts, entity registry), Lovelace dashboard configs (`.storage/lovelace*` and YAML dashboards), Jinja templates (`states('entity_id')` and `state_attr()` calls), Node-RED flows, AppDaemon configs, and any other external tools. A broken reference = broken automation/dashboard with no warning. Must be 100% thorough. | **Open** | D2 (naming plan) |
-| 10 | After dry-run preview, ha-apply-naming should use AskUserQuestion with "Execute now" / "Execute Phase N only" / "Done for now" options — not tell the user to type another slash command. After a long audit → plan → apply pipeline, "run `/ha-apply-naming --execute`" feels like going in circles. Same pattern as the post-save deploy prompt. | **Fixed** (unverified) — added AskUserQuestion instruction after dry-run preview | D2 (naming apply) |
-| 11 | ha-apply-naming should trust the plan file's `safety.yaml_references_found` data and skip redundant reference scanning. D2 apply step re-scanned all config files (51 tool uses, 31k tokens, 2m 34s) despite the plan already confirming 0 references. Apply step should at most do a quick delta check ("any new references since plan was generated?"), not a full re-scan. | **Open** | D2 (naming apply) |
+| 5 | `/ha-deploy` should check whether Git Pull add-on (or equivalent auto-pull) is configured on HA before promising "HA pulls via Git Pull add-on" in the deploy steps. If not configured, offer alternatives (manual pull, scp, or guide to set it up). | **Fixed** (verified) — added Step 2.5 with pull_method detection + caching. Verified: deploy checked API for Git Pull add-on, read settings for cached method, asked via AskUserQuestion (3 options), cached answer to `deploy.pull_method` in settings.local.json. Also added `pull_method` check to SessionStart hook as non-critical warning. | ha-deploy |
+| 7 | ha-onboard Step 7 asks user "Have you configured Git Pull add-on?" — should auto-check via Supervisor API (`hass-cli raw get /api/hassio/addons/core_git_pull/info`) instead of relying on user answer. Same check could be shared with ha-deploy (UX #5). | **Fixed** (verified) — added API check + AskUserQuestion fallback with pull method caching. Verified: same API check pattern as UX #5 (confirmed working); deploy successfully cached `pull_method: manual` to settings. SessionStart hook now warns if `deploy.pull_method` is missing. | B3 (ha-onboard) |
+| 8 | When asking user to identify ambiguous devices, model should: (a) gather diagnostic info first (node status, alive/dead, last seen, friendly names) and present it WITH the question — not ask bare, get "I don't know", then investigate; and (b) **follow up** after investigating — D2 model investigated Node 4 (lock, alive, last seen Feb 6) and Node 3 (dead) but never circled back with findings. Silently marked Phase 5 as "BLOCKED" instead of presenting what it found and asking a more informed follow-up question. | **Fixed** (verified) — added "Investigating Unknown Devices" subsection to ha-naming Plan Workflow. Verified: model checked lock.node_4 state (unavailable), searched for door/contact sensors to correlate, attempted JSON attribute lookup, then asked WITH context ("lock.node_4 is unavailable... sensors on garage, backyard, entryway but no clear match") and 4 options including "It's been removed". | D2 (naming plan) |
+| 9 | Naming pipeline must check ALL possible reference locations before executing renames — not just YAML config files in the git repo. Must also check: `.storage/` (UI-created automations, scenes, scripts, entity registry), Lovelace dashboard configs (`.storage/lovelace*` and YAML dashboards), Jinja templates (`states('entity_id')` and `state_attr()` calls), Node-RED flows, AppDaemon configs, and any other external tools. A broken reference = broken automation/dashboard with no warning. Must be 100% thorough. | **Fixed** (verified) — added 8-location scan checklist to ha-apply-naming Phase 1 with editable/read-only flags. Verified: UX #11 delta-check correctly short-circuited the full scan (plan had 0 refs, no file changes). Guidance present, correct decision made. | D2 (naming plan) |
+| 10 | After dry-run preview, ha-apply-naming should use AskUserQuestion with "Execute now" / "Execute Phase N only" / "Done for now" options — not tell the user to type another slash command. After a long audit → plan → apply pipeline, "run `/ha-apply-naming --execute`" feels like going in circles. Same pattern as the post-save deploy prompt. | **Fixed** (verified) — added AskUserQuestion instruction after dry-run preview. Verified: dry-run presented 4 options (Execute Phases 2-4 / Phase 2 only / Phases 3-4 only / Done for now) via AskUserQuestion. | D2 (naming apply) |
+| 11 | ha-apply-naming should trust the plan file's `safety.yaml_references_found` data and skip redundant reference scanning. D2 apply step re-scanned all config files (51 tool uses, 31k tokens, 2m 34s) despite the plan already confirming 0 references. Apply step should at most do a quick delta check ("any new references since plan was generated?"), not a full re-scan. | **Fixed** (verified) — added "Leveraging Plan Data" section to ha-apply-naming Phase 1. Verified: model ran `git log --since` delta check, found no changes, used plan data directly with no full re-scan. | D2 (naming apply) |
+| 12 | ha-troubleshooting evidence table is informal "findings list" rather than formal ran-vs-skipped table. Safety Invariant #6 requires explicit "what ran vs skipped" format with tiers. D3 showed structured output but not the tier-based evidence table format used by ha-validate and ha-deploy. | **Open** | D3 (config debugging) |
 | 6 | Post-generation should use AskUserQuestion with selectable options instead of plain text prompts | **Fixed** — updated ha-automations, ha-scripts, ha-scenes to use AskUserQuestion | A3 (`7e53ec54`) |
 
 ---
@@ -834,16 +882,18 @@ HASS_SERVER=set
 | 7 | Git Bash path mangling on hass-cli API paths (MINGW converts `/api/...`) | Medium | /ha-validate, D2 (naming plan) | **Fixed** (core) — `MSYS_NO_PATHCONV=1` on all hass-cli raw commands in skills/agents. Note: model still improvises `hass-cli raw get /api/...` without the prefix in ad-hoc contexts (seen in D2 naming plan). May need a broader PreToolUse hook. |
 | 8 | `argument-hint` in frontmatter causes fully qualified slash command names | Low | Plugin loading | **Fixed** — removed from ha-devices, ha-naming, ha-validate |
 | 9 | SessionStart hook: missing settings file triggers false "setup incomplete" | Medium | /ha-deploy | **Fixed** — removed settings file from missingEnv check + terminal restart |
-| 10 | Agent tries `--output json` on hass-cli (flag doesn't exist in 0.9.6) | Low | /ha-analyze | **Fixed** (unverified) — created references/hass-cli.md, removed flag from skills, added prohibition to resolver agent |
+| 10 | Agent tries `--output json` on hass-cli (flag doesn't exist in 0.9.6) | Low | /ha-analyze | **Fixed** (verified) — created references/hass-cli.md, removed flag from skills, added prohibition to resolver agent. Verified: `--output json` appears only in hass-cli.md as warnings (3 occurrences), zero in skills/agents. |
 | 11 | PostToolUse:Edit hook error after writing automation to automations.yaml | Medium | ha-automations | **Fixed** (verified A2) — removed PostToolUse hook entirely |
 | 12 | Entity resolver uses `-o json` on hass-cli | ~~Low~~ Not a bug | A4 (`5c5db733`), A4 re-test | **Reclassified** — `-o json` is valid and returns full attributes. Prohibition was wrong. Docs corrected to recommend `-o json`. |
 | 13 | ha-deploy `disable-model-invocation` causes model to bypass skill safety workflow | High | A4 (`5c5db733`) | **Fixed** (verified A4 re-test) — removed flag, added in-skill confirmation gates |
 | 14 | Edit tool fails on repeated YAML blocks — `old_string` matches multiple scenes/automations when entity appears in multiple blocks | Medium | B1 (scene capabilities) | **Fixed** (partial) — guidance added to skills; B2 re-test passed first attempt, B1 re-test still needed 2nd attempt |
 | 15 | Model silently downgrades unsupported attributes instead of stopping to ask user — violates Safety Invariant #1 clarification gate | High | B1 (scene capabilities) | **Fixed** (verified B1 re-test) — added capability mismatch gate to ha-scenes/automations/scripts |
-| 16 | Background agent output file empty — Task agent completed but wrote 0 lines to output file; model had to redo analysis inline | Medium | D2 (naming audit) | **Open** — needs investigation |
-| 17 | `hass-cli entity list` timeout — 1,247 entities exceeds 30s default; also seen in /ha-analyze | Low | D2 (naming audit), /ha-analyze | **Open** — consider documenting timeout increase or recommending `state list` + grep |
-| 18 | `/ha:` colon syntax used throughout skill docs instead of `/ha-` hyphen syntax — model outputs broken slash commands to user | Medium | D2 (naming audit), ~15 files affected | **Fixed** (unverified) — global `/ha:` → `/ha-` replacement applied across all 12 affected files (63 occurrences) |
+| 16 | Background agent output file empty — Task agent completed but wrote 0 lines to output file; model had to redo analysis inline | Medium | D2 (naming audit) | **Fixed** (verified) — root cause is Claude Code platform bug [#17011](https://github.com/anthropics/claude-code/issues/17011) (background agents silently lose output). Added `run_in_background: true` warning to all 6 agent files + ha-naming skill. Verified: audit test ran inline successfully; fix is defensive against platform bug. |
+| 17 | `hass-cli entity list` timeout — 1,247 entities exceeds 30s default; also seen in /ha-analyze | Low | D2 (naming audit), /ha-analyze | **Fixed** (verified) — switched to `state list` in ha-naming/ha-analyze, added Performance Notes to hass-cli.md. Verified: text changes confirmed in all 3 files. |
+| 18 | `/ha:` colon syntax used throughout skill docs instead of `/ha-` hyphen syntax — model outputs broken slash commands to user | Medium | D2 (naming audit), ~15 files affected | **Fixed** (verified) — global `/ha:` → `/ha-` replacement applied across all 12 affected files (63 occurrences). Verified: zero `/ha:` occurrences remain in plugin. |
 | 19 | ha-apply-naming `disable-model-invocation` blocks Skill tool — same pattern as Bug #13 (ha-deploy). Model improvises by running tools directly, bypassing skill safety gates (dry-run, reference scanning, confirmation). | High | D2 (naming apply) | **Fixed** (verified D2 apply) — removed flag; skill already has dry-run default + phased execution + AskUserQuestion gates |
 | 20 | ha-troubleshooting uses invalid hass-cli flags (`--entity-id`) — same family as resolver's `--entity-filter` (fixed in resolver but not in troubleshooting skill/agent). Model self-corrects but wastes 1 tool call per session. | Low | D1 (automation debugging) | **Reclassified** — docs are correct; model improvises bad flags despite correct patterns in skill docs. Same behavior seen with resolver before Group B fixes (model tried `--entity-filter` even though it wasn't documented). No additional doc fix will prevent this. |
-| 21 | `/api/error_log` endpoint returns 404 — ha-log-analyzer agent and ha-troubleshooting try this endpoint but it doesn't exist or requires different auth. Correct endpoint may be `/api/error/all` (also 404'd) or logs may need to be accessed via SSH/add-on. | Low | D1 (automation debugging) | **Open** — investigate correct HA error log API endpoint |
-| 22 | Model confabulates non-existent tools/files — D2 plan referenced `ws_rename_entities.py` and "migration safety checklist" that don't exist in the repo. Same family as Bug #10 (assuming `--output json` flag) but for files/scripts rather than CLI flags. Model invents plausible-sounding tools. | Low | D2 (naming plan) | **Open** — either create the referenced tools or add guidance to naming skills to not reference non-existent utilities |
+| 21 | `/api/error_log` endpoint returns 404 — ha-log-analyzer agent and ha-troubleshooting try this endpoint but it doesn't exist or requires different auth. Correct endpoint may be `/api/error/all` (also 404'd) or logs may need to be accessed via SSH/add-on. | Low | D1 (automation debugging) | **Fixed** (unverified) — added "(may 404)" label + fallback chain (error/all → log file → UI) to ha-troubleshooting + ha-log-analyzer |
+| 22 | Model confabulates non-existent tools/files — D2 plan referenced `ws_rename_entities.py` and "migration safety checklist" that don't exist in the repo. Same family as Bug #10 (assuming `--output json` flag) but for files/scripts rather than CLI flags. Model invents plausible-sounding tools. | Low | D2 (naming plan) | **Fixed** (verified) — corrected 3 stale path references (`references-home-assistant-assistant/` prefix, `SKILL-naming.md`). Verified: all 3 paths corrected, all target files exist, zero stale references remain. |
+| 23 | ha-troubleshooting never spawns config-debugger or ha-log-analyzer agents — handles everything inline. Consistent across D1 and D3. Skill Process section and test plan expect agent delegation. | Low | D1, D3 | **Open** — agent descriptions may need stronger trigger conditions, or inline handling is acceptable |
+| 24 | Troubleshooting skips trace and error log checks — goes straight to config file + entity state analysis. Never attempts `/api/trace/automation.*` or `/api/error_log` despite being documented in skill Process section steps 2-3. | Medium | D1, D3 | **Open** — skill Process section needs stronger "MUST check traces and logs" language |

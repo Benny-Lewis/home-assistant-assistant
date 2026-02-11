@@ -34,9 +34,15 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
 | Command | Purpose |
 |---------|---------|
 | `hass-cli state get automation.name` | Check if automation enabled |
-| `MSYS_NO_PATHCONV=1 hass-cli raw get /api/error_log` | Get error logs |
+| `MSYS_NO_PATHCONV=1 hass-cli raw get /api/error_log` | Get error logs (may 404) |
 | `MSYS_NO_PATHCONV=1 hass-cli raw get /api/trace/automation.name` | Get automation trace |
 | `MSYS_NO_PATHCONV=1 hass-cli raw get "/api/history/period?filter_entity_id=X"` | Entity history |
+
+**Error log fallback:** If `/api/error_log` returns 404, try these alternatives in order:
+1. `MSYS_NO_PATHCONV=1 hass-cli raw get /api/error/all` — alternative endpoint
+2. Check for `home-assistant.log` in the config directory (if accessible)
+3. Guide user to Settings > System > Logs in the HA web UI
+4. Note in evidence table: "Error logs: unavailable via API — checked manually via UI"
 
 ## Process
 

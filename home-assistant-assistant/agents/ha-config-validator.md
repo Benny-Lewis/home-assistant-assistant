@@ -10,6 +10,8 @@ skills: [ha-validate]
 
 # Config Validator Agent
 
+**Warning:** Do NOT spawn this agent with `run_in_background: true`. Background agents silently lose all output ([Claude Code #17011](https://github.com/anthropics/claude-code/issues/17011)). Always use foreground execution.
+
 Validate Home Assistant YAML configuration before deployment.
 
 > **Safety Invariant #6:** Always show "what ran vs skipped" evidence tables.

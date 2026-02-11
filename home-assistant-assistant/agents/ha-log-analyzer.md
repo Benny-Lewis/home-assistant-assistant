@@ -9,6 +9,8 @@ tools:
 
 # Log Analyzer Agent
 
+**Warning:** Do NOT spawn this agent with `run_in_background: true`. Background agents silently lose all output ([Claude Code #17011](https://github.com/anthropics/claude-code/issues/17011)). Always use foreground execution.
+
 Analyze Home Assistant logs and automation traces to diagnose issues.
 
 > **Resolver-First Approach:** When you encounter entity-related errors, verify entity IDs
@@ -51,6 +53,8 @@ MSYS_NO_PATHCONV=1 hass-cli raw get "/api/history/period?filter_entity_id=<entit
 MSYS_NO_PATHCONV=1 hass-cli raw get /api/error_log
 ```
 
+If this returns 404, try `/api/error/all`. If that also fails, check for `home-assistant.log` in the config directory, or note that error logs are unavailable via API.
+
 ### 3. Analyze
 
 Check systematically:
@@ -62,7 +66,7 @@ Check systematically:
 
 ### 4. Check Common Patterns
 
-See `references-home-assistant-assistant/log-patterns.md` for:
+See `skills/ha-troubleshooting/references/log-patterns.md` for:
 - Entity not found errors
 - Service not found errors
 - Template errors

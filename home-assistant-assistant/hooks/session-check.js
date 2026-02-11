@@ -38,6 +38,12 @@ if (!e.HASS_SERVER) {
 const settingsFile = '.claude/settings.local.json';
 if (fs.existsSync(settingsFile)) {
   status.push('Settings file: found');
+  try {
+    const settings = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+    if (!settings.deploy || !settings.deploy.pull_method) {
+      warnings.push('Deploy pull method not configured. Run /ha-onboard to set it up, or /ha-deploy will ask on first use.');
+    }
+  } catch { /* ignore parse errors */ }
 } else {
   warnings.push('No settings file found. If this is your first time, run /ha-onboard to get started.');
 }

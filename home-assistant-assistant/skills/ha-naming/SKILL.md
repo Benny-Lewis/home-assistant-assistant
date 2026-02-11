@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Bash, Glob, Grep, AskUserQuestion
 
 This skill provides guidance on consistent naming for Home Assistant entities, devices, and configurations.
 
-**Detailed reference tables:** `references-home-assistant-assistant/naming-conventions.md`
+**Detailed reference tables:** `references/naming-conventions.md`
 
 ## Why Naming Matters
 
@@ -92,7 +92,7 @@ When renaming existing entities:
 
 ## References
 
-- `references-home-assistant-assistant/naming-conventions.md` - Complete tables for areas, devices, domains
+- `references/naming-conventions.md` - Complete tables for areas, devices, domains
 - `ha-conventions` skill - Detect naming patterns from your existing config
 
 ---
@@ -103,6 +103,8 @@ When renaming existing entities:
 > To apply changes, use `/ha-apply-naming` after reviewing the audit.
 
 Scan all entities, devices, areas, automations, scripts, and scenes for naming inconsistencies.
+
+**Agent usage:** If spawning the naming-analyzer agent, do NOT use `run_in_background: true` — background agents silently lose all output ([Claude Code #17011](https://github.com/anthropics/claude-code/issues/17011)). Always use foreground execution.
 
 ### Data Source Citation
 
@@ -138,11 +140,13 @@ If found, read them and report: "Found existing naming conventions at {path}. In
 
 **From hass-cli (if available):**
 ```bash
-hass-cli entity list
+# For large setups (>500 entities), state list is faster than entity list
+hass-cli state list
 hass-cli area list
 hass-cli device list
 ```
 
+> Use Bash tool with `timeout: 60000` if entity count exceeds 500.
 > Output is tabular text, not JSON. See `references/hass-cli.md` for parsing patterns.
 
 **From local config files:**
@@ -289,6 +293,23 @@ device_renames:
 ```
 
 #### Step 4: Dependency Analysis
+
+##### Investigating Unknown Devices
+
+When the plan includes entities whose purpose is unclear (e.g., `zwave_js.node_4`, generic device names):
+
+**Always investigate BEFORE asking the user:**
+1. Query entity state and attributes: `hass-cli -o json state get <entity_id>`
+2. Check device class, manufacturer, model from attributes
+3. Check if the node/device is alive or dead (last_seen, node_status)
+4. Search config files for references to understand how it's used
+
+**Then ask WITH context:** Present what you found and ask the user to confirm or clarify:
+"I found `zwave_js.node_4` — it appears to be a Zooz ZEN27 dimmer (alive, last seen 2 min ago) in the Rec Room area. It's referenced in 2 automations. Should I rename it to `light.rec_room_dimmer`?"
+
+**Never ask bare questions like** "What is Node 4?" without first investigating.
+
+##### Dependency Mapping
 
 For each rename, identify dependencies:
 

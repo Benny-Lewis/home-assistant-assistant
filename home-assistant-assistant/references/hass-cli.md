@@ -74,3 +74,10 @@ hass-cli entity list --no-headers | awk -F'.' '{print $1}' | sort | uniq -c | so
 3. **Service call arguments** — Use `--arguments` flag with key=value pairs.
 4. **Entity rename** — Only changes the registry ID, not the device itself.
 5. **Rate limiting** — Avoid rapid-fire calls in loops; batch where possible.
+
+## Performance Notes
+
+`entity list` can be slow on large setups (>500 entities). For bulk entity inventory:
+- Use `state list` + grep for faster results (state list streams output, entity list buffers)
+- Use Bash tool's `timeout` parameter (e.g., 60000ms) for entity list on large setups
+- For domain-specific queries, always pipe through grep: `hass-cli state list | grep "^light\."`

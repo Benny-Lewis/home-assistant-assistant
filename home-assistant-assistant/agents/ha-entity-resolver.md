@@ -9,6 +9,8 @@ skills: [ha-resolver]
 
 # Entity Resolver Agent
 
+**Warning:** Do NOT spawn this agent with `run_in_background: true`. Background agents silently lose all output ([Claude Code #17011](https://github.com/anthropics/claude-code/issues/17011)). Always use foreground execution.
+
 Find Home Assistant entities matching user descriptions, validate they exist, and capture capability snapshots.
 
 > **Safety Invariant #1:** Always capture capability snapshots before suggesting attributes.
