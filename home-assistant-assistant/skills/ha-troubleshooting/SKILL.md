@@ -46,17 +46,55 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
 
 ## Process
 
-1. **Identify issue** - What automation/entity/feature isn't working?
-2. **Resolve entities** - Use Resolver module to verify entity_ids exist
+1. **Identify issue** — What automation/entity/feature isn't working?
+2. **Resolve entities** — Use Resolver module to verify entity_ids exist
    - Check if entities mentioned in error actually exist
    - Look for typos, renamed entities, missing integrations
-3. **Gather data** via ha-log-analyzer agent
-   - Automation state (enabled/disabled)
-   - Recent traces and error logs
-   - Entity history around incident time
-4. **Analyze** - Compare expected vs actual behavior
-5. **Report with evidence** - Present findings with "what was checked" table
-6. **Suggest fixes** - Describe what to change, but do NOT auto-apply
+3. **Gather data** — Attempt ALL four checks before moving to analysis
+
+   > **Tip:** For complex multi-automation debugging, delegate to the ha-log-analyzer or config-debugger agent. Inline handling is fine for straightforward cases. Either way, the evidence table in step 5 is required.
+
+   - **3a. Automation state**
+     ```bash
+     hass-cli state get automation.<name>
+     ```
+     Look for `state: on` (enabled) or `state: off` (disabled).
+
+   - **3b. Automation traces**
+     ```bash
+     MSYS_NO_PATHCONV=1 hass-cli raw get /api/trace/automation.<name>
+     ```
+     Shows trigger, conditions, actions, and variables for recent runs.
+
+   - **3c. Error logs**
+     ```bash
+     MSYS_NO_PATHCONV=1 hass-cli raw get /api/error_log
+     ```
+     If 404, follow the fallback chain in Quick Reference above.
+
+   - **3d. Entity history**
+     ```bash
+     MSYS_NO_PATHCONV=1 hass-cli raw get "/api/history/period?filter_entity_id=<entity_id>"
+     ```
+     Check whether the trigger entity reached the expected state.
+
+   **Rule:** Do NOT skip to analysis without attempting all four checks. If a check fails or returns empty, record it in the evidence table as `✗ Failed` with the reason.
+
+4. **Analyze** — Compare expected vs actual behavior
+5. **Report with evidence** — Present findings using this ran-vs-skipped table:
+
+   | Check | Status | Result | Evidence |
+   |-------|--------|--------|----------|
+   | Automation state | ✓ Ran | on/off | `state: on` from hass-cli |
+   | Automation traces | ✓ Ran | triggered/not found | Trace showed condition X failed |
+   | Error logs | ✗ Failed | 404 | API returned 404, checked UI instead |
+   | Entity history | ✓ Ran | state reached | History shows change at HH:MM |
+
+   **Status values:** `✓ Ran` — check completed, `⊘ Skipped (reason)` — not applicable, `✗ Failed` — check errored (404, timeout, etc.)
+
+   Every check from step 3 MUST appear in the table. Never silently omit a check.
+
+6. **Suggest fixes** — Describe what to change, but do NOT auto-apply
    - Route to appropriate skill (ha-automations, ha-scripts, ha-scenes)
    - User must explicitly request changes
 

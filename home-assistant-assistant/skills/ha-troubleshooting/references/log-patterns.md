@@ -186,13 +186,17 @@ trigger:
 
 ## Evidence Table Template
 
-When reporting troubleshooting results, include:
+When reporting troubleshooting results, use this ran-vs-skipped format:
 
-| Check | Result | Evidence |
-|-------|--------|----------|
-| Automation enabled | ✅/❌ | `state: on/off` |
-| Trigger entity exists | ✅/❌ | Found via `hass-cli state list` |
-| Trigger state reached | ✅/❌ | History shows state change |
-| Conditions met | ✅/❌ | Trace shows condition result |
-| Actions executed | ✅/❌ | Trace shows action result |
-| Error in logs | ✅/❌ | Error message: "..." |
+| Check | Status | Result | Evidence |
+|-------|--------|--------|----------|
+| Automation enabled | ✓ Ran | on/off | `state: on/off` from hass-cli |
+| Trigger entity exists | ✓ Ran | found/missing | `hass-cli state list` output |
+| Trigger state reached | ✓ Ran | reached/not reached | History shows state change |
+| Conditions met | ✓ Ran | passed/failed | Trace shows condition result |
+| Actions executed | ✓ Ran | success/error | Trace shows action result |
+| Error in logs | ✗ Failed | 404 | API unavailable, checked UI |
+
+**Status values:** `✓ Ran` — check completed, `⊘ Skipped (reason)` — not applicable, `✗ Failed` — check errored
+
+Every check MUST appear in the table. Never silently omit a check.
