@@ -11,9 +11,13 @@ This is a Claude Code plugin for Home Assistant. It allows users to manage Home 
 ## Repository Structure
 
 ```
-home-assistant-assistant/      # The plugin (load with --plugin-dir)
-merge-plan/                    # Merge documentation and progress tracking
-references/                    # Development references (yaml-syntax, frontmatter-compliance)
+.claude-plugin/
+  plugin.json                   # Plugin manifest
+skills/                         # 15 skill directories (14 user-invocable + 1 infrastructure)
+agents/                         # 6 subagent markdown files
+hooks/                          # hooks.json + session-check.js
+references/                     # safety-invariants.md, settings-schema.md, hass-cli.md
+templates/                      # templates.md
 ```
 
 ## Safety Invariants
@@ -32,35 +36,34 @@ All generated YAML and commands enforce these invariants:
 The plugin follows Claude Code's plugin structure:
 
 ```
-home-assistant-assistant/
-  .claude-plugin/
-    plugin.json               # Plugin manifest - metadata, component discovery
-  skills/
-    ha-automations/           # Automation creation + domain knowledge (user-invocable)
-    ha-scripts/               # Script creation + domain knowledge (user-invocable)
-    ha-scenes/                # Scene creation + domain knowledge (user-invocable)
-    ha-config/                # Config organization knowledge (user-invocable)
-    ha-jinja/                 # Jinja templating knowledge (user-invocable)
-    ha-lovelace/              # Dashboard design knowledge (user-invocable)
-    ha-naming/                # Naming conventions + audit + plan (user-invocable)
-    ha-apply-naming/          # Naming execution (user-invocable, NO model invocation)
-    ha-devices/               # Device knowledge + new device workflow (user-invocable)
-    ha-troubleshooting/       # Debugging knowledge (user-invocable)
-    ha-onboard/               # Setup wizard + connection + settings (user-invocable)
-    ha-deploy/                # Deploy + rollback (user-invocable, in-skill confirmation gates)
-    ha-validate/              # Validation workflow + procedures (user-invocable, agent-preloadable)
-    ha-analyze/               # Setup analysis + recommendations (user-invocable)
-    ha-resolver/              # Entity resolution (NOT user-invocable, agent-preloaded)
-  agents/
-    *.md                      # Subagents with specialized prompts (config-debugger,
-                              # ha-config-validator, device-advisor, naming-analyzer)
-  hooks/
-    hooks.json                # Event-driven hooks (SessionStart, PreToolUse, PostToolUse)
-  references/
-    safety-invariants.md      # Core safety rules referenced by all skills
-    settings-schema.md        # Settings file schema
-  templates/
-    *.md                      # Reference templates for generated configs
+.claude-plugin/
+  plugin.json               # Plugin manifest - metadata, component discovery
+skills/
+  ha-automations/           # Automation creation + domain knowledge (user-invocable)
+  ha-scripts/               # Script creation + domain knowledge (user-invocable)
+  ha-scenes/                # Scene creation + domain knowledge (user-invocable)
+  ha-config/                # Config organization knowledge (user-invocable)
+  ha-jinja/                 # Jinja templating knowledge (user-invocable)
+  ha-lovelace/              # Dashboard design knowledge (user-invocable)
+  ha-naming/                # Naming conventions + audit + plan (user-invocable)
+  ha-apply-naming/          # Naming execution (user-invocable, NO model invocation)
+  ha-devices/               # Device knowledge + new device workflow (user-invocable)
+  ha-troubleshooting/       # Debugging knowledge (user-invocable)
+  ha-onboard/               # Setup wizard + connection + settings (user-invocable)
+  ha-deploy/                # Deploy + rollback (user-invocable, in-skill confirmation gates)
+  ha-validate/              # Validation workflow + procedures (user-invocable, agent-preloadable)
+  ha-analyze/               # Setup analysis + recommendations (user-invocable)
+  ha-resolver/              # Entity resolution (NOT user-invocable, agent-preloaded)
+agents/
+  *.md                      # Subagents with specialized prompts (config-debugger,
+                            # ha-config-validator, device-advisor, naming-analyzer)
+hooks/
+  hooks.json                # Event-driven hooks (SessionStart, PreToolUse, PostToolUse)
+references/
+  safety-invariants.md      # Core safety rules referenced by all skills
+  settings-schema.md        # Settings file schema
+templates/
+  *.md                      # Reference templates for generated configs
 ```
 
 **15 skills total:** 14 user-invocable + 1 infrastructure (ha-resolver). ha-validate is both user-invocable and agent-preloadable.
@@ -70,16 +73,9 @@ home-assistant-assistant/
 No automated tests exist. Manual testing approach:
 
 ```bash
-# Load plugin for testing
-claude --plugin-dir "C:\Users\blewis\dev\home-assistant-assistant\home-assistant-assistant"
+# Load plugin for testing (from repo root)
+claude --plugin-dir .
 ```
-
-See `home-assistant-assistant/TEST_PLAN.md` for the manual test plan covering:
-- Plugin loading verification
-- Skill testing (user-invocable and domain)
-- Agent testing scenarios
-- Hook testing
-- Safety invariant regression tests
 
 ## Prerequisites for Plugin Users
 
@@ -119,27 +115,12 @@ export HASS_TOKEN="your-long-lived-access-token"
 
 ## Key Files
 
-**Merge documentation:**
-- `merge-plan/PROGRESS.md` - 61-item checklist (all complete)
-- `merge-plan/ha_plugins_merge_fix_plan-v4.md` - Detailed merge strategy
-- `merge-plan/analysis-report.md` - Compliance review against Anthropic docs
-
 **Infrastructure skill (preloaded by agents):**
 - `skills/ha-resolver/SKILL.md` - Entity resolution and capability snapshots
 
 **Skill references (domain-specific):**
 - `skills/ha-automations/references/intent-classifier.md` - Inactivity vs delay classification
 - `skills/ha-naming/references/editor.md` - YAML AST editing procedures
-
-**Backlog:**
-- `BACKLOG.md` - Ideas, optimizations, and future considerations
-
-**Testing:**
-- `home-assistant-assistant/TEST_PLAN.md` - Manual test plan with safety invariant tests
-
-**Development references (repo root):**
-- `references/yaml-syntax.md` - HA 2024+ YAML schema (triggers/conditions/actions)
-- `references/frontmatter-compliance.md` - Anthropic plugin spec compliance
 
 ## Development Notes
 

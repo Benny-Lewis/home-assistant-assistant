@@ -1,10 +1,10 @@
 {
   "name": "home-assistant-assistant",
-  "version": "0.1.0",
-  "description": "Natural language management of Home Assistant configurations - create automations, scripts, and scenes through conversation",
-  "author": {
-    "name": "blewis"
-  },
+  "version": "1.0.0",
+  "description": "Manage your Home Assistant setup through natural language — automations, scripts, scenes, dashboards, naming, deployment, and more.",
+  "author": { "name": "blewis" },
   "homepage": "https://github.com/Benny-Lewis/home-assistant-assistant",
-  "keywords": ["home-assistant", "automation", "smart-home", "yaml", "iot"]
+  "repository": "https://github.com/Benny-Lewis/home-assistant-assistant",
+  "license": "MPL-2.0",
+  "keywords": ["home-assistant", "automation", "smart-home", "yaml", "iot", "home-automation"]
 }
