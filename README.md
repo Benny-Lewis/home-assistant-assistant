@@ -4,18 +4,18 @@ A Claude Code plugin that lets you setup and manage your Home Assistant through 
 
 ## Quick Start
 
-In Claude Code: 
+Install thke plugin. In Claude Code: 
 ```
 /plugin marketplace add Benny-Lewis/home-assistant-assistant
 /plugin install home-assistant-assistant@home-assistant-assistant
 ```
 
-First time? Launch the onboarding wizard:
+Launch the onboarding wizard:
 ```
 /ha-onboard
 ```
 
-The onboarding wizard walks you through hass-cli installation, token setup, git configuration, and HA connection — one step at a time, with resume detection if you need to stop halfway.
+The onboarding wizard walks you through hass-cli installation, token setup, git configuration, and HA connection — one step at a time. It will save progress if you need to stop halfway.
 
 ## How It Works
 
