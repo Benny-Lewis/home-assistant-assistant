@@ -7,7 +7,7 @@ A Claude Code plugin that lets you setup and manage your Home Assistant through 
 Install thke plugin. In Claude Code: 
 ```
 /plugin marketplace add Benny-Lewis/home-assistant-assistant
-/plugin install home-assistant-assistant@home-assistant-assistant
+/plugin install home-assistant-assistant
 ```
 
 Launch the onboarding wizard:

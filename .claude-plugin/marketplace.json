@@ -9,7 +9,10 @@
   "plugins": [
     {
       "name": "home-assistant-assistant",
-      "source": ".",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/Benny-Lewis/home-assistant-assistant.git"
+      },
       "description": "Manage your Home Assistant setup through natural language — automations, scripts, scenes, dashboards, naming, deployment, and more.",
       "version": "1.0.0",
       "author": { "name": "blewis" },
