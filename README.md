@@ -33,12 +33,12 @@ The plugin classifies this as an inactivity pattern (not a delay — the distinc
 ```yaml
 - alias: "Hallway lights off on no motion"
   id: hallway_lights_off_no_motion
-  trigger:
+  triggers:
     - trigger: state
       entity_id: binary_sensor.hallway_motion
       to: "off"
       for: "00:10:00"
-  action:
+  actions:
     - action: light.turn_off
       target:
         entity_id: light.hallway
