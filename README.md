@@ -139,6 +139,17 @@ The entire plugin is 42 markdown files and one 91-line JavaScript hook. Every sk
 - Git repository for your HA config (setup during onboarding)
 - Home Assistant with a long-lived access token (token setup during onboarding)
 
+## Contributing
+
+To contribute:
+
+1. Fork the repository
+2. Create a branch for your skill
+3. Follow the `writing-skills` skill for creating and testing new skills
+4. Submit a PR
+
+Found a bug or have an idea? [Open an issue](https://github.com/Benny-Lewis/home-assistant-assistant/issues).
+
 ## License
 
 [MPL-2.0](LICENSE)
