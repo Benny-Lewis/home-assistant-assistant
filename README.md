@@ -55,7 +55,7 @@ The `for: "00:10:00"` on the trigger is the key detail. If motion resumes before
 
 ### Audit and fix entity naming:
 ```
-> "Audit my entity names"
+> Audit my entity names
 ```
 
 Claude runs `/ha-naming`, which scans every entity, automation, script, and scene. It detects your dominant naming pattern and flags inconsistencies — mixed casing, missing area prefixes, `sensor_1` sitting next to `living_room_temperature`. It writes a rename plan to `.claude/naming-plan.yaml` with dependency analysis: which automations, scripts, scenes, and dashboards reference each entity that would be renamed.
@@ -119,7 +119,12 @@ Agents are spawned by skills when needed. They run in isolated context, do their
 
 ## Design
 
-Every component in this plugin enforces five safety invariants. No YAML is emitted with unsupported device attributes. Inactivity patterns are never silently replaced with timers. Config edits use context-aware anchors, not brittle string replacement. Tokens are never printed. Nothing deploys without explicit confirmation.
+Every component in this plugin enforces five safety invariants:
+- No YAML is emitted with unsupported device attributes.
+- Inactivity patterns are never silently replaced with timers.
+- Config edits use context-aware anchors, not brittle string replacement.
+- Tokens are never printed.
+- Nothing deploys without explicit confirmation.
 
 Validation outputs include evidence tables — not just "passed" or "failed," but what checks actually ran, what was skipped, and why. When the plugin can't fully validate (no HA connection, hass-cli unavailable), it says so. False confidence is worse than no confidence.
 
