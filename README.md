@@ -1,7 +1,3 @@
-# Home Assistant Assistant
-
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that lets you manage your Home Assistant setup through natural language. Describe what you want — automations, scripts, scenes, dashboards, naming conventions — and the plugin generates device-aware YAML, resolves entity names against your real HA instance, validates everything, and deploys via git with confirmation at every step.
-
 # home-assistant-assistant
 
 A Claude Code plugin that lets you setup and manage your Home Assistant through natural language. Describe what you want — "turn off the kitchen lights after 5 minutes of no motion" — and the plugin resolves entity names against your real HA instance, checks device capabilities, generates YAML, validates everything, and deploys to your Home Assistant via git after your confirmation.
