@@ -2,236 +2,141 @@
 
 A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that lets you manage your Home Assistant setup through natural language. Describe what you want — automations, scripts, scenes, dashboards, naming conventions — and the plugin generates device-aware YAML, resolves entity names against your real HA instance, validates everything, and deploys via git with confirmation at every step.
 
+# home-assistant-assistant
+
+A Claude Code plugin that lets you setup and manage your Home Assistant through natural language. Describe what you want — "turn off the kitchen lights after 5 minutes of no motion" — and the plugin resolves entity names against your real HA instance, checks device capabilities, generates YAML, validates everything, and deploys to your Home Assistant via git after your confirmation.
+
 ## Quick Start
 
-Add the marketplace and install the plugin:
-
+In Claude Code: 
 ```
 /plugin marketplace add Benny-Lewis/home-assistant-assistant
 /plugin install home-assistant-assistant@home-assistant-assistant
 ```
 
-Then run `/ha-onboard` — the setup wizard walks you through installing hass-cli, creating an access token, setting environment variables, connecting to Home Assistant, and configuring git-based deployment.
-
-## What Can It Do?
-
-**You can ask for these directly:**
-
-| Skill | What it does |
-|-------|-------------|
-| ha-onboard | First-time setup — connect to HA, verify prerequisites, configure settings |
-| ha-validate | Check your configuration for errors with evidence tables showing what was checked |
-| ha-deploy | Deploy changes to HA via git commit + push + reload (with confirmation at each step) |
-| ha-analyze | Analyze your setup and get improvement suggestions |
-| ha-naming | Audit naming conventions, plan renames |
-| ha-apply-naming | Execute a naming plan (dry-run by default) |
-
-**These activate automatically** when you ask about their domain:
-
-| Skill | Domain |
-|-------|--------|
-| ha-automations | Triggers, conditions, actions, automation modes |
-| ha-scripts | Script sequences, modes, fields |
-| ha-scenes | Scene creation with capability verification |
-| ha-config | Configuration structure, packages, secrets |
-| ha-lovelace | Dashboard cards, layouts, themes |
-| ha-jinja | Template syntax, filters, state access |
-| ha-devices | Device types, integrations, new device workflows |
-| ha-troubleshooting | Log analysis, debugging, common errors |
-
-## Usage Examples
-
-### Create an automation
-
-> "Create an automation that turns off the living room lights 5 minutes after no motion is detected"
-
-The plugin classifies this as an inactivity pattern (not a simple delay), generates a `state` trigger with `for:` duration, and verifies the motion sensor and light entities exist.
-
-### Set up a new device
-
-> "I just added a Zigbee motion sensor in the garage"
-
-The plugin suggests a name following your conventions, recommends automations (motion-triggered lights, alerts), offers dashboard integration, and checks for related devices.
-
-### Design a dashboard
-
-> "Create a dashboard card showing the temperature and humidity in each room"
-
-The plugin resolves your climate sensors, checks their available attributes, and generates a Lovelace card configuration.
-
-### Deploy changes
-
+First time? Launch the onboarding wizard:
 ```
-/ha-deploy
+/ha-onboard
 ```
 
-Shows a diff of what changed, asks for confirmation, commits, pushes, and triggers HA to reload — with a confirmation gate before each step.
+The onboarding wizard walks you through hass-cli installation, token setup, git configuration, and HA connection — one step at a time, with resume detection if you need to stop halfway.
 
 ## How It Works
 
-```mermaid
-flowchart LR
-    A[You describe what you want] --> B
+You run Claude Code from a directory containing a clone of your Home Assistant configuration. When you make a request, such as a new automation, scene, or script, the plugin resolves your natural language to actual entity IDs by querying your HA instance through `hass-cli`. It pulls a capability snapshot for every device it touches and refuses to emit attributes a device doesn't support. If you say "warm white" for a brightness-only bulb, it stops and asks what you'd like to do instead. When your config is ready, it validates across progressive tiers (YAML syntax, HA schema, entity existence, service verification) and deploys via git commit, push, and HA reload — with explicit confirmation at every step. The entire workflow, from "make the porch lights come on at sunset" to a deployed, running automation, happens in a single conversation.
 
-    subgraph gen [skill: ha-automations / ha-scripts / ha-scenes]
-        direction LR
-        B([Resolve entities]) --> C([Generate YAML])
-    end
+## Examples
 
-    C --> D{Deploy?}
-    D -- Yes --> E2
-    D -- No --> I[Keep editing]
-
-    subgraph deploy [skill: ha-deploy]
-        direction LR
-        E2([skill: ha-validate]) --> F([Commit]) --> G([Push]) --> H([Reload HA])
-    end
-
-    B <-.-> AG1{{subagent: ha-entity-resolver}}
-    E2 <-.-> AG2{{subagent: ha-config-validator}}
-
-    style A fill:#6c757d,color:#fff,stroke:#6c757d
-    style I fill:#6c757d,color:#fff,stroke:#6c757d
-    style B fill:#4a9eff,color:#fff,stroke:#3a7fcf
-    style C fill:#4a9eff,color:#fff,stroke:#3a7fcf
-    style D fill:#6c757d,color:#fff,stroke:#6c757d
-    style E2 fill:#ff9800,color:#fff,stroke:#cc7a00
-    style F fill:#ff9800,color:#fff,stroke:#cc7a00
-    style G fill:#ff9800,color:#fff,stroke:#cc7a00
-    style H fill:#ff9800,color:#fff,stroke:#cc7a00
-    style gen fill:none,stroke:#4a9eff,stroke-width:2px,stroke-dasharray:5 5
-    style deploy fill:none,stroke:#ff9800,stroke-width:2px,stroke-dasharray:5 5
-    style AG1 fill:#7c4dff,color:#fff,stroke:#6a3de0
-    style AG2 fill:#7c4dff,color:#fff,stroke:#6a3de0
+### Build an automation from a sentence
+```
+> When no motion is detected in the hallway for 10 minutes, turn off the lights and set the thermostat to 67 degrees
 ```
 
-**Blue** = skills &nbsp;&nbsp; **Purple** = subagents &nbsp;&nbsp; **Orange** = deploy / side-effectful &nbsp;&nbsp; **Gray** = user / output
+The plugin classifies this as an inactivity pattern (not a delay — the distinction matters), finds actual entity names `binary_sensor.hallway_motion` and `light.hallway` on your HA machine using hass-cli, verifies the thermostat supports `set_temperature`, and generates YAML like this:
 
-Each step includes guardrails: entities are verified against your real HA instance, device capabilities are checked before generating attributes, and deployment requires explicit confirmation.
-
-### Naming Audit & Rename
-
-```mermaid
-flowchart LR
-    A[Audit my entity names] --> B
-
-    subgraph naming [skill: ha-naming]
-        direction LR
-        B([Scan + detect issues]) --> C([Generate rename plan])
-    end
-
-    C --> D[Review plan]
-    D --> E
-
-    subgraph apply [skill: ha-apply-naming]
-        direction LR
-        E([Dry-run preview]) --> F([Execute renames])
-    end
-
-    B <-.-> AG1{{subagent: naming-analyzer}}
-
-    style A fill:#6c757d,color:#fff,stroke:#6c757d
-    style D fill:#6c757d,color:#fff,stroke:#6c757d
-    style B fill:#4a9eff,color:#fff,stroke:#3a7fcf
-    style C fill:#4a9eff,color:#fff,stroke:#3a7fcf
-    style E fill:#ff9800,color:#fff,stroke:#cc7a00
-    style F fill:#ff9800,color:#fff,stroke:#cc7a00
-    style naming fill:none,stroke:#4a9eff,stroke-width:2px,stroke-dasharray:5 5
-    style apply fill:none,stroke:#ff9800,stroke-width:2px,stroke-dasharray:5 5
-    style AG1 fill:#7c4dff,color:#fff,stroke:#6a3de0
+```yaml
+- alias: "Hallway lights off on no motion"
+  id: hallway_lights_off_no_motion
+  trigger:
+    - trigger: state
+      entity_id: binary_sensor.hallway_motion
+      to: "off"
+      for: "00:10:00"
+  action:
+    - action: light.turn_off
+      target:
+        entity_id: light.hallway
+    - action: climate.set_temperature
+      target:
+        entity_id: climate.hallway_thermostat
+      data:
+        temperature: 67
 ```
 
-### Troubleshooting
+The `for: "00:10:00"` on the trigger is the key detail. If motion resumes before 10 minutes, the trigger resets automatically — no extra cancel logic needed. Claude then asks for your review before commiting the update to git and deploying it to your Home Assistant.
 
-```mermaid
-flowchart LR
-    A[My automation is not working] --> B
+---
 
-    subgraph ts [skill: ha-troubleshooting]
-        direction LR
-        B([Gather state + traces + logs]) --> C[Evidence table]
-    end
-
-    C --> D([skill: ha-automations / ha-scripts / ha-scenes])
-
-    B <-.-> AG1{{subagents: config-debugger + ha-log-analyzer}}
-
-    style A fill:#6c757d,color:#fff,stroke:#6c757d
-    style C fill:#6c757d,color:#fff,stroke:#6c757d
-    style B fill:#4a9eff,color:#fff,stroke:#3a7fcf
-    style D fill:#4a9eff,color:#fff,stroke:#3a7fcf
-    style ts fill:none,stroke:#4a9eff,stroke-width:2px,stroke-dasharray:5 5
-    style AG1 fill:#7c4dff,color:#fff,stroke:#6a3de0
+### Audit and fix entity naming:
+```
+> "Audit my entity names"
 ```
 
-### Configuration Review
+Claude runs `/ha-naming`, which scans every entity, automation, script, and scene. It detects your dominant naming pattern and flags inconsistencies — mixed casing, missing area prefixes, `sensor_1` sitting next to `living_room_temperature`. It writes a rename plan to `.claude/naming-plan.yaml` with dependency analysis: which automations, scripts, scenes, and dashboards reference each entity that would be renamed.
 
-```mermaid
-flowchart LR
-    A[Review my setup] --> B([skill: ha-analyze]) --> C[Improvement report] --> D([skill: ha-automations / ha-scripts / ha-scenes])
+It asks you to review the plan, remove any renames you don't want, and then runs `/ha-apply-naming`. It executes the plan with a dry-run preview first, updating every reference across your configuration files. The two-step design means you always see exactly what will change before it changes.
 
-    style A fill:#6c757d,color:#fff,stroke:#6c757d
-    style C fill:#6c757d,color:#fff,stroke:#6c757d
-    style B fill:#4a9eff,color:#fff,stroke:#3a7fcf
-    style D fill:#4a9eff,color:#fff,stroke:#3a7fcf
+---
+
+### Debug a broken automation:
+```
+> Why didn't my kitchen motion light trigger last night?
+```
+The troubleshooting skill checks automation state, pulls traces, queries error logs, and examines entity history. It builds an evidence table — a row-by-row accounting of what was checked, what passed, what failed, and what was skipped. If the root cause is a misconfigured trigger, a renamed entity, or a state that never fires, it shows you the evidence and offers a fix with deployment.
+
+---
+
+### Design a dashboard
+```
+> Create a climate dashboard with temperature and humidity for each room
 ```
 
-## Prerequisites
+Resolves your climate sensors against the live instance, checks which attributes each one actually exposes (not every sensor reports humidity), and generates Lovelace card YAML that matches your real hardware. No placeholder entity IDs, no attributes your devices don't support.
+
+## Skills
+
+| Skill | What it does |
+|-------|-------------|
+| `/ha-onboard` | First-time setup wizard with resume detection |
+| `/ha-automations` | Create automations with intent classification and entity resolution |
+| `/ha-scripts` | Create reusable action sequences with mode selection |
+| `/ha-scenes` | Create device presets with capability verification |
+| `/ha-validate` | Progressive validation: YAML syntax, schema, entity existence, services |
+| `/ha-deploy` | Git-based deploy and rollback with confirmation gates |
+| `/ha-naming` | Audit naming patterns, generate rename plans |
+| `/ha-apply-naming` | Execute rename plans with dry-run default and phased rollout |
+| `/ha-analyze` | Analyze your setup for automation opportunities and config health |
+| `/ha-troubleshooting` | Debug automations with evidence-backed diagnostics |
+| `/ha-devices` | New device setup: naming, automations, dashboard integration |
+| `/ha-config` | Configuration structure and organization guidance |
+| `/ha-lovelace` | Dashboard design: cards, views, layouts, themes |
+| `/ha-jinja` | Jinja2 templating reference and patterns |
+
+
+## Agents
+
+Six specialized subagents handle work that benefits from deep, focused analysis:
+
+- **config-debugger** — Traces automation logic step by step, cross-references entity states, produces diagnostic evidence tables
+- **ha-config-validator** — Progressive validation in tiers: YAML syntax, then schema, then live HA config check
+- **ha-entity-resolver** — Resolves natural-language descriptions ("the kitchen motion sensor") to real entity IDs with full capability snapshots
+- **ha-log-analyzer** — Gathers logs, automation traces, and entity history via the HA API
+- **device-advisor** — New device setup: naming, capability discovery, automation suggestions, dashboard placement
+- **naming-analyzer** — Quantified naming audit with output scaling based on entity count
+
+Agents are spawned by skills when needed. They run in isolated context, do their analysis, and return results. You don't invoke them directly.
+
+## Hooks
+
+- **Session Start** — verifies your environment and routes to the right skill.
+- **Post-edit** — ensures Claude follows the correct sequence per the skill, and asks you to review any edits before deploying.
+
+## Design
+
+Every component in this plugin enforces five safety invariants. No YAML is emitted with unsupported device attributes. Inactivity patterns are never silently replaced with timers. Config edits use context-aware anchors, not brittle string replacement. Tokens are never printed. Nothing deploys without explicit confirmation.
+
+Validation outputs include evidence tables — not just "passed" or "failed," but what checks actually ran, what was skipped, and why. When the plugin can't fully validate (no HA connection, hass-cli unavailable), it says so. False confidence is worse than no confidence.
+
+The plugin treats your HA instance as the source of truth. Entity IDs are resolved, not guessed. Device capabilities are queried, not assumed. If something doesn't exist or isn't supported, the plugin stops and tells you — it doesn't invent a workaround.
+
+The entire plugin is 42 markdown files and one 91-line JavaScript hook. Every skill is a spec file — YAML frontmatter declaring tools and permissions, markdown body defining the complete behavior — that Claude Code reads and executes. See [Component Reference](COMPONENTS.md) for the full inventory.
+
+## Requirements
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
-- Git
-- A running Home Assistant instance
-
-Everything else (hass-cli, access token, environment variables, Git Pull add-on) is set up by `/ha-onboard`.
-
-## Architecture
-
-See [COMPONENTS.md](COMPONENTS.md) for detailed documentation of every skill, agent, and hook.
-
-```
-├── .claude-plugin/
-│   └── plugin.json               # Plugin manifest
-├── skills/
-│   ├── ha-automations/           # Automation creation + domain knowledge
-│   ├── ha-scripts/               # Script creation + domain knowledge
-│   ├── ha-scenes/                # Scene creation with capability checks
-│   ├── ha-config/                # Configuration organization
-│   ├── ha-jinja/                 # Jinja templating
-│   ├── ha-lovelace/              # Dashboard design
-│   ├── ha-naming/                # Naming conventions + audit
-│   ├── ha-apply-naming/          # Naming plan execution
-│   ├── ha-devices/               # Device knowledge + setup workflows
-│   ├── ha-troubleshooting/       # Debugging + log analysis
-│   ├── ha-onboard/               # Setup wizard
-│   ├── ha-deploy/                # Git-based deploy + rollback
-│   ├── ha-validate/              # Configuration validation
-│   ├── ha-analyze/               # Setup analysis + recommendations
-│   └── ha-resolver/              # Entity resolution (used by agents)
-├── agents/
-│   ├── config-debugger.md        # Analyzes and fixes configuration errors
-│   ├── ha-config-validator.md    # Deep configuration validation
-│   ├── ha-entity-resolver.md     # Entity resolution for other agents
-│   ├── ha-log-analyzer.md        # HA log analysis
-│   ├── device-advisor.md         # Device setup recommendations
-│   └── naming-analyzer.md        # Naming pattern analysis
-├── hooks/
-│   ├── hooks.json                # SessionStart, PostToolUse hooks
-│   └── session-check.js          # Environment verification on session start
-├── references/
-│   ├── safety-invariants.md      # Safety rules referenced by all skills
-│   ├── settings-schema.md        # Settings file schema
-│   └── hass-cli.md               # hass-cli reference
-└── templates/
-    └── templates.md              # Reference templates for generated configs
-```
-
-## Configuration
-
-The plugin stores user-specific configuration in `.claude/` (gitignored):
-
-- **`settings.local.json`** — connection settings, HA config path, feature flags
-- **`ha.conventions.json`** — your naming patterns (learned from your setup or defined manually)
-- **`naming-plan.yaml`** — generated rename plans (from `/ha-naming`)
+- [hass-cli](https://github.com/home-assistant-ecosystem/home-assistant-cli) (installed during onboarding)
+- Git repository for your HA config (setup during onboarding)
+- Home Assistant with a long-lived access token (token setup during onboarding)
 
 ## License
 
