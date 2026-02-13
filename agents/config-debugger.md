@@ -54,7 +54,14 @@ Before assuming an entity ID is wrong, verify it exists:
 ```bash
 hass-cli state list | grep -i "<entity_name>"
 ```
-The ha-resolver skill is preloaded with the full entity resolution procedure.
+If not found, escalate through search tiers (multi-term, JSON friendly_name,
+registry). See ha-resolver `references/enhanced-search.md`.
+
+For area-specific debugging, find all entities in the relevant area:
+```bash
+hass-cli area list
+```
+Then use ha-resolver `references/area-search.md` to enumerate entities by area.
 
 **Analysis Process:**
 

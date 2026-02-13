@@ -15,6 +15,7 @@
 | `hass-cli device list` | List all devices | `hass-cli device list` |
 | `hass-cli raw get <path>` | Raw API GET | `hass-cli raw get /api/states` |
 | `hass-cli raw post <path>` | Raw API POST | `hass-cli raw post /api/services/light/turn_on` |
+| `hass-cli raw ws '<json>'` | WebSocket message | `hass-cli raw ws '{"type":"config/area_registry/list"}'` |
 | `hass-cli config check` | Validate HA config | `hass-cli config check` |
 | `hass-cli entity rename <old> <new>` | Rename an entity | `hass-cli entity rename light.old light.new` |
 
@@ -45,6 +46,37 @@ MSYS_NO_PATHCONV=1 hass-cli raw get /api/states
 ```
 
 This is **not** needed for non-path commands like `entity list`, `state get`, etc.
+
+## WebSocket Commands
+
+`hass-cli raw ws` sends a WebSocket message and returns the response as JSON.
+
+```bash
+# Area registry
+MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/area_registry/list"}'
+
+# Entity registry (includes area_id, device_id, disabled_by per entity)
+MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/entity_registry/list"}'
+
+# Device registry (includes area_id, manufacturer, model per device)
+MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/device_registry/list"}'
+
+# Floor registry
+MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/floor_registry/list"}'
+```
+
+**Response format:** JSON with `success: true/false` and `result: [...]` array.
+
+**MINGW note:** Always use `MSYS_NO_PATHCONV=1` prefix for `raw ws` commands on Windows — the JSON payload may be misinterpreted.
+
+### Common Registry Message Types
+
+| Type | Returns |
+|------|---------|
+| `config/area_registry/list` | Areas with `area_id`, `name`, `floor_id`, `icon`, `aliases` |
+| `config/entity_registry/list` | Entities with `entity_id`, `area_id`, `device_id`, `disabled_by`, `hidden_by` |
+| `config/device_registry/list` | Devices with `id`, `area_id`, `name`, `manufacturer`, `model` |
+| `config/floor_registry/list` | Floors with `floor_id`, `name`, `level`, `aliases` |
 
 ## Parsing Tabular Output
 

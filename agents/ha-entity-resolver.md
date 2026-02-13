@@ -24,10 +24,32 @@ Given a description (e.g., "hallway motion sensor", "kitchen lights"), find the 
 
 ## Process
 
+### 0. System orientation (optional — for unfamiliar setups)
+
+If you don't know what areas or domains exist, run a quick overview first:
+```bash
+hass-cli state list --no-headers | awk -F'.' '{print $1}' | sort | uniq -c | sort -rn
+hass-cli area list
+```
+See ha-resolver `references/system-overview.md` for the full procedure.
+
 ### 1. Search for matching entities
+
+**Quick search** (start here):
 ```bash
 hass-cli state list | grep -i "<search_term>"
 ```
+
+**If user mentions a room/area**, use area-based search:
+```bash
+hass-cli area list
+MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/entity_registry/list"}'
+```
+Filter results by `area_id`. See ha-resolver `references/area-search.md`.
+
+**If quick search returns nothing**, escalate through search tiers (domain
+filter → multi-term → broad → JSON friendly_name → registry). See
+ha-resolver `references/enhanced-search.md`.
 
 ### 2. Filter by domain if needed
 ```bash
