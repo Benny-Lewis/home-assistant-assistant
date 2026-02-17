@@ -114,7 +114,7 @@ Hooks fire automatically in response to plugin events.
 
 | Event | Type | What it does |
 |-------|------|-------------|
-| `SessionStart` | async command | Runs `session-check.js` on every new session. Checks for `HASS_TOKEN`, `HASS_SERVER`, `configuration.yaml`, and settings file. Warns if anything is missing. Timeout: 10s |
+| `SessionStart` | async command | Runs `session-check.sh` on every new session. Checks for `HASS_TOKEN`, `HASS_SERVER`, `configuration.yaml`, and settings file. Detects Python command and writes breadcrumb files (`.claude/ha-python.txt`, `.claude/ha-plugin-root.txt`). Timeout: 10s |
 | `PostToolUse` (Edit\|Write) | sync command | After any file edit or write, reminds about `ha-deploy` for validation and deployment. Timeout: 5s |
 
 ## Plugin References

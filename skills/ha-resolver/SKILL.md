@@ -2,7 +2,7 @@
 name: ha-resolver
 description: Entity resolution and capability snapshot procedures for Home Assistant
 user-invocable: false
-allowed-tools: Bash(hass-cli:*)
+allowed-tools: Bash(hass-cli:*,python*,py:*)
 ---
 
 # Resolver Module
@@ -24,7 +24,7 @@ Before generating YAML that references entities, services, or device capabilitie
 | Task | Quick Command | Full Procedure |
 |------|--------------|----------------|
 | System overview | `hass-cli area list` + domain counts | `references/system-overview.md` |
-| Search by area/room | `hass-cli raw ws entity_registry` | `references/area-search.md` |
+| Search by area/room | `area-search.py search` (via breadcrumb) | `references/area-search.md` |
 | Search by name | `hass-cli state list \| grep -i` | `references/enhanced-search.md` |
 | Capability snapshot | `hass-cli -o json state get` | Inline below |
 | Service discovery | `hass-cli service list` | Inline below |
@@ -37,13 +37,13 @@ Run an overview first when you need orientation on the user's HA setup.
 
 ```bash
 # Domain distribution
-hass-cli state list --no-headers | awk -F'.' '{print $1}' | sort | uniq -c | sort -rn
+hass-cli state list | awk '$1 ~ /\./ {split($1, a, "."); print a[1]}' | sort | uniq -c | sort -rn
 
 # Areas
 hass-cli area list
 
 # Total entity count
-hass-cli state list --no-headers | wc -l
+hass-cli state list | tail -n +2 | wc -l
 ```
 
 For standard (adds system info, device/service counts) or full (adds per-area
@@ -53,22 +53,34 @@ entity distribution via registries), see `references/system-overview.md`.
 
 ### Step 1: Search for Entities
 
-**Quick search** (start here):
+**Choose search strategy based on the query:**
+
+**A. Query names a room/area** (e.g., "kitchen lights", "bedroom sensors"):
+Use the area-search helper — it handles registry cross-referencing automatically.
+
+First, resolve the helper path and Python command:
 
 ```bash
-# Domain + keyword (most common)
-hass-cli state list | grep "^light\." | grep -i "kitchen"
+PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null)"
+PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+$PY "$PLUGIN_ROOT/helpers/area-search.py" search "<area_name>"
+# With domain filter:
+$PY "$PLUGIN_ROOT/helpers/area-search.py" search "<area_name>" --domain light
+```
 
-# Case-insensitive broad search
+If the helper is unavailable (e.g. `$PLUGIN_ROOT` is empty), fall back to
+`hass-cli -o json entity list` + `hass-cli -o json area list` — see
+`references/area-search.md`.
+
+**B. Query names a specific entity** (e.g., "the motion sensor", "thermostat"):
+Use name-based grep search.
+
+```bash
 hass-cli state list | grep -i "<search_term>"
 ```
 
-**If user mentions a room/area**, use area-based search instead — see
-`references/area-search.md`.
-
-**If quick search returns nothing**, escalate through search tiers (domain
-filter → multi-term → broad → JSON friendly_name → registry). See
-`references/enhanced-search.md`.
+If no results, escalate through search tiers (domain filter → multi-term →
+broad → JSON friendly_name → registry). See `references/enhanced-search.md`.
 
 ### Step 2: Get Entity Details
 
@@ -92,14 +104,27 @@ Find all entities in a specific room/area using HA registries.
 > (direct `area_id`) or device registry (via `device_id`). State attributes
 > are NOT authoritative for area membership.
 
-**Quick area search:**
+**Preferred: Use the area-search helper** (handles registry cross-referencing automatically):
 
 ```bash
-# List areas
-hass-cli area list
+PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null)"
+PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+$PY "$PLUGIN_ROOT/helpers/area-search.py" search "<area_name>"
+$PY "$PLUGIN_ROOT/helpers/area-search.py" search "<area_name>" --domain light
+$PY "$PLUGIN_ROOT/helpers/area-search.py" list-areas
+```
 
-# Get entity registry (all entity-to-area assignments)
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/entity_registry/list"}'
+**Manual method** (when helper is unavailable):
+
+```bash
+# List areas (includes area_id, name)
+hass-cli -o json area list
+
+# Get entity registry (includes entity_id, area_id, device_id)
+hass-cli -o json entity list
+
+# Get device registry (includes id, area_id)
+hass-cli -o json device list
 ```
 
 Filter entity registry results by `area_id`. For entities without a direct
@@ -107,10 +132,10 @@ area_id, check their device's area_id via the device registry.
 
 **Resolution priority:** Entity area_id > Device area_id > No area assigned
 
-For the full procedure (device registry fallback, domain grouping, multi-area
+For the full manual procedure (device registry fallback, domain grouping, multi-area
 search, grep fallback), see `references/area-search.md`.
 
-**Grep fallback** (when WebSocket unavailable):
+**Grep fallback** (when registry commands are too slow):
 
 ```bash
 hass-cli state list | grep -i "<area_name>"

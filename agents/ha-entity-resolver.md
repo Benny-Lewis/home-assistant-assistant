@@ -28,28 +28,44 @@ Given a description (e.g., "hallway motion sensor", "kitchen lights"), find the 
 
 If you don't know what areas or domains exist, run a quick overview first:
 ```bash
-hass-cli state list --no-headers | awk -F'.' '{print $1}' | sort | uniq -c | sort -rn
+hass-cli state list | awk '$1 ~ /\./ {split($1, a, "."); print a[1]}' | sort | uniq -c | sort -rn
 hass-cli area list
 ```
 See ha-resolver `references/system-overview.md` for the full procedure.
 
 ### 1. Search for matching entities
 
-**Quick search** (start here):
+**Choose search strategy based on the query:**
+
+**A. Query names a room/area** (e.g., "kitchen lights", "bedroom sensors"):
+Use the area-search helper — it handles registry cross-referencing automatically.
+
+First, resolve the helper path and Python command:
+```bash
+PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null)"
+PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+```
+
+Then run the search:
+```bash
+$PY "$PLUGIN_ROOT/helpers/area-search.py" search "<area_name>"
+# With domain filter:
+$PY "$PLUGIN_ROOT/helpers/area-search.py" search "<area_name>" --domain light
+# List all areas:
+$PY "$PLUGIN_ROOT/helpers/area-search.py" list-areas
+```
+If the helper is unavailable (e.g. `$PLUGIN_ROOT` is empty), fall back to
+`hass-cli -o json entity list` + `hass-cli -o json area list` — see
+ha-resolver `references/area-search.md`.
+
+**B. Query names a specific entity** (e.g., "the motion sensor", "thermostat"):
+Use name-based grep search.
 ```bash
 hass-cli state list | grep -i "<search_term>"
 ```
-
-**If user mentions a room/area**, use area-based search:
-```bash
-hass-cli area list
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/entity_registry/list"}'
-```
-Filter results by `area_id`. See ha-resolver `references/area-search.md`.
-
-**If quick search returns nothing**, escalate through search tiers (domain
-filter → multi-term → broad → JSON friendly_name → registry). See
-ha-resolver `references/enhanced-search.md`.
+If no results, escalate through search tiers (domain filter → multi-term →
+broad → JSON friendly_name → registry). See ha-resolver
+`references/enhanced-search.md`.
 
 ### 2. Filter by domain if needed
 ```bash

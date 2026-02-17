@@ -9,13 +9,13 @@ Use for quick orientation when you just need to know what domains and areas exis
 
 ```bash
 # Domain distribution (sorted by count)
-hass-cli state list --no-headers | awk -F'.' '{print $1}' | sort | uniq -c | sort -rn
+hass-cli state list | awk '$1 ~ /\./ {split($1, a, "."); print a[1]}' | sort | uniq -c | sort -rn
 
 # Areas
 hass-cli area list
 
 # Total entity count
-hass-cli state list --no-headers | wc -l
+hass-cli state list | tail -n +2 | wc -l
 ```
 
 ### Output Format
@@ -95,10 +95,10 @@ Run the standard commands above, plus:
 
 ```bash
 # Area registry (full details: floor, icon, aliases)
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/area_registry/list"}'
+hass-cli -o json area list
 
 # Entity registry (area_id per entity for distribution)
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/entity_registry/list"}'
+hass-cli -o json entity list
 ```
 
 Cross-reference entity registry `area_id` with area registry to build per-area breakdown.

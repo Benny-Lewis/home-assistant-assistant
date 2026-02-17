@@ -76,7 +76,7 @@ This searches across JSON output including `friendly_name` in attributes. Output
 The entity registry contains `original_name`, `aliases`, and other metadata not visible in state output.
 
 ```bash
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/entity_registry/list"}'
+hass-cli -o json entity list
 ```
 
 Pipe through `grep -i "<query>"` to search across entity_id, original_name, and aliases fields. This is the most comprehensive search but returns the most data.

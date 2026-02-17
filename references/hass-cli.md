@@ -15,7 +15,6 @@
 | `hass-cli device list` | List all devices | `hass-cli device list` |
 | `hass-cli raw get <path>` | Raw API GET | `hass-cli raw get /api/states` |
 | `hass-cli raw post <path>` | Raw API POST | `hass-cli raw post /api/services/light/turn_on` |
-| `hass-cli raw ws '<json>'` | WebSocket message | `hass-cli raw ws '{"type":"config/area_registry/list"}'` |
 | `hass-cli config check` | Validate HA config | `hass-cli config check` |
 | `hass-cli entity rename <old> <new>` | Rename an entity | `hass-cli entity rename light.old light.new` |
 
@@ -24,8 +23,8 @@
 | Flag | Description |
 |------|-------------|
 | `-o json` / `-o yaml` / `-o table` | Output format (short flag only: `-o json`, not `--output json`) |
-| `--no-headers` | Suppress column headers in tabular output |
-| `--columns <cols>` | Select specific columns (comma-separated) |
+| `--no-headers` | Suppress column headers in tabular output (`entity list` only — not supported by `state list`) |
+| `--columns <cols>` | Select specific columns (comma-separated, `entity list` only) |
 
 ### JSON Output for Full Attributes
 
@@ -47,36 +46,22 @@ MSYS_NO_PATHCONV=1 hass-cli raw get /api/states
 
 This is **not** needed for non-path commands like `entity list`, `state get`, etc.
 
-## WebSocket Commands
+## Registry Commands
 
-`hass-cli raw ws` sends a WebSocket message and returns the response as JSON.
+Use built-in commands with `-o json` to query HA registries:
 
 ```bash
-# Area registry
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/area_registry/list"}'
+# Area registry (area_id, name, floor_id, icon, aliases)
+hass-cli -o json area list
 
-# Entity registry (includes area_id, device_id, disabled_by per entity)
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/entity_registry/list"}'
+# Entity registry (entity_id, area_id, device_id, disabled_by, hidden_by)
+hass-cli -o json entity list
 
-# Device registry (includes area_id, manufacturer, model per device)
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/device_registry/list"}'
-
-# Floor registry
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/floor_registry/list"}'
+# Device registry (id, area_id, name, manufacturer, model)
+hass-cli -o json device list
 ```
 
-**Response format:** JSON with `success: true/false` and `result: [...]` array.
-
-**MINGW note:** Always use `MSYS_NO_PATHCONV=1` prefix for `raw ws` commands on Windows — the JSON payload may be misinterpreted.
-
-### Common Registry Message Types
-
-| Type | Returns |
-|------|---------|
-| `config/area_registry/list` | Areas with `area_id`, `name`, `floor_id`, `icon`, `aliases` |
-| `config/entity_registry/list` | Entities with `entity_id`, `area_id`, `device_id`, `disabled_by`, `hidden_by` |
-| `config/device_registry/list` | Devices with `id`, `area_id`, `name`, `manufacturer`, `model` |
-| `config/floor_registry/list` | Floors with `floor_id`, `name`, `level`, `aliases` |
+All return JSON arrays. These are the authoritative source for area/device/entity assignments.
 
 ## Parsing Tabular Output
 
@@ -95,8 +80,11 @@ hass-cli entity list --no-headers --columns entity_id,state
 # Find entities in a specific state
 hass-cli state list | grep "unavailable"
 
-# Count entities by domain
+# Count entities by domain (entity list supports --no-headers)
 hass-cli entity list --no-headers | awk -F'.' '{print $1}' | sort | uniq -c | sort -rn
+
+# Count entities by domain (state list — no --no-headers, awk filter skips headers)
+hass-cli state list | awk '$1 ~ /\./ {split($1, a, "."); print a[1]}' | sort | uniq -c | sort -rn
 ```
 
 ## Common Pitfalls

@@ -6,16 +6,28 @@ Find all entities in a specific room or area using HA registries.
 > (direct `area_id`) or device registry (via `device_id`). State attributes
 > are NOT authoritative for area membership.
 
-## Step 1: List Areas
+## Step 0: Quick Method (Helper Script)
 
-**Quick:**
+If the area-search helper is available, use it instead of the manual steps below.
+It performs Steps 1–3 automatically (fetches all registries, cross-references
+entity and device area assignments, groups by domain):
+
 ```bash
-hass-cli area list
+PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null)"
+PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+$PY "$PLUGIN_ROOT/helpers/area-search.py" search "<area_name>"
+$PY "$PLUGIN_ROOT/helpers/area-search.py" search "<area_name>" --domain light
+$PY "$PLUGIN_ROOT/helpers/area-search.py" list-areas
 ```
 
-**Full details** (includes floor_id, aliases, icons):
+Breadcrumb files are written by the session startup hook. Python auto-detection
+is the fallback if the breadcrumb is missing. If `$PLUGIN_ROOT` is empty,
+proceed with the manual steps below.
+
+## Step 1: List Areas
+
 ```bash
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/area_registry/list"}'
+hass-cli -o json area list
 ```
 
 Response fields per area: `area_id`, `name`, `floor_id`, `icon`, `aliases`, `picture`.
@@ -25,7 +37,7 @@ Match the user's query to an `area_id` or `name` (case-insensitive).
 ## Step 2: Get Entity Registry
 
 ```bash
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/entity_registry/list"}'
+hass-cli -o json entity list
 ```
 
 Filter results where `area_id` matches the target area. Each entry includes:
@@ -41,7 +53,7 @@ Filter results where `area_id` matches the target area. Each entry includes:
 Entities without a direct `area_id` may inherit area from their device.
 
 ```bash
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/device_registry/list"}'
+hass-cli -o json device list
 ```
 
 For each entity with `area_id: null` but a non-null `device_id`:
@@ -87,7 +99,7 @@ Include area source in evidence tables when relevant:
 
 ## Grep Fallback
 
-When WebSocket commands fail (e.g., hass-cli version doesn't support `raw ws`):
+When JSON commands are too slow or unavailable:
 
 ```bash
 hass-cli state list | grep -i "kitchen"
@@ -107,8 +119,8 @@ To find entities across multiple areas (e.g., "all downstairs rooms"):
 4. Combine results
 
 ```bash
-# Get floors
-MSYS_NO_PATHCONV=1 hass-cli raw ws '{"type":"config/floor_registry/list"}'
+# Get areas with floor_id
+hass-cli -o json area list
 
-# Then filter areas by floor_id from area registry results
+# Filter areas by floor_id, then search entities for each matching area
 ```
