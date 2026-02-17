@@ -131,3 +131,15 @@ export HASS_TOKEN="your-long-lived-access-token"
 - PostToolUse Edit|Write hook reminds about /ha-deploy after config changes
 - The plugin uses hass-cli for HA API operations and git for configuration deployment
 - ha-apply-naming uses `disable-model-invocation: true`; ha-deploy uses in-skill confirmation gates instead
+
+## hass-cli Gotchas
+
+- `hass-cli raw ws` is broken on HA 2026.2+ — use built-in `-o json` commands (`area list`, `entity list`, `device list`)
+- `--no-headers` only works with `entity list` — not `state list`, `device list`, or `service list`
+- `state list` domain count: `hass-cli state list | awk '$1 ~ /\./ {split($1, a, "."); print a[1]}' | sort | uniq -c | sort -rn`
+
+## Releasing Updates
+
+- Bump `version` in `.claude-plugin/plugin.json` AND `.claude-plugin/marketplace.json` — Claude Code caches by version, so users won't get updates without a bump
+- Update `CHANGELOG.md` with a summary of changes
+- Merge to main — marketplace source URL points to the repo, auto-update pulls latest
