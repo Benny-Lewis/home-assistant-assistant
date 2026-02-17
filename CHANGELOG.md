@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.1.0
+
+### New
+
+- **Area search helper** (`helpers/area-search.py`) — Cross-references HA entity, device, and area registries to find all entities in a room/area with a single command. Supports domain filtering and multi-area matching.
+- **Template evaluation via CLI** — ha-jinja skill now includes `hass-cli raw post /api/template` patterns for testing Jinja templates against the live HA instance.
+
+### Improved
+
+- **Entity resolver agent** — Area-based queries (e.g., "kitchen lights") now resolve in 1 tool use instead of 15, using the new area-search helper.
+- **Session hook migrated to bash** — Removes Node.js as a runtime dependency. Hook now writes breadcrumb files for reliable agent discovery across all platforms.
+- **Registry commands updated** — All `hass-cli raw ws` commands replaced with built-in `-o json` commands (`area list`, `entity list`, `device list`), which are more reliable on current HA versions.
+- **Domain count command fixed** — awk filter now correctly skips header rows from `state list` output.
+
 ## 1.0.0
 
 Initial public release.
