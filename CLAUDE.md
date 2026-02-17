@@ -15,7 +15,8 @@ This is a Claude Code plugin for Home Assistant. It allows users to manage Home 
   plugin.json                   # Plugin manifest
 skills/                         # 15 skill directories (14 user-invocable + 1 infrastructure)
 agents/                         # 6 subagent markdown files
-hooks/                          # hooks.json + session-check.js
+helpers/                        # Python helper scripts for complex operations
+hooks/                          # hooks.json + session-check.sh (bash)
 references/                     # safety-invariants.md, settings-schema.md, hass-cli.md
 templates/                      # templates.md
 ```
@@ -58,7 +59,7 @@ agents/
   *.md                      # Subagents with specialized prompts (config-debugger,
                             # ha-config-validator, device-advisor, naming-analyzer)
 hooks/
-  hooks.json                # Event-driven hooks (SessionStart, PreToolUse, PostToolUse)
+  hooks.json                # Event-driven hooks (SessionStart, PostToolUse)
 references/
   safety-invariants.md      # Core safety rules referenced by all skills
   settings-schema.md        # Settings file schema
@@ -126,8 +127,19 @@ export HASS_TOKEN="your-long-lived-access-token"
 
 - Settings stored in `.claude/settings.local.json` (gitignored)
 - Conventions stored in `.claude/ha.conventions.json` (user's naming patterns)
-- SessionStart async hook runs env check via node (HASS_TOKEN, HASS_SERVER, configuration.yaml, settings)
-- PreToolUse Edit|Write prompt hook reminds about /ha-deploy after config changes
-- PostToolUse hooks validate YAML structure after file edits
+- SessionStart async hook runs env check via bash (HASS_TOKEN, HASS_SERVER, configuration.yaml, settings) and writes breadcrumb files for agent discovery
+- PostToolUse Edit|Write hook reminds about /ha-deploy after config changes
 - The plugin uses hass-cli for HA API operations and git for configuration deployment
 - ha-apply-naming uses `disable-model-invocation: true`; ha-deploy uses in-skill confirmation gates instead
+
+## hass-cli Gotchas
+
+- `hass-cli raw ws` is broken on HA 2026.2+ — use built-in `-o json` commands (`area list`, `entity list`, `device list`)
+- `--no-headers` only works with `entity list` — not `state list`, `device list`, or `service list`
+- `state list` domain count: `hass-cli state list | awk '$1 ~ /\./ {split($1, a, "."); print a[1]}' | sort | uniq -c | sort -rn`
+
+## Releasing Updates
+
+- Bump `version` in `.claude-plugin/plugin.json` AND `.claude-plugin/marketplace.json` — Claude Code caches by version, so users won't get updates without a bump
+- Update `CHANGELOG.md` with a summary of changes
+- Merge to main — marketplace source URL points to the repo, auto-update pulls latest

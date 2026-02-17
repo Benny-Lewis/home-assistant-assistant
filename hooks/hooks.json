@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-check.js\"",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-check.sh\"",
             "async": true,
             "timeout": 10
           }
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PostToolUse',additionalContext:'You just edited an HA config file. If a skill is active, follow the skill\\'s next-step instructions (usually calling AskUserQuestion). Otherwise, mention /ha-deploy is available for validation and deployment.'}}))\"",
+            "command": "echo 'You just edited an HA config file. If a skill is active, follow its next-step instructions (usually calling AskUserQuestion). Otherwise, mention /ha-deploy is available for validation and deployment.'",
             "timeout": 5
           }
         ]

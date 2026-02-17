@@ -23,8 +23,8 @@
 | Flag | Description |
 |------|-------------|
 | `-o json` / `-o yaml` / `-o table` | Output format (short flag only: `-o json`, not `--output json`) |
-| `--no-headers` | Suppress column headers in tabular output |
-| `--columns <cols>` | Select specific columns (comma-separated) |
+| `--no-headers` | Suppress column headers in tabular output (`entity list` only — not supported by `state list`) |
+| `--columns <cols>` | Select specific columns (comma-separated, `entity list` only) |
 
 ### JSON Output for Full Attributes
 
@@ -46,6 +46,23 @@ MSYS_NO_PATHCONV=1 hass-cli raw get /api/states
 
 This is **not** needed for non-path commands like `entity list`, `state get`, etc.
 
+## Registry Commands
+
+Use built-in commands with `-o json` to query HA registries:
+
+```bash
+# Area registry (area_id, name, floor_id, icon, aliases)
+hass-cli -o json area list
+
+# Entity registry (entity_id, area_id, device_id, disabled_by, hidden_by)
+hass-cli -o json entity list
+
+# Device registry (id, area_id, name, manufacturer, model)
+hass-cli -o json device list
+```
+
+All return JSON arrays. These are the authoritative source for area/device/entity assignments.
+
 ## Parsing Tabular Output
 
 hass-cli outputs plain text tables. Use standard CLI tools to extract data:
@@ -63,8 +80,11 @@ hass-cli entity list --no-headers --columns entity_id,state
 # Find entities in a specific state
 hass-cli state list | grep "unavailable"
 
-# Count entities by domain
+# Count entities by domain (entity list supports --no-headers)
 hass-cli entity list --no-headers | awk -F'.' '{print $1}' | sort | uniq -c | sort -rn
+
+# Count entities by domain (state list — no --no-headers, awk filter skips headers)
+hass-cli state list | awk '$1 ~ /\./ {split($1, a, "."); print a[1]}' | sort | uniq -c | sort -rn
 ```
 
 ## Common Pitfalls

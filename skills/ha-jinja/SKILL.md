@@ -3,7 +3,7 @@ name: ha-jinja
 description: This skill should be used when the user asks about "template", "jinja", "jinja2", "template sensor", "value_template", "state_attr", "states()", mentions Jinja syntax, template debugging, or needs help with Home Assistant templating patterns.
 user-invocable: true
 version: 0.1.0
-allowed-tools: Read, Grep, Glob
+allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
 ---
 
 # Home Assistant Jinja2 Templating
@@ -298,6 +298,37 @@ value_template: >
 ### Developer Tools
 Use Developer Tools → Template to test templates interactively.
 
+### Template Evaluation via CLI
+
+Evaluate templates against the live HA instance using `hass-cli raw post /api/template`.
+
+**Basic syntax:**
+```bash
+MSYS_NO_PATHCONV=1 hass-cli raw post /api/template \
+  --json "{\"template\": \"{{ now() }}\"}"
+```
+
+**Entity state:**
+```bash
+MSYS_NO_PATHCONV=1 hass-cli raw post /api/template \
+  --json "{\"template\": \"{{ states('sensor.temperature') }}\"}"
+```
+
+**Multi-entity conditional:**
+```bash
+MSYS_NO_PATHCONV=1 hass-cli raw post /api/template \
+  --json "{\"template\": \"{% if states('sensor.temperature') | float(0) > 75 %}Hot{% else %}OK{% endif %}\"}"
+```
+
+**Shell quoting:** Use double-quoted outer string with escaped `\"` for JSON keys/values. Jinja single quotes (e.g., `states('...')`) pass through cleanly inside double-quoted bash strings.
+
+**Error responses from HA:**
+- **Undefined entity** — returns the literal string `unknown` (not an error)
+- **Syntax error** — HTTP 400 with `"message": "TemplateSyntaxError: ..."` describing the parse failure
+- **Type error** — HTTP 400 with `"message": "UndefinedError: ..."` for missing variables/filters
+
+See `references/hass-cli.md` for the MINGW path conversion note (`MSYS_NO_PATHCONV=1`).
+
 ### Common Errors
 
 **"UndefinedError"**: Entity doesn't exist
@@ -336,6 +367,6 @@ Use Developer Tools → Template to test templates interactively.
    {{ power | round(1) }}
    ```
 
-4. **Test templates before deployment**: Use Developer Tools → Template
+4. **Test templates before deployment**: Use `hass-cli raw post /api/template` for CLI testing, or Developer Tools → Template in the HA UI
 
 5. **Document complex logic**: Add comments explaining the template purpose
