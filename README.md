@@ -130,7 +130,7 @@ Validation outputs include evidence tables — not just "passed" or "failed," bu
 
 The plugin treats your HA instance as the source of truth. Entity IDs are resolved, not guessed. Device capabilities are queried, not assumed. If something doesn't exist or isn't supported, the plugin stops and tells you — it doesn't invent a workaround.
 
-The entire plugin is 42 markdown files and one 91-line JavaScript hook. Every skill is a spec file — YAML frontmatter declaring tools and permissions, markdown body defining the complete behavior — that Claude Code reads and executes. See [Component Reference](COMPONENTS.md) for the full inventory.
+The entire plugin is markdown files, one bash hook, and one Python helper. Every skill is a spec file — YAML frontmatter declaring tools and permissions, markdown body defining the complete behavior — that Claude Code reads and executes. See [Component Reference](COMPONENTS.md) for the full inventory.
 
 ## Requirements
 
