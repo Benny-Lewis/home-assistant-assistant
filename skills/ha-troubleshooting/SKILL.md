@@ -35,8 +35,9 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
 |---------|---------|
 | `hass-cli state get automation.name` | Check if automation enabled |
 | `MSYS_NO_PATHCONV=1 hass-cli raw get /api/error_log` | Get error logs (may 404) |
-| `MSYS_NO_PATHCONV=1 hass-cli raw get /api/trace/automation.name` | Get automation trace |
+| `$PY "$PLUGIN_ROOT/helpers/trace-fetch.py" list automation.<name>` | List automation traces (see helper setup below) |
 | `MSYS_NO_PATHCONV=1 hass-cli raw get "/api/history/period?filter_entity_id=X"` | Entity history |
+| `MSYS_NO_PATHCONV=1 hass-cli raw get "/api/logbook?entity=X"` | Logbook events (causation chain) |
 
 **Error log fallback:** If `/api/error_log` returns 404, try these alternatives in order:
 1. `MSYS_NO_PATHCONV=1 hass-cli raw get /api/error/all` — alternative endpoint
@@ -62,9 +63,13 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
 
    - **3b. Automation traces**
      ```bash
-     MSYS_NO_PATHCONV=1 hass-cli raw get /api/trace/automation.<name>
+     PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null)"
+     PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+     $PY "$PLUGIN_ROOT/helpers/trace-fetch.py" list automation.<name>
      ```
      Shows trigger, conditions, actions, and variables for recent runs.
+     Use `get automation.<name> <run_id>` for full trace detail.
+     Note: `/api/trace` REST endpoint returns 404; `hass-cli raw ws` is broken on HA 2026.2+.
 
    - **3c. Error logs**
      ```bash
@@ -78,7 +83,13 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
      ```
      Check whether the trigger entity reached the expected state.
 
-   **Rule:** Do NOT skip to analysis without attempting all four checks. If a check fails or returns empty, record it in the evidence table as `✗ Failed` with the reason.
+   - **3e. Logbook events**
+     ```bash
+     MSYS_NO_PATHCONV=1 hass-cli raw get "/api/logbook?entity=<entity_id>"
+     ```
+     Shows automation triggers, state changes, and causation chains (what caused what).
+
+   **Rule:** Do NOT skip to analysis without attempting all five checks. If a check fails or returns empty, record it in the evidence table as `✗ Failed` with the reason.
 
 4. **Analyze** — Compare expected vs actual behavior
 5. **Report with evidence** — Present findings using this ran-vs-skipped table:
@@ -89,6 +100,7 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
    | Automation traces | ✓ Ran | triggered/not found | Trace showed condition X failed |
    | Error logs | ✗ Failed | 404 | API returned 404, checked UI instead |
    | Entity history | ✓ Ran | state reached | History shows change at HH:MM |
+   | Logbook events | ✓ Ran | causation found | Logbook shows automation triggered by X |
 
    **Status values:** `✓ Ran` — check completed, `⊘ Skipped (reason)` — not applicable, `✗ Failed` — check errored (404, timeout, etc.)
 
@@ -119,3 +131,4 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
 ## References
 
 - `references/log-patterns.md` - Common error patterns and fixes
+- `references/diagnostic-api.md` - History, Logbook, and Trace API procedures
