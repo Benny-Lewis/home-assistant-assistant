@@ -86,11 +86,19 @@ hass-cli state get entity.id
 
 Traces show exactly what happened during automation execution.
 
-**Get trace via API:**
+**Get traces via helper** (REST `/api/trace` returns 404; `hass-cli raw ws` is broken on HA 2026.2+):
 ```bash
-# Note: Replace automation.name with actual automation ID
-MSYS_NO_PATHCONV=1 hass-cli raw get /api/trace/automation.name
+PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null)"
+PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+
+# List recent traces
+$PY "$PLUGIN_ROOT/helpers/trace-fetch.py" list automation.<name>
+
+# Get full trace detail
+$PY "$PLUGIN_ROOT/helpers/trace-fetch.py" get automation.<name> <run_id>
 ```
+
+See `references/diagnostic-api.md` for trace path navigation and interpretation patterns.
 
 **What traces show:**
 | Section | Information |
@@ -116,8 +124,19 @@ Look for `state: on`
 MSYS_NO_PATHCONV=1 hass-cli raw get "/api/history/period?filter_entity_id=binary_sensor.motion"
 ```
 
+### 2b. What caused this? (logbook causation)
+```bash
+MSYS_NO_PATHCONV=1 hass-cli raw get "/api/logbook?entity=automation.<name>"
+```
+
 ### 3. Were conditions met at trigger time?
-- Check automation trace for condition evaluation
+- Use trace-fetch.py helper to get trace (REST endpoint returns 404):
+  ```bash
+  PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null)"
+  PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+  $PY "$PLUGIN_ROOT/helpers/trace-fetch.py" list automation.<name>
+  ```
+- Inspect condition results in trace (`condition/N.result.result: true/false`)
 - Verify time/sun conditions match actual time
 
 ### 4. Did actions execute?
@@ -193,6 +212,7 @@ When reporting troubleshooting results, use this ran-vs-skipped format:
 | Automation enabled | ✓ Ran | on/off | `state: on/off` from hass-cli |
 | Trigger entity exists | ✓ Ran | found/missing | `hass-cli state list` output |
 | Trigger state reached | ✓ Ran | reached/not reached | History shows state change |
+| Logbook events | ✓ Ran | causation found/absent | Logbook shows triggered by X |
 | Conditions met | ✓ Ran | passed/failed | Trace shows condition result |
 | Actions executed | ✓ Ran | success/error | Trace shows action result |
 | Error in logs | ✗ Failed | 404 | API unavailable, checked UI |
