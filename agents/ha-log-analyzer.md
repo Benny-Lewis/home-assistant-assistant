@@ -38,9 +38,17 @@ hass-cli state list | grep -i "kitchen"
 hass-cli state get automation.<name>
 ```
 
-**Get automation trace (if available)**
+**Get automation traces** (REST `/api/trace` returns 404; use helper instead)
 ```bash
-MSYS_NO_PATHCONV=1 hass-cli raw get /api/trace/automation.<name>
+PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null)"
+PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+$PY "$PLUGIN_ROOT/helpers/trace-fetch.py" list automation.<name>
+# Then get full detail: $PY "$PLUGIN_ROOT/helpers/trace-fetch.py" get automation.<name> <run_id>
+```
+
+**Get logbook events (causation chain)**
+```bash
+MSYS_NO_PATHCONV=1 hass-cli raw get "/api/logbook?entity=automation.<name>"
 ```
 
 **Get entity history**
@@ -72,6 +80,11 @@ See `skills/ha-troubleshooting/references/log-patterns.md` for:
 - Template errors
 - Unavailable entity issues
 
+See `skills/ha-troubleshooting/references/diagnostic-api.md` for:
+- History API command syntax and response interpretation
+- Logbook API parameters and causation reading
+- Trace path navigation (condition/N, action/N)
+
 ## Output Format
 
 **Always include an evidence table:**
@@ -92,6 +105,7 @@ See `skills/ha-troubleshooting/references/log-patterns.md` for:
 | Automation enabled | ✅ | `state: on` |
 | Trigger entity exists | ✅ | Found: binary_sensor.hallway_motion |
 | Trigger state reached | ❌ | History shows no "on" state in period |
+| Logbook events | ❌ | No logbook entries for automation in period |
 | Conditions met | N/A | Never reached conditions |
 | Actions executed | N/A | Never triggered |
 | Errors in logs | ❌ | No errors found |
