@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.0
+
+### Added
+
+- **Diagnostic API reference** (`references/diagnostic-api.md`) — History, Logbook, and Trace API procedures for ha-troubleshooting, with command syntax, response shapes, interpretation guides, and gotchas
+- **trace-fetch.py helper** — WebSocket-based trace access bypassing broken `hass-cli raw ws` (HA 2026.2+) and missing `/api/trace` REST endpoint
+- **Logbook diagnostic step** — step 3e in troubleshooting process with `hass-cli raw get /api/logbook?entity=X` for causation chain analysis
+- Logbook row added to all evidence table templates (SKILL.md, log-patterns.md, ha-log-analyzer.md)
+
+### Fixed
+
+- **Broken trace command** — `/api/trace/automation.<name>` REST endpoint returns 404 (never existed). Replaced with `trace-fetch.py` helper across SKILL.md, log-patterns.md, and ha-log-analyzer.md
+
 ## 1.1.0
 
 ### New
