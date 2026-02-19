@@ -4,10 +4,10 @@ A Claude Code plugin that lets you setup and manage your Home Assistant through 
 
 ## Quick Start
 
-Install thke plugin. In Claude Code: 
+Install the plugin. In Claude Code:
 ```
-/plugin marketplace add Benny-Lewis/home-assistant-assistant
-/plugin install home-assistant-assistant
+/plugin marketplace add Benny-Lewis/plugins
+/plugin install home-assistant-assistant@plugins
 ```
 
 Launch the onboarding wizard:
