@@ -449,8 +449,14 @@ Save configuration to `.claude/settings.local.json`:
   "ha": {
     "config_path": "/path/to/ha-config",
     "git_remote": "https://github.com/user/repo.git",
+    "git_branch": "main",
     "setup_complete": true,
     "setup_date": "2026-02-05"
+  },
+  "deploy": {
+    "pull_method": "git_pull_addon",
+    "git_remote": "origin",
+    "git_branch": "main"
   }
 }
 ```
@@ -471,6 +477,7 @@ For returning users who want to update a specific setting without re-running onb
 | connection | URL and token | Re-run Step 6 (connection setup) |
 | config_path | Local path to HA config | Update `.claude/settings.local.json` |
 | git_remote | Git remote URL | Update `.claude/settings.local.json` |
+| git_branch | Git branch for deploy pushes | Update `.claude/settings.local.json` |
 | conventions | Naming conventions | Use the `ha-naming` skill |
 
 ### Config Path Setting
@@ -485,11 +492,18 @@ For returning users who want to update a specific setting without re-running onb
 2. Verify access: `git ls-remote <url> 2>&1 | head -1`
 3. Update `.claude/settings.local.json`
 
+### Git Branch Setting
+
+1. Ask user for the git branch name
+2. Verify it exists (or can be created): `git show-ref --verify --quiet refs/heads/<branch> || git ls-remote --heads origin <branch>`
+3. Update `.claude/settings.local.json`
+
 ### Quick Update Mode
 
 ```
 /ha-onboard config_path /home/user/ha-config
 /ha-onboard git_remote https://github.com/user/repo.git
+/ha-onboard git_branch main
 ```
 
 Update the setting and confirm.

@@ -43,6 +43,8 @@ a) Fix issues (describe what to change)
 b) Go back to editing
 c) Abort deploy
 
+Validation failures are blocking. Do NOT offer a skip/bypass path.
+
 ### Step 2.5: Verify HA Can Pull
 
 Check if `deploy.pull_method` is cached in `.claude/settings.local.json`. If cached, use that method and skip this step.
@@ -94,8 +96,15 @@ git commit -m "<message>"
 
 ### Step 5: Push to Remote
 
+Resolve push target from `.claude/settings.local.json`:
+- `deploy.git_remote` (preferred) -> `ha.git_remote` (legacy fallback) -> `origin`
+- `deploy.git_branch` (preferred) -> `ha.git_branch` (legacy fallback) -> `main`
+
+Show the chosen push target before pushing:
+`Using push target: <remote> <branch>`
+
 ```bash
-git push origin main
+git push <remote> <branch>
 ```
 
 Handle push failures:
@@ -138,7 +147,7 @@ Report verification result with evidence:
 | Check | Result | Evidence |
 |-------|--------|----------|
 | Git commit | commit abc123 |
-| Git push | origin/main updated |
+| Git push | <remote>/<branch> updated |
 | Automation reload | Service call succeeded |
 | Entity exists | Found: automation.kitchen_motion_light |
 | Entity enabled | state: on |
@@ -164,7 +173,7 @@ Changes deployed:
   packages/climate.yaml (+8, -0)
 
 Commit: abc1234 "Add motion-triggered lighting automation"
-Pushed to: origin/main
+Pushed to: <remote>/<branch>
 
 Home Assistant will pull changes within 5 minutes.
 To force immediate reload, the Git Pull add-on can be restarted.
@@ -174,9 +183,10 @@ Deployment complete!
 
 ## Flags
 
-- `--force` - Skip validation and deploy anyway
 - `--dry-run` - Show what would be deployed without committing
 - `--rollback` - Enter rollback mode (see below)
+
+Validation bypass is intentionally disabled. Deploy cannot proceed if validation fails.
 
 ## Auto-Deploy Mode (Deprecated)
 
@@ -190,9 +200,17 @@ require explicit confirmation. Would you like me to remove this setting?"
 ## Configuration
 
 Read settings from `.claude/settings.local.json`:
-- commit_prefix: string (e.g., "ha: ")
-- git_remote: string (e.g., "origin")
-- git_branch: string (e.g., "main")
+- commit_prefix: string (optional, e.g., "ha: ")
+- deploy.pull_method: string (e.g., "git_pull_addon" | "ssh" | "manual")
+- deploy.git_remote: string (optional, preferred push remote)
+- deploy.git_branch: string (optional, preferred push branch)
+- ha.git_remote: string (optional, legacy fallback push remote)
+- ha.git_branch: string (optional, legacy fallback push branch)
+
+Push target resolution order:
+1. `deploy.git_remote` / `deploy.git_branch`
+2. `ha.git_remote` / `ha.git_branch`
+3. `origin` / `main`
 
 ---
 
@@ -285,7 +303,7 @@ This action modifies git history and HA configuration.
 ```bash
 git revert --no-commit HEAD~<n>..HEAD
 git commit -m "Rollback: Revert abc123..def456 (user-requested)"
-git push
+git push <remote> <branch>
 ```
 
 ### Step 6: Reload Home Assistant
@@ -305,7 +323,7 @@ hass-cli service call scene.reload
 |------|--------|
 | Git revert | Commits abc123..def456 reverted |
 | Git commit | Created xyz789 |
-| Git push | origin/main updated |
+| Git push | <remote>/<branch> updated |
 | HA reload | Automations/scripts/scenes reloaded |
 
 **Configuration reverted to state from ghi789 (2 days ago).**

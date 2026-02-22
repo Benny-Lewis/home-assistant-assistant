@@ -20,15 +20,23 @@ Settings are stored in `.claude/settings.local.json` in the user's Home Assistan
   },
   "ha": {
     "config_path": "string (optional) - path to HA config directory",
-    "git_remote": "string (optional) - git remote for push",
+    "git_remote": "string (optional, legacy fallback) - git remote or URL for push",
+    "git_branch": "string (optional, legacy fallback) - git branch for push",
     "setup_complete": "boolean - whether onboarding finished",
     "setup_date": "string - ISO date of last onboarding"
   },
   "deploy": {
-    "pull_method": "string (optional) - how HA gets config updates: 'git_pull_addon' | 'ssh' | 'manual'"
+    "pull_method": "string (optional) - how HA gets config updates: 'git_pull_addon' | 'ssh' | 'manual'",
+    "git_remote": "string (optional, preferred) - git remote or URL for deploy push",
+    "git_branch": "string (optional, preferred) - git branch for deploy push"
   }
 }
 ```
+
+Deploy push target resolution:
+1. `deploy.git_remote` / `deploy.git_branch`
+2. `ha.git_remote` / `ha.git_branch` (legacy fallback)
+3. `origin` / `main`
 
 ### Permissions
 
@@ -67,13 +75,20 @@ The `permissions.allow` array auto-approves plugin tools so the model can invoke
 
 ```json
 {
-  "ha_url": "http://homeassistant.local:8123",
-  "ha_token_env": "HASS_TOKEN",
-  "config_path": "/config",
-  "auto_deploy": false,
-  "auto_commit": false,
+  "permissions": {
+    "allow": ["Skill(ha-onboard)", "Skill(ha-deploy)", "Bash(hass-cli *)"]
+  },
+  "ha": {
+    "config_path": "/config",
+    "git_remote": "origin",
+    "git_branch": "main",
+    "setup_complete": true,
+    "setup_date": "2026-02-22"
+  },
   "deploy": {
-    "pull_method": "git_pull_addon"
+    "pull_method": "git_pull_addon",
+    "git_remote": "origin",
+    "git_branch": "main"
   }
 }
 ```
