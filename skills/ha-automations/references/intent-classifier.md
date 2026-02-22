@@ -201,5 +201,5 @@ actions:
 ## Integration Points
 
 - **ha-automations skill**: Must classify before generating
-- **ha-conventions skill**: Timer preference should not override classification
+- **ha-naming conventions file (`.claude/ha.conventions.json`)**: Naming preferences should not override classification
 - **ha-troubleshooting skill**: Check if timer misuse caused the bug

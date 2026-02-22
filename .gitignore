@@ -3,6 +3,8 @@
 .claude/*.local.md
 .claude/naming-plan.yaml
 .claude/ha.conventions.json
+.claude/ha-python.txt
+.claude/ha-plugin-root.txt
 .claude/plans/
 
 # OS files

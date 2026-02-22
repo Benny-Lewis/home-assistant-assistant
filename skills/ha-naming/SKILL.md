@@ -93,7 +93,7 @@ When renaming existing entities:
 ## References
 
 - `references/naming-conventions.md` - Complete tables for areas, devices, domains
-- `ha-conventions` skill - Detect naming patterns from your existing config
+- `/ha-naming` planning workflow - Detect naming patterns from your existing config and persist conventions in `.claude/ha.conventions.json`
 
 ---
 
