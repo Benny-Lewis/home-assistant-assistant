@@ -130,11 +130,11 @@ Shared reference documents used across skills and agents:
 
 ## Safety Invariants
 
-Every skill, agent, and hook enforces these rules (detailed in `references/safety-invariants.md`):
+Every skill, agent, and hook enforces these rules (canonical wording in `references/safety-invariants.md`):
 
 1. **No unsupported attributes** — checks `supported_features`/`supported_color_modes` before emitting device attributes
 2. **No semantic substitution** — distinguishes "after no motion" (inactivity) from "wait 5 minutes" (delay)
 3. **AST editing only** — no brittle string replacement; uses precise context-aware edits
 4. **No secrets printed** — never echoes tokens or API keys
-5. **Never auto-deploy** — all side-effectful actions require explicit confirmation
+5. **Never deploy unless explicitly requested** — all side-effectful actions require explicit confirmation
 6. **Evidence tables** — all validation output shows what ran vs. what was skipped

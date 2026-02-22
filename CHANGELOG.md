@@ -75,5 +75,5 @@ Six enforced invariants across all skills, agents, and hooks:
 2. No semantic substitution (inactivity vs. delay classification)
 3. AST editing only (no brittle string replacement)
 4. No secrets printed (token presence only, never values)
-5. Never auto-deploy (explicit confirmation at every side-effectful step)
+5. Never deploy unless explicitly requested (explicit confirmation at every side-effectful step)
 6. Evidence tables (what ran vs. skipped in all validation output)

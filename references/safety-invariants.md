@@ -1,8 +1,9 @@
 # Safety Invariants
 
 These are the **north-star rules** that every skill, command, and agent in this plugin must follow. Violations break user trust and cause real-world failures.
+This file is the canonical source of truth for invariant count and wording.
 
-## The Five Invariants
+## The Six Invariants
 
 ### 1. No Unsupported Attributes
 
@@ -121,7 +122,7 @@ echo "Token set: ${HASS_TOKEN:+yes}${HASS_TOKEN:-no}"  # :-no expands to value w
 TLEN=$(printf '%s' "$HASS_TOKEN" | wc -c); echo "TOKEN_LEN=$TLEN"
 ```
 
-### 5. Never Deploy Unless Requested
+### 5. Never Deploy Unless Explicitly Requested
 
 **Rule:** No side-effectful action (commit, push, reload, write) without explicit user confirmation.
 
@@ -149,6 +150,14 @@ Side-effectful commands must:
 | HA reload | Yes | Yes |
 | Entity rename | Yes | Yes |
 
+### 6. Evidence Tables Required
+
+**Rule:** Validation, deployment, and diagnostic outputs must include a "what ran vs skipped" table.
+
+**Why:** Summary-only status can hide skipped checks and create false confidence.
+
+See "Invariant 6 Details" below for the required table format.
+
 ## Applying Invariants
 
 ### For Skills
@@ -165,6 +174,9 @@ Before generating output:
 Before writing:
 - [ ] User explicitly requested write/deploy (Invariant 5)
 - [ ] Using Editor module for YAML changes (Invariant 3)
+
+Before reporting validation/diagnostics:
+- [ ] Include an evidence table with checks run vs skipped (Invariant 6)
 ```
 
 ### For Commands
@@ -188,10 +200,11 @@ You must follow these invariants:
 1. Always get capability snapshots before suggesting device attributes
 2. Never substitute timers for inactivity patterns without explicit logic
 3. Never print tokens or secret values
-4. Never initiate deployment without user confirmation
+4. Never initiate deployment without explicit user request/confirmation
+5. Report checks run/skipped using an evidence table (Invariant 6)
 ```
 
-## Evidence Tables Requirement
+### Invariant 6 Details
 
 All validation, deployment, and diagnostic outputs must include a "what ran vs skipped" table:
 
@@ -200,11 +213,11 @@ All validation, deployment, and diagnostic outputs must include a "what ran vs s
 
 | Check | Status | Result | Details |
 |-------|--------|--------|---------|
-| YAML Syntax | ✓ Ran | Passed | Valid YAML structure |
-| HA Schema | ✓ Ran | Passed | All fields recognized |
-| Entity Resolution | ✓ Ran | 3/3 found | All entities exist |
-| Service Validation | ⊘ Skipped | - | hass-cli unavailable |
-| HA Config Check | ⊘ Skipped | - | No HA connection |
+| YAML Syntax | Ran | Passed | Valid YAML structure |
+| HA Schema | Ran | Passed | All fields recognized |
+| Entity Resolution | Ran | 3/3 found | All entities exist |
+| Service Validation | Skipped | - | hass-cli unavailable |
+| HA Config Check | Skipped | - | No HA connection |
 ```
 
 **Why this matters:**
