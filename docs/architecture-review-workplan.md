@@ -526,3 +526,4 @@ Status: Review execution complete (all planned phases complete)
 | 2026-02-21 | Executed Phase 4 and Phase 5; published Checkpoint 3 option analysis and eval/guardrail architecture: `docs/architecture-review-checkpoints/2026-02-21-checkpoint-3-phase-4-5-composition-and-eval-guardrails.md`. | Codex |
 | 2026-02-21 | Executed Phase 6 and published final target architecture plus roadmap (Checkpoint 4): `docs/architecture-review-checkpoints/2026-02-21-checkpoint-4-phase-6-target-architecture-and-roadmap.md`. | Codex |
 | 2026-02-22 | Implemented near-term remediation items `AR-F001`, `AR-F002`, `AR-F004`, `AR-F005`, `AR-F006`, and `AR-F008` in skills/docs/gitignore; prepared next implementation focus on `AR-F003` eval/test harness bootstrap. | Codex |
+| 2026-02-22 | Bootstrapped `AR-F003` deterministic eval harness with split capability/regression suites, single-run + pass@3 metrics, and CI workflow execution (`.github/workflows/eval-harness.yml`). | Codex |

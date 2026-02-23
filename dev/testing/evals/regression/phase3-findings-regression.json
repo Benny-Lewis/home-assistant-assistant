@@ -1,0 +1,73 @@
+{
+  "suite": "regression",
+  "cases": [
+    {
+      "id": "REG-001",
+      "name": "broken ha-conventions references removed",
+      "description": "Active skills/docs should not route to a non-existent ha-conventions skill.",
+      "checks": [
+        {
+          "path": "skills/ha-naming/SKILL.md",
+          "not_contains": "ha-conventions"
+        },
+        {
+          "path": "skills/ha-automations/references/intent-classifier.md",
+          "not_contains": "ha-conventions"
+        }
+      ]
+    },
+    {
+      "id": "REG-002",
+      "name": "README invariant count consistency",
+      "description": "README should remain aligned to six safety invariants.",
+      "checks": [
+        {
+          "path": "README.md",
+          "contains": "enforces six safety invariants"
+        }
+      ]
+    },
+    {
+      "id": "REG-003",
+      "name": "core docs use explicit deploy wording",
+      "description": "Canonical docs should use explicit deploy-request wording.",
+      "checks": [
+        {
+          "path": "CLAUDE.md",
+          "contains": "Never deploy unless explicitly requested"
+        },
+        {
+          "path": "COMPONENTS.md",
+          "contains": "Never deploy unless explicitly requested"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "contains": "Never deploy unless explicitly requested"
+        }
+      ]
+    },
+    {
+      "id": "REG-004",
+      "name": "deploy settings schema includes branch and remote hierarchy",
+      "description": "Settings schema should preserve preferred deploy keys and legacy fallback keys.",
+      "checks": [
+        {
+          "path": "references/settings-schema.md",
+          "contains": "deploy.git_remote"
+        },
+        {
+          "path": "references/settings-schema.md",
+          "contains": "deploy.git_branch"
+        },
+        {
+          "path": "references/settings-schema.md",
+          "contains": "ha.git_remote"
+        },
+        {
+          "path": "references/settings-schema.md",
+          "contains": "ha.git_branch"
+        }
+      ]
+    }
+  ]
+}

@@ -71,7 +71,13 @@ templates/
 
 ## Testing
 
-No automated tests exist. Manual testing approach:
+Minimal deterministic eval harness exists for core safety/contract checks:
+
+```bash
+powershell -ExecutionPolicy Bypass -File dev/testing/scripts/eval-harness.ps1 -Suite all -Passes 3
+```
+
+Manual testing approach (still required for live HA workflows):
 
 ```bash
 # Load plugin for testing (from repo root)

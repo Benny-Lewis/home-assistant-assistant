@@ -1,0 +1,20 @@
+name: Eval Harness
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  contract-evals:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run deterministic eval harness
+        shell: pwsh
+        run: |
+          ./dev/testing/scripts/eval-harness.ps1 -Suite all -Passes 3

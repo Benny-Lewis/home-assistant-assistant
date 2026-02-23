@@ -1,0 +1,80 @@
+{
+  "suite": "capability",
+  "cases": [
+    {
+      "id": "CAP-001",
+      "name": "apply-naming side-effect contract",
+      "description": "ha-apply-naming is explicitly locked to manual invocation for side effects.",
+      "checks": [
+        {
+          "path": "skills/ha-apply-naming/SKILL.md",
+          "contains": "disable-model-invocation: true"
+        }
+      ]
+    },
+    {
+      "id": "CAP-002",
+      "name": "deploy validation gate is non-bypassable",
+      "description": "Deploy path must keep validation blocking and avoid bypass flags.",
+      "checks": [
+        {
+          "path": "skills/ha-deploy/SKILL.md",
+          "contains": "Validation failures are blocking. Do NOT offer a skip/bypass path."
+        },
+        {
+          "path": "skills/ha-deploy/SKILL.md",
+          "not_contains": "--force"
+        }
+      ]
+    },
+    {
+      "id": "CAP-003",
+      "name": "deploy push target contract",
+      "description": "Deploy must resolve push target from settings and avoid hardcoded origin/main.",
+      "checks": [
+        {
+          "path": "skills/ha-deploy/SKILL.md",
+          "contains": "deploy.git_remote"
+        },
+        {
+          "path": "skills/ha-deploy/SKILL.md",
+          "contains": "git push <remote> <branch>"
+        },
+        {
+          "path": "skills/ha-deploy/SKILL.md",
+          "not_contains": "git push origin main"
+        }
+      ]
+    },
+    {
+      "id": "CAP-004",
+      "name": "runtime breadcrumb artifacts ignored",
+      "description": "Session breadcrumb files must be ignored to prevent noisy machine-specific commits.",
+      "checks": [
+        {
+          "path": ".gitignore",
+          "contains": ".claude/ha-python.txt"
+        },
+        {
+          "path": ".gitignore",
+          "contains": ".claude/ha-plugin-root.txt"
+        }
+      ]
+    },
+    {
+      "id": "CAP-005",
+      "name": "canonical invariant source declares six",
+      "description": "Safety invariant source of truth must explicitly declare six invariants.",
+      "checks": [
+        {
+          "path": "references/safety-invariants.md",
+          "contains": "## The Six Invariants"
+        },
+        {
+          "path": "references/safety-invariants.md",
+          "contains": "This file is the canonical source of truth for invariant count and wording."
+        }
+      ]
+    }
+  ]
+}
