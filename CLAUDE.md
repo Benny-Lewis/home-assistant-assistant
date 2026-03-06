@@ -148,4 +148,5 @@ export HASS_TOKEN="your-long-lived-access-token"
 
 - Bump `version` in `.claude-plugin/plugin.json` AND `.claude-plugin/marketplace.json` — Claude Code caches by version, so users won't get updates without a bump
 - Update `CHANGELOG.md` with a summary of changes
+- If renaming slash commands or changing install steps, add a **Breaking Changes** section to the changelog
 - Merge to main — marketplace source URL points to the repo, auto-update pulls latest
