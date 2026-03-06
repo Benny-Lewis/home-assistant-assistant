@@ -127,7 +127,7 @@ Every component in this plugin enforces six safety invariants (canonical: `refer
 - Nothing deploys without explicit user request and confirmation.
 - Validation/deploy/troubleshooting outputs include evidence tables (what ran vs skipped).
 
-Validation outputs also include evidence tables — not just "passed" or "failed," but what checks actually ran, what was skipped, and why. When the plugin can't fully validate (no HA connection, hass-cli unavailable), it says so. False confidence is worse than no confidence.
+Validation outputs include evidence tables — not just "passed" or "failed," but what checks actually ran, what was skipped, and why. When the plugin can't fully validate (no HA connection, hass-cli unavailable), it says so. False confidence is worse than no confidence.
 
 The plugin treats your HA instance as the source of truth. Entity IDs are resolved, not guessed. Device capabilities are queried, not assumed. If something doesn't exist or isn't supported, the plugin stops and tells you — it doesn't invent a workaround.
 

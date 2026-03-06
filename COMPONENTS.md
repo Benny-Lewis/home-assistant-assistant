@@ -123,7 +123,7 @@ Shared reference documents used across skills and agents:
 
 | File | Description |
 |------|-------------|
-| `references/safety-invariants.md` | The 5 safety invariants enforced across all components |
+| `references/safety-invariants.md` | The 6 safety invariants enforced across all components |
 | `references/settings-schema.md` | Schema for `.claude/settings.local.json` |
 | `references/hass-cli.md` | hass-cli command reference |
 | `templates/templates.md` | Reference templates for generated configurations |
