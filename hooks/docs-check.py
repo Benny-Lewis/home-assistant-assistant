@@ -36,6 +36,8 @@ COUNT_FILES = [
     Path("references/safety-invariants.md"),
 ]
 
+INVARIANT_HEADING_RE = re.compile(r"^###\s+(\d+)\.\s", flags=re.MULTILINE)
+
 
 def slugify_heading(text: str) -> str:
     text = text.strip().lower()
@@ -120,12 +122,22 @@ def validate_invariant_count_consistency(errors: list[str]) -> None:
     canonical_path = ROOT / "references/safety-invariants.md"
     canonical = canonical_path.read_text(encoding="utf-8")
 
-    # Derive the invariant count from the canonical source-of-truth document,
-    # rather than hard-coding a stale value.
-    expected_count = len(re.findall(r"^###\s+\d+\.\s", canonical, flags=re.MULTILINE))
-    if expected_count == 0:
+    heading_numbers = [int(n) for n in INVARIANT_HEADING_RE.findall(canonical)]
+    if not heading_numbers:
         errors.append("references/safety-invariants.md has no numbered invariant sections")
         return
+
+    expected_sequence = list(range(1, len(heading_numbers) + 1))
+    if heading_numbers != expected_sequence:
+        errors.append(
+            "references/safety-invariants.md has non-sequential numbered invariant headings "
+            f"(expected {expected_sequence}, found {heading_numbers})"
+        )
+        return
+
+    # Derive the invariant count from the canonical source-of-truth document,
+    # rather than hard-coding a stale value.
+    expected_count = len(heading_numbers)
 
     words = {
         1: "one",
@@ -157,16 +169,6 @@ def validate_invariant_count_consistency(errors: list[str]) -> None:
             has_generic_phrase = "these invariants" in content
             if not has_count_phrase and not has_generic_phrase:
                 errors.append(f"{rel_path} should mention {count_word} safety invariants or 'these invariants'")
-
-    # Defensive cross-check: ensure headings are sequentially numbered from 1..N.
-    expected_sequence = [f"{i}." for i in range(1, expected_count + 1)]
-    actual_sequence = re.findall(r"^###\s+(\d+\.)\s", canonical, flags=re.MULTILINE)
-    if actual_sequence != expected_sequence:
-        errors.append(
-            "references/safety-invariants.md has non-sequential numbered invariant headings "
-            f"(expected {expected_sequence}, found {actual_sequence})"
-        )
-
 
 def main() -> int:
     errors: list[str] = []
