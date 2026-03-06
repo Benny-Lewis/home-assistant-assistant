@@ -115,26 +115,48 @@ def validate_required_files(errors: list[str]) -> None:
 
 
 def validate_invariant_count_consistency(errors: list[str]) -> None:
-    expected_count = 5
+    canonical_path = ROOT / "references/safety-invariants.md"
+    canonical = canonical_path.read_text(encoding="utf-8")
+
+    # Derive the invariant count from the canonical source-of-truth document,
+    # rather than hard-coding a stale value.
+    expected_count = len(re.findall(r"^###\s+\d+\.\s", canonical, flags=re.MULTILINE))
+    if expected_count == 0:
+        errors.append("references/safety-invariants.md has no numbered invariant sections")
+        return
+
+    words = {
+        1: "one",
+        2: "two",
+        3: "three",
+        4: "four",
+        5: "five",
+        6: "six",
+        7: "seven",
+        8: "eight",
+        9: "nine",
+        10: "ten",
+    }
+    count_word = words.get(expected_count)
+
     for rel_path in COUNT_FILES:
         content = (ROOT / rel_path).read_text(encoding="utf-8").lower()
 
-        if "six safety invariants" in content or "the 6 safety invariants" in content:
-            errors.append(f"{rel_path} references six safety invariants; expected five")
+        if rel_path == Path("references/safety-invariants.md"):
+            if count_word and f"the {count_word} invariants" not in content:
+                errors.append(f"{rel_path} should define 'The {count_word.title()} Invariants'")
+            continue
 
-        if rel_path == Path("references/safety-invariants.md") and "the five invariants" not in content:
-            errors.append(f"{rel_path} should define 'The Five Invariants'")
+        if count_word and f"{count_word} safety invariants" not in content and f"{expected_count} safety invariants" not in content:
+            errors.append(f"{rel_path} should mention {count_word} safety invariants")
 
-        if rel_path != Path("references/safety-invariants.md"):
-            if "five safety invariants" not in content and "5 safety invariants" not in content:
-                errors.append(f"{rel_path} should mention five safety invariants")
-
-    # Defensive cross-check: ensure the canonical file still has exactly 5 numbered invariant headings.
-    canonical = (ROOT / "references/safety-invariants.md").read_text(encoding="utf-8")
-    count = len(re.findall(r"^###\s+[1-5]\.\s", canonical, flags=re.MULTILINE))
-    if count != expected_count:
+    # Defensive cross-check: ensure headings are sequentially numbered from 1..N.
+    expected_sequence = [f"{i}." for i in range(1, expected_count + 1)]
+    actual_sequence = re.findall(r"^###\s+(\d+\.)\s", canonical, flags=re.MULTILINE)
+    if actual_sequence != expected_sequence:
         errors.append(
-            f"references/safety-invariants.md expected {expected_count} numbered invariant sections, found {count}"
+            "references/safety-invariants.md has non-sequential numbered invariant headings "
+            f"(expected {expected_sequence}, found {actual_sequence})"
         )
 
 
