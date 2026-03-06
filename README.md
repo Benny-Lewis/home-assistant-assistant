@@ -139,6 +139,20 @@ The entire plugin is markdown files, one bash hook, and one Python helper. Every
 - Git repository for your HA config (setup during onboarding)
 - Home Assistant with a long-lived access token (token setup during onboarding)
 
+## Reporting
+
+Generate a current report from repository sources (`README.md`, `CHANGELOG.md`, and recent git history):
+
+```bash
+python3 helpers/generate-report.py
+```
+
+Write it to a file (example path):
+
+```bash
+python3 helpers/generate-report.py --output /tmp/REPORT.md
+```
+
 ## Contributing
 
 To contribute:
