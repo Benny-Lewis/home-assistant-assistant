@@ -119,12 +119,12 @@ Agents are spawned by skills when needed. They run in isolated context, do their
 
 ## Design
 
-Every component in this plugin enforces five safety invariants:
+Every component in this plugin enforces five safety invariants (canonical wording in `references/safety-invariants.md`):
 1. **No unsupported attributes** — capability-checked YAML generation only.
 2. **No semantic substitution** — "after no motion" (inactivity) is never converted to a raw delay timer.
 3. **AST editing only** — no brittle string replacement.
 4. **No secrets printed** — token presence only, never values.
-5. **Never Deploy Unless Requested** — explicit confirmation at every side-effectful step.
+5. **Never Deploy Unless Explicitly Requested** — explicit confirmation at every side-effectful step.
 
 Validation and diagnostic output must also include evidence tables showing what ran vs. skipped.
 

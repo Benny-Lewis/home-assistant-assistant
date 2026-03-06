@@ -23,14 +23,14 @@ templates/                      # templates.md
 
 ## Safety Invariants
 
-All generated YAML and commands enforce these invariants:
+All generated YAML and commands enforce these invariants (canonical wording in `references/safety-invariants.md`):
 
 1. **No unsupported attributes** - Always check `supported_features`/`supported_color_modes` before suggesting device attributes
 2. **No semantic substitution** - Never replace "after no motion" (inactivity) with raw timers
 3. **AST editing only** - No brittle string replacement; use Edit tool with precise old/new strings
 4. **No secrets printed** - Never echo tokens; show "TOKEN is set" not the value
-5. **Never auto-deploy** - All side-effectful skills require explicit user request
-6. **Evidence tables** - what ran vs. skipped in all validation output
+5. **Never deploy unless explicitly requested** - All side-effectful skills require explicit user request
+6. **Evidence tables** - all validation output shows what ran vs skipped
 
 ## Plugin Architecture
 
@@ -71,7 +71,13 @@ templates/
 
 ## Testing
 
-No automated tests exist. Manual testing approach:
+Minimal deterministic eval harness exists for core safety/contract checks:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File dev/testing/scripts/eval-harness.ps1 -Suite all -Passes 3
+```
+
+Manual testing approach (still required for live HA workflows):
 
 ```bash
 # Load plugin for testing (from repo root)
