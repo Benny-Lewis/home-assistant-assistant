@@ -151,6 +151,16 @@ To contribute:
 
 Found a bug or have an idea? [Open an issue](https://github.com/Benny-Lewis/home-assistant-assistant/issues).
 
+## Documentation Checks
+
+Run the documentation validation check locally from the repository root:
+
+```bash
+bash hooks/docs-check.sh
+```
+
+The check validates internal markdown links, verifies required docs files exist (including `skills/*/SKILL.md` and `agents/*.md`), and enforces consistency rules like the safety-invariant count.
+
 ## License
 
 [MPL-2.0](LICENSE)
