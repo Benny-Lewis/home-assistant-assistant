@@ -1,6 +1,6 @@
 # home-assistant-assistant
 
-A Claude Code plugin that lets you setup and manage your Home Assistant through natural language. Describe what you want — "turn off the kitchen lights after 5 minutes of no motion" — and the plugin resolves entity names against your real HA instance, checks device capabilities, generates YAML, validates everything, and deploys to your Home Assistant via git after your confirmation.
+A Claude Code plugin that lets you set up and manage your Home Assistant through natural language. Describe what you want — "turn off the kitchen lights after 5 minutes of no motion" — and the plugin resolves entity names against your real HA instance, checks device capabilities, generates YAML, validates everything, and deploys to your Home Assistant via git after your confirmation.
 
 ## Quick Start
 
@@ -49,7 +49,7 @@ The plugin classifies this as an inactivity pattern (not a delay — the distinc
         temperature: 67
 ```
 
-The `for: "00:10:00"` on the trigger is the key detail. If motion resumes before 10 minutes, the trigger resets automatically — no extra cancel logic needed. Claude then asks for your review before commiting the update to git and deploying it to your Home Assistant.
+The `for: "00:10:00"` on the trigger is the key detail. If motion resumes before 10 minutes, the trigger resets automatically — no extra cancel logic needed. Claude then asks for your review before committing the update to git and deploying it to your Home Assistant.
 
 ---
 
@@ -77,7 +77,7 @@ The troubleshooting skill checks automation state, pulls traces, queries error l
 > Create a climate dashboard with temperature and humidity for each room
 ```
 
-Resolves your climate sensors against the live instance, checks which attributes each one actually exposes (not every sensor reports humidity), and generates Lovelace card YAML that matches your real hardware. No placeholder entity IDs, no attributes your devices don't support.
+The plugin resolves your climate sensors against the live instance, checks which attributes each one actually exposes (not every sensor reports humidity), and generates Lovelace card YAML that matches your real hardware. No placeholder entity IDs, no attributes your devices don't support.
 
 ## Skills
 
