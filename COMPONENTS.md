@@ -137,4 +137,4 @@ Every skill, agent, and hook enforces these rules (detailed in `references/safet
 3. **AST editing only** — no brittle string replacement; uses precise context-aware edits
 4. **No secrets printed** — never echoes tokens or API keys
 5. **Never auto-deploy** — all side-effectful actions require explicit confirmation
-6. **Evidence tables** — all validation output shows what ran vs. what was skipped
+6. **Evidence tables** — what ran vs. skipped in all validation output

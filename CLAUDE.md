@@ -30,7 +30,7 @@ All generated YAML and commands enforce these invariants:
 3. **AST editing only** - No brittle string replacement; use Edit tool with precise old/new strings
 4. **No secrets printed** - Never echo tokens; show "TOKEN is set" not the value
 5. **Never auto-deploy** - All side-effectful skills require explicit user request
-6. **Evidence tables** - All validation outputs show "what ran vs skipped"
+6. **Evidence tables** - what ran vs. skipped in all validation output
 
 ## Plugin Architecture
 

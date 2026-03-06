@@ -119,14 +119,15 @@ Agents are spawned by skills when needed. They run in isolated context, do their
 
 ## Design
 
-Every component in this plugin enforces five safety invariants:
-- No YAML is emitted with unsupported device attributes.
-- Inactivity patterns are never silently replaced with timers.
-- Config edits use context-aware anchors, not brittle string replacement.
-- Tokens are never printed.
-- Nothing deploys without explicit confirmation.
+Every component in this plugin enforces six safety invariants:
+1. **No unsupported attributes** — capability-checked YAML generation only.
+2. **No semantic substitution** — "after no motion" (inactivity) is never converted to a raw delay timer.
+3. **AST editing only** — no brittle string replacement.
+4. **No secrets printed** — token presence only, never values.
+5. **Never auto-deploy** — explicit confirmation at every side-effectful step.
+6. **Evidence tables** — what ran vs. skipped in all validation output.
 
-Validation outputs include evidence tables — not just "passed" or "failed," but what checks actually ran, what was skipped, and why. When the plugin can't fully validate (no HA connection, hass-cli unavailable), it says so. False confidence is worse than no confidence.
+Validation output is never reduced to just "passed" or "failed"; it shows what checks actually ran, what was skipped, and why. When the plugin can't fully validate (no HA connection, hass-cli unavailable), it says so. False confidence is worse than no confidence.
 
 The plugin treats your HA instance as the source of truth. Entity IDs are resolved, not guessed. Device capabilities are queried, not assumed. If something doesn't exist or isn't supported, the plugin stops and tells you — it doesn't invent a workaround.
 
