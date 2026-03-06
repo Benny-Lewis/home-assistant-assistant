@@ -2,7 +2,7 @@
 
 These are the **north-star rules** that every skill, command, and agent in this plugin must follow. Violations break user trust and cause real-world failures.
 
-## The Five Invariants
+## The Six Invariants
 
 ### 1. No Unsupported Attributes
 
@@ -121,7 +121,7 @@ echo "Token set: ${HASS_TOKEN:+yes}${HASS_TOKEN:-no}"  # :-no expands to value w
 TLEN=$(printf '%s' "$HASS_TOKEN" | wc -c); echo "TOKEN_LEN=$TLEN"
 ```
 
-### 5. Never Deploy Unless Requested
+### 5. Never Deploy Unless Explicitly Requested
 
 **Rule:** No side-effectful action (commit, push, reload, write) without explicit user confirmation.
 
@@ -191,7 +191,7 @@ You must follow these invariants:
 4. Never initiate deployment without user confirmation
 ```
 
-## Evidence Tables Requirement
+### 6. Evidence Tables Required
 
 All validation, deployment, and diagnostic outputs must include a "what ran vs skipped" table:
 

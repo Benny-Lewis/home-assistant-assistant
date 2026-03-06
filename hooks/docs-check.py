@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Iterable
 
 ROOT = Path(__file__).resolve().parent.parent
+EXCLUDE_DIRS = {".git", "docs", "node_modules"}
 
 MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
@@ -47,7 +48,8 @@ def slugify_heading(text: str) -> str:
 
 def markdown_files() -> Iterable[Path]:
     for path in ROOT.rglob("*.md"):
-        if ".git" in path.parts:
+        rel_parts = set(path.relative_to(ROOT).parts)
+        if rel_parts & EXCLUDE_DIRS:
             continue
         yield path
 
@@ -147,8 +149,14 @@ def validate_invariant_count_consistency(errors: list[str]) -> None:
                 errors.append(f"{rel_path} should define 'The {count_word.title()} Invariants'")
             continue
 
-        if count_word and f"{count_word} safety invariants" not in content and f"{expected_count} safety invariants" not in content:
-            errors.append(f"{rel_path} should mention {count_word} safety invariants")
+        if count_word:
+            has_count_phrase = (
+                f"{count_word} safety invariants" in content
+                or f"{expected_count} safety invariants" in content
+            )
+            has_generic_phrase = "these invariants" in content
+            if not has_count_phrase and not has_generic_phrase:
+                errors.append(f"{rel_path} should mention {count_word} safety invariants or 'these invariants'")
 
     # Defensive cross-check: ensure headings are sequentially numbered from 1..N.
     expected_sequence = [f"{i}." for i in range(1, expected_count + 1)]

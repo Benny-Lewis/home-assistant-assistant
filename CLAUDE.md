@@ -23,7 +23,7 @@ templates/                      # templates.md
 
 ## Safety Invariants
 
-All generated YAML and commands enforce five safety invariants:
+All generated YAML and commands enforce these invariants:
 
 1. **No unsupported attributes** - Always check `supported_features`/`supported_color_modes` before suggesting device attributes
 2. **No semantic substitution** - Never replace "after no motion" (inactivity) with raw timers

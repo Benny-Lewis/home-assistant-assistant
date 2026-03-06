@@ -2,12 +2,13 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-if command -v python3 >/dev/null 2>&1; then
-  exec python3 "$SCRIPT_DIR/docs-check.py"
-elif command -v python >/dev/null 2>&1; then
-  exec python "$SCRIPT_DIR/docs-check.py"
-else
+PY="$(cat "$PLUGIN_ROOT/.claude/ha-python.txt" 2>/dev/null || command -v python3 || command -v py || command -v python)"
+
+if [ -z "$PY" ]; then
   echo "docs-check: FAILED (python is required)" >&2
   exit 1
 fi
+
+exec "$PY" "$SCRIPT_DIR/docs-check.py"
