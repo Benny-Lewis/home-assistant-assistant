@@ -38,6 +38,8 @@ COUNT_FILES = [
 
 INVARIANT_HEADING_RE = re.compile(r"^###\s+(\d+)\.\s", flags=re.MULTILINE)
 
+INVARIANT_HEADING_RE = re.compile(r"^###\s+(\d+)\.\s", flags=re.MULTILINE)
+
 
 def slugify_heading(text: str) -> str:
     text = text.strip().lower()
@@ -95,22 +97,22 @@ def validate_markdown_links(errors: list[str]) -> None:
                 if anchor:
                     if target_file not in heading_cache:
                         heading_cache[target_file] = collect_headings(target_file)
-                    if slugify_heading(anchor) not in heading_cache[target_file]:
-                        errors.append(
-                            f"{md.relative_to(ROOT)}:{idx} broken anchor in '{raw_target}' (anchor '{anchor}' not found)"
-                        )
+    heading_numbers = [int(n) for n in INVARIANT_HEADING_RE.findall(canonical)]
+    if not heading_numbers:
+
+    expected_sequence = list(range(1, len(heading_numbers) + 1))
+    if heading_numbers != expected_sequence:
+        errors.append(
+            "references/safety-invariants.md has non-sequential numbered invariant headings "
+            f"(expected {expected_sequence}, found {heading_numbers})"
+        )
+        return
+
+    # Derive the invariant count from the canonical source-of-truth document,
+    # rather than hard-coding a stale value.
+    expected_count = len(heading_numbers)
 
 
-def validate_required_files(errors: list[str]) -> None:
-    for req in REQUIRED_FILES:
-        if not (ROOT / req).exists():
-            errors.append(f"missing required file: {req}")
-
-    skill_dirs = sorted((ROOT / "skills").glob("*"))
-    if not skill_dirs:
-        errors.append("no skill directories found under skills/")
-    for skill_dir in skill_dirs:
-        if skill_dir.is_dir() and not (skill_dir / "SKILL.md").exists():
             errors.append(f"missing required skill spec: {skill_dir.relative_to(ROOT) / 'SKILL.md'}")
 
     agent_files = sorted((ROOT / "agents").glob("*.md"))
