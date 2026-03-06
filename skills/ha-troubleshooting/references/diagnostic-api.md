@@ -6,7 +6,7 @@ Runbook for querying History, Logbook, and Traces from Home Assistant to gather 
 
 - [History API](#history-api) — raw state change timeline
 - [Logbook API](#logbook-api) — human-readable event causation chain
-- [Trace API](#trace-api-via-trace-fetchpy) — automation/script execution steps
+- [Trace API](#trace-api-via-trace-fetchpy-helper) — automation/script execution steps
 - [When to Use Which](#when-to-use-which)
 
 ---
