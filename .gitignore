@@ -8,6 +8,3 @@
 # OS files
 .DS_Store
 Thumbs.db
-
-# Generated reports
-REPORT.md
