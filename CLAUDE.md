@@ -140,6 +140,7 @@ export HASS_TOKEN="your-long-lived-access-token"
 
 ## Releasing Updates
 
+- Complete `references/release-checklist.md` before tagging a release (required release gate)
 - Bump `version` in `.claude-plugin/plugin.json` AND `.claude-plugin/marketplace.json` — Claude Code caches by version, so users won't get updates without a bump
 - Update `CHANGELOG.md` with a summary of changes
 - Merge to main — marketplace source URL points to the repo, auto-update pulls latest
