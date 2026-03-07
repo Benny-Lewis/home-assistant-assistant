@@ -68,6 +68,47 @@
           "contains": "ha.git_branch"
         }
       ]
+    },
+    {
+      "id": "REG-005",
+      "name": "trace helper builds websocket URLs with api prefix",
+      "description": "Base-path Home Assistant installs should resolve to /api/websocket.",
+      "checks": [
+        {
+          "command": "@'\nimport importlib.util\nfrom pathlib import Path\nspec = importlib.util.spec_from_file_location('trace_fetch', Path('helpers/trace-fetch.py'))\nmod = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(mod)\nprint(mod.build_ws_url('https://example.com/homeassistant'))\nprint(mod.build_ws_url('http://ha.local:8123'))\n'@ | python -",
+          "contains": "wss://example.com/homeassistant/api/websocket"
+        },
+        {
+          "command": "@'\nimport importlib.util\nfrom pathlib import Path\nspec = importlib.util.spec_from_file_location('trace_fetch', Path('helpers/trace-fetch.py'))\nmod = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(mod)\nprint(mod.build_ws_url('https://example.com/homeassistant'))\nprint(mod.build_ws_url('http://ha.local:8123'))\n'@ | python -",
+          "contains": "ws://ha.local:8123/api/websocket"
+        }
+      ]
+    },
+    {
+      "id": "REG-006",
+      "name": "area search ignores empty metadata matches",
+      "description": "Blank registry fields should not match every area query.",
+      "checks": [
+        {
+          "command": "@'\nimport importlib.util\nfrom pathlib import Path\nspec = importlib.util.spec_from_file_location('area_search', Path('helpers/area-search.py'))\nmod = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(mod)\nprint(mod.area_matches('', '', 'kitchen'))\nprint(mod.area_matches('kitchen', '', 'kitchen'))\n'@ | python -",
+          "contains": "False"
+        },
+        {
+          "command": "@'\nimport importlib.util\nfrom pathlib import Path\nspec = importlib.util.spec_from_file_location('area_search', Path('helpers/area-search.py'))\nmod = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(mod)\nprint(mod.area_matches('', '', 'kitchen'))\nprint(mod.area_matches('kitchen', '', 'kitchen'))\n'@ | python -",
+          "contains": "True"
+        }
+      ]
+    },
+    {
+      "id": "DUP-001",
+      "name": "duplicate id regression half",
+      "description": "Harness should keep this regression case distinct from the capability case with the same id.",
+      "checks": [
+        {
+          "path": "README.md",
+          "contains": "## Agents"
+        }
+      ]
     }
   ]
 }

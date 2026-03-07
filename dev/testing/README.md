@@ -19,6 +19,11 @@ This directory contains the initial AR-F003 deterministic eval harness.
 - `dev/testing/evals/regression/*.json`
   - Regression checks seeded from reviewed incident findings.
 
+## Check Types
+
+- `path` checks assert file contents contain or omit specific strings.
+- `command` checks run a shell command from the repository root and assert against stdout using the same `contains` / `not_contains` fields.
+
 ## Run Locally
 
 ```powershell

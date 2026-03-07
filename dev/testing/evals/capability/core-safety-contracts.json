@@ -75,6 +75,54 @@
           "contains": "This file is the canonical source of truth for invariant count and wording."
         }
       ]
+    },
+    {
+      "id": "CAP-006",
+      "name": "apply-naming mutation tool contract",
+      "description": "ha-apply-naming keeps manual invocation but can perform the edits its workflow requires.",
+      "checks": [
+        {
+          "path": "skills/ha-apply-naming/SKILL.md",
+          "contains": "disable-model-invocation: true"
+        },
+        {
+          "path": "skills/ha-apply-naming/SKILL.md",
+          "contains": "allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion"
+        }
+      ]
+    },
+    {
+      "id": "CAP-007",
+      "name": "onboard settings persistence contract",
+      "description": "ha-onboard can write the settings file it documents.",
+      "checks": [
+        {
+          "path": "skills/ha-onboard/SKILL.md",
+          "contains": "allowed-tools: Read, Write, Edit, Bash, AskUserQuestion, Glob, Grep"
+        }
+      ]
+    },
+    {
+      "id": "CAP-008",
+      "name": "troubleshooting helper execution contract",
+      "description": "ha-troubleshooting can invoke the Python helper used for traces.",
+      "checks": [
+        {
+          "path": "skills/ha-troubleshooting/SKILL.md",
+          "contains": "allowed-tools: Read, Grep, Glob, Bash(hass-cli:*,python*,py:*)"
+        }
+      ]
+    },
+    {
+      "id": "DUP-001",
+      "name": "duplicate id capability half",
+      "description": "Harness should keep this capability case distinct from the regression case with the same id.",
+      "checks": [
+        {
+          "path": "README.md",
+          "contains": "## Skills"
+        }
+      ]
     }
   ]
 }

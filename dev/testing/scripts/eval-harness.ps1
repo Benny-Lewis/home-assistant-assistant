@@ -46,6 +46,9 @@ function Load-CasesFromDir {
                 if ($checkObject.PSObject.Properties.Name -contains 'path' -and $null -ne $checkObject.path) {
                     $checkHash.path = [string]$checkObject.path
                 }
+                if ($checkObject.PSObject.Properties.Name -contains 'command' -and $null -ne $checkObject.command) {
+                    $checkHash.command = [string]$checkObject.command
+                }
                 if ($checkObject.PSObject.Properties.Name -contains 'contains' -and $null -ne $checkObject.contains) {
                     $checkHash.contains = [string]$checkObject.contains
                 }
@@ -77,10 +80,61 @@ function Evaluate-Check {
         [string]$RepoRoot
     )
 
+    if ($Check.ContainsKey('command')) {
+        $command = [string]$Check.command
+        $output = ''
+        $passed = $true
+
+        try {
+            Push-Location $RepoRoot
+            $output = powershell -NoProfile -Command $command 2>&1 | Out-String
+            if ($LASTEXITCODE -ne 0) {
+                $passed = $false
+            }
+        } catch {
+            $output = $_ | Out-String
+            $passed = $false
+        } finally {
+            Pop-Location
+        }
+
+        if ($Check.ContainsKey('contains')) {
+            $needle = [string]$Check.contains
+            if (-not $output.Contains($needle)) {
+                return @{
+                    passed = $false
+                    detail = "expected command output not found: $needle"
+                }
+            }
+        }
+
+        if ($Check.ContainsKey('not_contains')) {
+            $needle = [string]$Check.not_contains
+            if ($output.Contains($needle)) {
+                return @{
+                    passed = $false
+                    detail = "unexpected command output found: $needle"
+                }
+            }
+        }
+
+        if (-not $passed) {
+            return @{
+                passed = $false
+                detail = "command failed: $command"
+            }
+        }
+
+        return @{
+            passed = $true
+            detail = "command matched: $command"
+        }
+    }
+
     if (-not $Check.ContainsKey('path')) {
         return @{
             passed = $false
-            detail = "Missing 'path' in check."
+            detail = "Missing 'path' or 'command' in check."
         }
     }
 
@@ -144,10 +198,14 @@ function Evaluate-Case {
     foreach ($check in $Case.checks) {
         $result = Evaluate-Check -Check $check -RepoRoot $RepoRoot
         $pathValue = ''
+        $commandValue = ''
         $containsValue = ''
         $notContainsValue = ''
         if ($check.ContainsKey('path')) {
             $pathValue = [string]$check['path']
+        }
+        if ($check.ContainsKey('command')) {
+            $commandValue = [string]$check['command']
         }
         if ($check.ContainsKey('contains')) {
             $containsValue = [string]$check['contains']
@@ -158,6 +216,7 @@ function Evaluate-Case {
 
         $checkResults += @{
             path = $pathValue
+            command = $commandValue
             contains = $containsValue
             not_contains = $notContainsValue
             passed = [bool]$result.passed
@@ -206,12 +265,12 @@ for ($attempt = 1; $attempt -le $Passes; $attempt++) {
     }
 }
 
-$grouped = $caseRuns | Group-Object -Property id
+$grouped = $caseRuns | Group-Object -Property suite, id
 $summaryCases = @()
 foreach ($group in $grouped) {
     $runs = @($group.Group | Sort-Object attempt)
     $singleRunPassed = [bool]$runs[0].passed
-    $passAtKPassed = [bool](($runs | Where-Object { $_.passed }).Count -gt 0)
+    $passAtKPassed = [bool](@($runs | Where-Object { $_.passed }).Count -gt 0)
 
     $summaryCases += [pscustomobject]@{
         id = $runs[0].id
