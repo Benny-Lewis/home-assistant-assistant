@@ -50,7 +50,10 @@ def area_matches(area_id, area_name, query):
     q = query.lower()
     aid = (area_id or "").lower()
     aname = (area_name or "").lower()
-    return q in aid or q in aname or aid in q or aname in q
+    return (
+        (bool(aid) and (q in aid or aid in q))
+        or (bool(aname) and (q in aname or aname in q))
+    )
 
 
 def cmd_list_areas():
@@ -76,7 +79,10 @@ def cmd_search(query, domain_filter=None):
     # Build area lookup: {area_id: area_name}
     area_names = {}
     for a in areas:
-        area_names[a.get("area_id", "")] = a.get("name", "")
+        area_id = a.get("area_id", "")
+        if not area_id:
+            continue
+        area_names[area_id] = a.get("name", "")
 
     # Find matching area(s)
     matched_areas = {}

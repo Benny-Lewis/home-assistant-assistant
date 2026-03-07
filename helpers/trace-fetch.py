@@ -23,12 +23,6 @@ import os
 import sys
 from urllib.parse import urlparse
 
-try:
-    import websockets
-except ImportError:
-    print("Error: websockets library not found. Install: pip install websockets")
-    sys.exit(1)
-
 
 def build_ws_url(hass_server: str) -> str:
     """Convert http(s)://host to ws(s)://host/api/websocket."""
@@ -36,12 +30,18 @@ def build_ws_url(hass_server: str) -> str:
     scheme = "wss" if parsed.scheme == "https" else "ws"
     if parsed.path and parsed.path != "/":
         base_path = parsed.path.rstrip("/")
-        return f"{scheme}://{parsed.netloc}{base_path}/websocket"
+        return f"{scheme}://{parsed.netloc}{base_path}/api/websocket"
     return f"{scheme}://{parsed.netloc}/api/websocket"
 
 
 async def ws_connect_and_auth(ws_url: str, token: str):
     """Connect to HA WebSocket and authenticate. Returns websocket object."""
+    try:
+        import websockets
+    except ImportError:
+        print("Error: websockets library not found. Install: pip install websockets")
+        sys.exit(1)
+
     ws = await websockets.connect(
         ws_url,
         ping_interval=30,

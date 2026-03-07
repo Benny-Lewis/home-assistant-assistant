@@ -135,7 +135,7 @@ export HASS_TOKEN="your-long-lived-access-token"
 - Conventions stored in `.claude/ha.conventions.json` (user's naming patterns)
 - SessionStart async hook runs env check via bash (HASS_TOKEN, HASS_SERVER, configuration.yaml, settings) and writes breadcrumb files for agent discovery
 - PostToolUse Edit|Write hook reminds about /ha-deploy after config changes
-- The plugin uses hass-cli for HA API operations and git for configuration deployment
+- The plugin uses hass-cli for HA API operations, local Python helpers for registry/trace workflows, and git for configuration deployment
 - ha-apply-naming uses `disable-model-invocation: true`; ha-deploy uses in-skill confirmation gates instead
 
 ## hass-cli Gotchas
