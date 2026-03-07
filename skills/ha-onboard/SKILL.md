@@ -2,7 +2,7 @@
 name: ha-onboard
 description: Use when user needs to set up their Home Assistant connection, configure settings, install prerequisites, or mentions "onboard", "setup", "connect", "configure".
 user-invocable: true
-allowed-tools: Read, Bash, AskUserQuestion, Glob, Grep
+allowed-tools: Read, Write, Edit, Bash, AskUserQuestion, Glob, Grep
 ---
 
 # Home Assistant Onboarding & Connection Setup

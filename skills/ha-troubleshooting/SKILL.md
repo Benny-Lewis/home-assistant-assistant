@@ -2,7 +2,7 @@
 name: ha-troubleshooting
 description: Use when user asks "why didn't X work", "not working", "debug", "check logs", mentions something "stopped working", or needs to diagnose Home Assistant issues.
 user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
+allowed-tools: Read, Grep, Glob, Bash(hass-cli:*,python*,py:*)
 ---
 
 # Home Assistant Troubleshooting
@@ -51,7 +51,7 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
 2. **Resolve entities** — Use Resolver module to verify entity_ids exist
    - Check if entities mentioned in error actually exist
    - Look for typos, renamed entities, missing integrations
-3. **Gather data** — Attempt ALL four checks before moving to analysis
+3. **Gather data** — Attempt ALL five checks before moving to analysis
 
    > **Tip:** For complex multi-automation debugging, delegate to the ha-log-analyzer or config-debugger agent. Inline handling is fine for straightforward cases. Either way, the evidence table in step 5 is required.
 
@@ -63,7 +63,7 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
 
    - **3b. Automation traces**
      ```bash
-     PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null)"
+     PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null || echo '.')"
      PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
      $PY "$PLUGIN_ROOT/helpers/trace-fetch.py" list automation.<name>
      ```

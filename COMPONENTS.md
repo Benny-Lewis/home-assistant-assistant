@@ -18,7 +18,7 @@ Skills are the core of the plugin. 14 are user-invocable (you can ask for them d
 
 | Skill | Description | Tools |
 |-------|-------------|-------|
-| `ha-onboard` | First-time setup wizard — walks through hass-cli install, token creation, environment variables, HA connection, and git-based deployment config | Read, Bash, AskUserQuestion, Glob, Grep |
+| `ha-onboard` | First-time setup wizard — walks through hass-cli install, token creation, environment variables, HA connection, and git-based deployment config | Read, Write, Edit, Bash, AskUserQuestion, Glob, Grep |
 | `ha-deploy` | Deploy config changes to HA via git commit + push + reload, or rollback to a previous commit. Confirmation gate before every side-effectful step | Read, Write, Bash, AskUserQuestion, Glob |
 | `ha-validate` | Validate configuration files with progressive tiers — YAML syntax, HA schema, entity existence, service validation. Outputs evidence tables showing what ran vs. skipped | Read, Bash, Glob, Grep, AskUserQuestion |
 
@@ -37,14 +37,14 @@ Skills are the core of the plugin. 14 are user-invocable (you can ask for them d
 | Skill | Description | Tools |
 |-------|-------------|-------|
 | `ha-naming` | Audit naming patterns across entities, suggest conventions, and generate rename plans. Plans are saved to `.claude/naming-plan.yaml` | Read, Write, Bash, Glob, Grep, AskUserQuestion |
-| `ha-apply-naming` | Execute a naming plan — rename entities via hass-cli and update all YAML references. Dry-run by default. **No model invocation** (`disable-model-invocation: true`) — executes the plan mechanically | Read, Bash, Glob, Grep, AskUserQuestion |
+| `ha-apply-naming` | Execute a naming plan — rename entities via hass-cli and update all YAML references. Dry-run by default. **No model invocation** (`disable-model-invocation: true`) — executes the plan mechanically | Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion |
 
 ### Analysis & Troubleshooting (2)
 
 | Skill | Description | Tools |
 |-------|-------------|-------|
 | `ha-analyze` | Analyze your HA setup and provide improvement suggestions — unused entities, missing automations, config organization, security | Read, Bash, Glob, Grep, AskUserQuestion |
-| `ha-troubleshooting` | Debug HA issues — log analysis, automation trace inspection, entity state checking, common error patterns | Read, Grep, Glob, Bash(hass-cli) |
+| `ha-troubleshooting` | Debug HA issues — log analysis, automation trace inspection, entity state checking, common error patterns | Read, Grep, Glob, Bash(hass-cli, python, py) |
 
 ### Domain Knowledge (4)
 

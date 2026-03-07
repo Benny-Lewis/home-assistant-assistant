@@ -3,7 +3,7 @@ name: ha-apply-naming
 description: Execute a naming plan to rename entities and update all references
 user-invocable: true
 disable-model-invocation: true
-allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---
 
 # Apply Naming Plan

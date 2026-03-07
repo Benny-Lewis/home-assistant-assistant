@@ -88,7 +88,7 @@ Traces show exactly what happened during automation execution.
 
 **Get traces via helper** (REST `/api/trace` returns 404; `hass-cli raw ws` is broken on HA 2026.2+):
 ```bash
-PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null)"
+PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null || echo '.')"
 PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
 
 # List recent traces
@@ -132,7 +132,7 @@ MSYS_NO_PATHCONV=1 hass-cli raw get "/api/logbook?entity=automation.<name>"
 ### 3. Were conditions met at trigger time?
 - Use trace-fetch.py helper to get trace (REST endpoint returns 404):
   ```bash
-  PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null)"
+  PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null || echo '.')"
   PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
   $PY "$PLUGIN_ROOT/helpers/trace-fetch.py" list automation.<name>
   ```
