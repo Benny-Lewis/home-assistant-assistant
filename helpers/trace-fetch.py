@@ -24,6 +24,17 @@ import sys
 from urllib.parse import urlparse
 
 
+def format_timestamp(timestamp: str) -> str:
+    """Render an HA timestamp without dropping timezone information."""
+    if not timestamp:
+        return "?"
+
+    normalized = str(timestamp).replace("T", " ")
+    if normalized.endswith("Z"):
+        return f"{normalized[:-1]}+00:00"
+    return normalized
+
+
 def build_ws_url(hass_server: str) -> str:
     """Convert http(s)://host to ws(s)://host/api/websocket."""
     parsed = urlparse(hass_server.rstrip("/"))
@@ -148,22 +159,19 @@ async def cmd_list(entity_id: str) -> None:
             return
 
         print(f"Traces for {entity_id} ({len(traces)} found):\n")
-        print(f"{'run_id':<40}  {'timestamp':<25}  {'state':<10}  trigger")
+        print(f"{'run_id':<40}  {'timestamp':<30}  {'state':<10}  trigger")
         print("-" * 100)
         for t in traces:
             run_id = str(t.get("run_id", "?"))
             # timestamp is a dict with start/finish keys; show start for list view
             ts_raw = t.get("timestamp", {})
             if isinstance(ts_raw, dict):
-                timestamp = ts_raw.get("start", str(ts_raw))
+                timestamp = format_timestamp(ts_raw.get("start", str(ts_raw)))
             else:
-                timestamp = str(ts_raw)
-            # Trim timezone suffix for readability (keep up to seconds)
-            if "T" in timestamp and ("+" in timestamp or timestamp.endswith("Z")):
-                timestamp = timestamp.split("+")[0].replace("T", " ")[:19]
+                timestamp = format_timestamp(str(ts_raw))
             state = str(t.get("state", "?"))
             trigger = str(t.get("trigger", ""))
-            print(f"{run_id:<40}  {timestamp:<20}  {state:<10}  {trigger}")
+            print(f"{run_id:<40}  {timestamp:<30}  {state:<10}  {trigger}")
 
     finally:
         await ws.close()

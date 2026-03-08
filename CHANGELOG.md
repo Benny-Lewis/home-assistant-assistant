@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.0
+
+### Added
+
+- **`ha-overview.py` helper** - `/ha-analyze` now has a stdlib-only overview helper that returns exact JSON metrics plus source availability for live HA and local config data
+
+### Fixed
+
+- **`ha-analyze` evidence contract** - analysis guidance now requires exact counts, an evidence table, explicit inference labeling, and single-skill follow-up routing instead of inline mutation
+- **Trace timestamp rendering** - `trace-fetch.py` now keeps timezone offsets in rendered timestamps so analysis and troubleshooting flows do not silently present UTC as local time
+- **Regression coverage for analysis reliability** - evals now guard against approximate metrics, missing evidence tables, direct mutation from analysis, unstable overview output, and timezone loss
+
 ## 1.2.1
 
 ### Added

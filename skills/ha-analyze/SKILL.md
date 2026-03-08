@@ -9,239 +9,228 @@ allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
 
 > **Data-Derived Analysis:** All metrics and suggestions must be backed by evidence.
 > Do NOT invent statistics. Only report what was actually measured.
+> Never use approximate counts. If you cannot measure a value exactly, write `not available`.
 
 Perform comprehensive analysis of the Home Assistant configuration and provide actionable suggestions for improvements, new automations, and optimizations.
 
 ## Evidence Requirements
 
-**Every metric reported must include:**
+Every metric reported must include:
 1. How it was measured (command or file read)
 2. Actual count/value (not estimated)
 3. Source (hass-cli output, file path, or "not available")
+4. Availability status (`Ran`, `Unavailable`, or `Skipped`)
 
-**Example:**
-```
-Entities: 147 (from: hass-cli entity list | wc -l)
-Automations: 23 (from: grep -c "^- id:" automations.yaml)
+Example:
+```text
+Entities: 147 (status: Ran, source: hass-cli -o json raw get /api/states)
+Automations: 23 (status: Ran, source: grep -c "^- id:" automations.yaml)
+Notify services: not available (status: Unavailable, source: hass-cli -o json raw get /api/services)
 ```
 
-**Do NOT report metrics you cannot verify.**
+Do NOT report metrics you cannot verify.
+
+## Operating Rules
+
+- Do NOT edit config files directly or deploy from `/ha-analyze`.
+- Do NOT mix live hass-cli calls with file reads in the same parallel batch.
+- Do NOT use browser automation for HA analysis.
+- Every recommendation must include `Observed:`, `Inference:`, and `Next skill:`.
+- If a source fails, continue with remaining sources and record the failure in the evidence table.
 
 ## Analysis Areas
 
-If $ARGUMENTS provided, focus on specific area:
-- `automations` - Automation efficiency and opportunities
-- `energy` - Energy management and monitoring
-- `security` - Security-related suggestions
-- `presence` - Presence detection improvements
-- `performance` - Configuration optimization
+If `$ARGUMENTS` are provided, focus on the requested area:
+- `automations` - automation efficiency and opportunities
+- `energy` - energy management and monitoring
+- `security` - security-related suggestions
+- `presence` - presence detection improvements
+- `performance` - configuration optimization
 
-If no arguments, analyze all areas.
+If no arguments are provided, analyze all areas.
 
 ## Data Collection
 
-### Error Resilience
+### Step 0: Orientation Snapshot
 
-Collect data in **independent batches** — do not mix file reads with hass-cli calls in the same parallel batch. If one source fails, proceed with whatever data was collected. Report which data sources were available vs unavailable in the output.
+Prefer the overview helper first. It returns exact JSON metrics plus source availability.
 
-### From hass-cli (if available):
 ```bash
-# Entity inventory (state list is faster than entity list for large setups)
-hass-cli state list
+PY="$(cat .claude/ha-python.txt 2>/dev/null)"
+if [ -z "$PY" ]; then
+  for candidate in python3 python py; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      PY="$candidate"
+      break
+    fi
+  done
+fi
 
-# State history (for pattern detection)
-hass-cli state history --entity light.* --since "7 days ago"
-
-# Device list
-hass-cli device list
-
-# Area list
-hass-cli area list
+PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null)"
+if [ -n "$PY" ] && [ -n "$PLUGIN_ROOT" ] && [ -f "$PLUGIN_ROOT/helpers/ha-overview.py" ]; then
+  "$PY" "$PLUGIN_ROOT/helpers/ha-overview.py" snapshot
+fi
 ```
 
-> **Performance:** For setups with >500 entities, use Bash tool with `timeout: 60000` if commands are slow. See `references/hass-cli.md` Performance Notes.
+If the helper is unavailable, continue with the direct commands below and record the helper as `Unavailable`. Do NOT spawn an agent just to locate the helper.
 
-> Output is tabular text, not JSON. See `references/hass-cli.md` for parsing patterns.
+### Step 1: Live Overview Commands
 
-### From local config:
-- Read automations.yaml for existing automations
-- Read packages/ for organized configs
-- Analyze dashboard configurations
-- Check integration configurations
+Run these in order. Keep them in a live-data batch separate from file reads.
+
+```bash
+hass-cli -o json area list
+hass-cli -o json device list
+hass-cli -o json entity list
+hass-cli -o json raw get /api/states
+hass-cli -o json raw get /api/services
+```
+
+### Step 2: Local Config Commands
+
+Run these in a separate batch from live data:
+
+```bash
+grep -c "^- id:" automations.yaml
+grep -c "^  description: ''$" automations.yaml
+grep -R "notify\\.|person\\.|doorbell|humidity|lock\\." dashboards templates configuration.yaml automations.yaml
+```
+
+### Step 3: Targeted Follow-ups
+
+Only run follow-ups after the overview is complete. Examples:
+
+```bash
+hass-cli state get person.<name>
+hass-cli state get binary_sensor.indoor_humidity_alert
+hass-cli state get lock.<name>
+hass-cli state list | grep "^automation\\."
+```
+
+When naming a specific entity, automation, or dashboard in a recommendation, cite the command or file read that supports it.
 
 ## Analysis Categories
 
 ### 1. Automation Opportunities
 
-Identify devices that could benefit from automation:
-
-**Lights without motion automation:**
-- "Living room light has no motion sensor automation"
-- Suggest: Connect to motion sensor if available
-
-**Repeated patterns:**
-- "You turn on kitchen lights every day at 7am"
-- Suggest: Create time-based automation
-
-**Related devices not linked:**
-- "Motion sensor and light in same room not connected"
-- Suggest: Create motion-triggered automation
+Identify measured gaps such as:
+- motion/occupancy sensors that are not referenced by matching room automations
+- people/device trackers that exist without home/away automation references
+- alerts/sensors that exist without a notification path
 
 ### 2. Energy Analysis
 
-**High-usage devices:**
-- Identify devices with energy monitoring
-- Flag always-on devices that could be scheduled
-
-**Missing monitoring:**
-- "These high-power devices lack energy monitoring"
-- Suggest: Add smart plugs with metering
-
-**Optimization opportunities:**
-- "HVAC runs continuously, consider schedule"
-- "Lights left on in unoccupied rooms"
+Look for:
+- energy or humidity sensors with no action path
+- always-on or unavailable devices that should be investigated or cleaned up
+- climate-related entities with monitoring but no automation references
 
 ### 3. Security Analysis
 
-**Coverage gaps:**
-- "Front door has sensor, back door does not"
-- "No motion sensor in garage"
-
-**Missing alerts:**
-- "Door sensors not triggering notifications"
-- Suggest: Add alert automations
-
-**Away mode:**
-- "No presence-based security mode"
-- Suggest: Create away/home mode automations
+Look for:
+- locks, door sensors, cameras, or doorbell entities with no notification or away-mode references
+- unavailable security devices that create blind spots
+- actual notify service availability before claiming notification gaps
 
 ### 4. Presence Detection
 
-**Device tracker analysis:**
-- What presence detection methods in use
-- Accuracy assessment
-- Redundancy suggestions
-
-**Home/Away automations:**
-- What happens when everyone leaves
-- What happens on arrival
-- Suggestions for improvements
+Look for:
+- `person.*` entities and device tracker counts
+- excessive unavailable device trackers that indicate tracker clutter
+- missing home/away automation references
 
 ### 5. Configuration Health
 
-**Unused entities:**
-- Entities not used in any automation/dashboard
-- Suggest: Clean up or utilize
+Look for:
+- blank descriptions
+- unused or stale recovery files
+- unavailable entities that still influence dashboards or automations
 
-**Deprecated configurations:**
-- Old-style configs that should be updated
-- Suggest: Migration path
+## Smart Suggestion Rules
 
-**Performance issues:**
-- Complex templates that could be simplified
-- Frequent polling that could be event-based
-
-## Smart Suggestions Engine
-
-Based on analysis, generate suggestions:
-
-### Pattern-Based
-```yaml
-observation: "You have 5 lights in the living room"
-suggestion: "Create a light group for easier control"
-automation_template: |
-  light:
-    - platform: group
-      name: Living Room Lights
-      entities:
-        - light.living_room_ceiling
-        - light.living_room_lamp
-        # ...
-```
-
-### Device Capability-Based
-```yaml
-observation: "Your thermostat supports scheduling"
-current: "No schedule automations found"
-suggestion: "Create temperature schedule"
-benefit: "Save energy, improve comfort"
-```
-
-### Best Practice-Based
-```yaml
-observation: "Automations lack descriptions"
-suggestion: "Add descriptions for documentation"
-benefit: "Easier troubleshooting and maintenance"
-```
+- Label raw facts as `Observed:`.
+- Label conclusions as `Inference:`.
+- If a conclusion is only likely, say so explicitly.
+- Point to one downstream skill with `Next skill:`.
+- Do not recommend cleanup/removal for a specific entity unless you have exact evidence for it.
 
 ## Output Format
 
-```
+```text
 Home Assistant Analysis Report
 
-Overview:
-  Entities: 147
-  Automations: 23
-  Areas: 8
-  Devices: 45
+Evidence Table
+| Source | Command/File | Status | Exact Value |
+|--------|--------------|--------|-------------|
+| Overview helper | helpers/ha-overview.py snapshot | Ran | entities=625 |
+| Areas | hass-cli -o json area list | Ran | 19 |
+| Devices | hass-cli -o json device list | Ran | 125 |
+| Live states | hass-cli -o json raw get /api/states | Ran | 625 |
+| Services | hass-cli -o json raw get /api/services | Ran | notify=3 |
+| automations.yaml | grep -c "^- id:" automations.yaml | Ran | 25 |
+
+Overview
+- Entities: 625
+- Automations: 25
+- Areas: 19
+- Devices: 125
+- Unavailable entities: 195
+- Device trackers: 49
+- Unavailable device trackers: 45
 
 Top Recommendations
 
-1. HIGH IMPACT: Add motion-triggered lights
-   Devices: living_room_light, kitchen_light
-   Motion sensors available: living_room_motion, kitchen_motion
-   Potential: Reduce manual switching, energy savings
+1. HIGH IMPACT: Clean up stale presence trackers
+   Observed: 49 device_tracker entities exist and 45 are currently unavailable.
+   Inference: This likely indicates tracker clutter rather than active presence coverage.
+   Next skill: ha-troubleshooting
 
-2. MEDIUM IMPACT: Create light groups
-   5 ungrouped lights in living room
-   Benefit: Easier control, scene creation
+2. HIGH IMPACT: Add presence-based actions only if usage is verified
+   Observed: person.ben exists and no home/away automation references were found.
+   Inference: Presence-based automations are likely missing.
+   Next skill: ha-automations
 
-3. QUICK WIN: Add away mode
-   Presence detection available but unused
-   Suggestion: Turn off lights/adjust HVAC when away
+3. QUICK WIN: Fill in blank automation descriptions
+   Observed: 8 automations still use description: ''.
+   Inference: This is a maintainability gap, not a runtime bug.
+   Next skill: ha-automations
 
 Detailed Analysis
 
 Automations:
-  Good coverage: Lighting (80%)
-  Gap: Climate control (20%)
-  Missing: Security notifications
+  Cite exact counts and exact references only.
 
 Energy:
-  Monitored devices: 12/45
-  Suggestion: Add monitoring to high-power devices
+  Separate measured facts from suggestions.
 
 Security:
-  Sensors: 8 doors/windows
-  Gap: No notification automations
+  Do not claim missing alerts unless you checked notify services and automation references.
 
 Performance:
-  Config is efficient
-  Note: 3 template sensors could be simplified
+  Do not call the config "efficient" without measured support.
 
 Next Steps:
-  1. Ask me to implement any suggestion — I'll load the right skill automatically
-  2. Run /ha-deploy when ready to apply changes
+  Ask one routing question only:
+  "Which should I do next: build an automation, investigate a device issue, review naming/config hygiene, or stop here?"
 ```
 
 ## Interactive Mode
 
 After presenting analysis:
-1. Ask if user wants to implement any suggestion
-2. **Route to the appropriate skill** — do NOT edit config files directly:
-   - Automation changes → invoke `ha-automations` skill
-   - Script changes → invoke `ha-scripts` skill
-   - Scene changes → invoke `ha-scenes` skill
-   - Naming/organization → invoke `ha-naming` skill
-   - Device issues → invoke `ha-troubleshooting` skill
-   - New devices → invoke `ha-devices` skill
-3. Guide through testing
-4. Iterate on improvements
+1. Ask one routing question.
+2. Route to exactly one appropriate skill:
+   - automation changes -> `ha-automations`
+   - script changes -> `ha-scripts`
+   - scene changes -> `ha-scenes`
+   - naming/organization -> `ha-naming`
+   - device issues -> `ha-troubleshooting`
+   - new devices -> `ha-devices`
+3. If no next action is chosen, stop after the analysis summary.
 
 ## Scheduling
 
 Suggest running analysis periodically:
-```
-Tip: Run /ha-analyze monthly to discover new optimization opportunities
-as your setup evolves.
+
+```text
+Tip: Run /ha-analyze monthly to discover new optimization opportunities as your setup evolves.
 ```

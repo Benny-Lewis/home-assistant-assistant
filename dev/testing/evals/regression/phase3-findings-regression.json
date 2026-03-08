@@ -100,6 +100,73 @@
       ]
     },
     {
+      "id": "REG-007",
+      "name": "ha-analyze forbids approximate metrics",
+      "description": "Analysis guidance should require exact counts or not available.",
+      "checks": [
+        {
+          "path": "skills/ha-analyze/SKILL.md",
+          "contains": "Never use approximate counts. If you cannot measure a value exactly, write `not available`."
+        }
+      ]
+    },
+    {
+      "id": "REG-008",
+      "name": "ha-analyze requires an evidence table",
+      "description": "Analysis reports should show what ran vs skipped with exact values.",
+      "checks": [
+        {
+          "path": "skills/ha-analyze/SKILL.md",
+          "contains": "Evidence Table"
+        },
+        {
+          "path": "skills/ha-analyze/SKILL.md",
+          "contains": "| Source | Command/File | Status | Exact Value |"
+        }
+      ]
+    },
+    {
+      "id": "REG-009",
+      "name": "ha-analyze forbids direct mutation",
+      "description": "Analysis should route to a downstream skill rather than editing or deploying.",
+      "checks": [
+        {
+          "path": "skills/ha-analyze/SKILL.md",
+          "contains": "Do NOT edit config files directly or deploy from `/ha-analyze`."
+        },
+        {
+          "path": "skills/ha-analyze/SKILL.md",
+          "contains": "Route to exactly one appropriate skill"
+        }
+      ]
+    },
+    {
+      "id": "REG-010",
+      "name": "trace helper preserves timezone offsets",
+      "description": "Rendered trace timestamps should keep timezone information.",
+      "checks": [
+        {
+          "command": "@'\nimport importlib.util\nfrom pathlib import Path\nspec = importlib.util.spec_from_file_location('trace_fetch', Path('helpers/trace-fetch.py'))\nmod = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(mod)\nprint(mod.format_timestamp('2026-03-08T17:36:11+00:00'))\nprint(mod.format_timestamp('2026-03-08T17:36:11Z'))\n'@ | python -",
+          "contains": "2026-03-08 17:36:11+00:00"
+        }
+      ]
+    },
+    {
+      "id": "REG-011",
+      "name": "ha-overview snapshot emits stable JSON",
+      "description": "Overview helper should always return parseable JSON with metrics and sources.",
+      "checks": [
+        {
+          "command": "@'\nimport json\nimport subprocess\nimport sys\nproc = subprocess.run([sys.executable, 'helpers/ha-overview.py', 'snapshot'], capture_output=True, text=True, check=False)\nprint(proc.returncode)\ndata = json.loads(proc.stdout)\nprint(sorted(data.keys()))\nprint('metrics' in data and 'sources' in data)\nprint(sorted(data['metrics'].keys())[:4])\n'@ | python -",
+          "contains": "['cwd', 'details', 'generated_at', 'metrics', 'sources']"
+        },
+        {
+          "command": "@'\nimport json\nimport subprocess\nimport sys\nproc = subprocess.run([sys.executable, 'helpers/ha-overview.py', 'snapshot'], capture_output=True, text=True, check=False)\ndata = json.loads(proc.stdout)\nprint('areas' in data['metrics'])\nprint('automations' in data['metrics'])\nprint('states' in data['sources'])\n'@ | python -",
+          "contains": "True"
+        }
+      ]
+    },
+    {
       "id": "DUP-001",
       "name": "duplicate id regression half",
       "description": "Harness should keep this regression case distinct from the capability case with the same id.",
