@@ -69,6 +69,12 @@ templates/
 
 **15 skills total:** 14 user-invocable + 1 infrastructure (ha-resolver). ha-validate is both user-invocable and agent-preloadable.
 
+## Marketplace Packaging Note
+
+For this repo's self-hosted single-plugin marketplace, keep `.claude-plugin/marketplace.json` pointing the plugin entry at `source: "./"`.
+
+Do not point that marketplace entry back to this same repository via a remote git/GitHub URL. In Claude Code's local-scope install/update path, that can cause the marketplace repo to be recursively repackaged into the plugin cache and break updates on Windows.
+
 ## Testing
 
 Minimal deterministic eval harness exists for core safety/contract checks:
