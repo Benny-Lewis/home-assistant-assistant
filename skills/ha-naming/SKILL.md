@@ -136,20 +136,35 @@ Also check: `.claude/ha.conventions.json`
 
 If found, read them and report: "Found existing naming conventions at {path}. Incorporating into audit."
 
-### Data Collection
+### Data Prefetch (MANDATORY before agent spawn)
 
-**From hass-cli (if available):**
+**Collect ALL raw data once in the skill, write to temp files, then pass file paths to the agent.**
+This eliminates duplicate hass-cli calls between the skill and the naming-analyzer agent.
+
+Run these commands in parallel (use `timeout: 60000` for large setups):
+
 ```bash
-# For large setups (>500 entities), state list is faster than entity list
-hass-cli state list
-hass-cli area list
-hass-cli device list
+# JSON outputs for structured analysis
+hass-cli -o json entity list > .claude/ha-prefetch-entities.json
+hass-cli -o json area list > .claude/ha-prefetch-areas.json
+hass-cli -o json device list > .claude/ha-prefetch-devices.json
+
+# Tabular state list for quick domain counting
+hass-cli state list > .claude/ha-prefetch-states.txt
 ```
 
-> Use Bash tool with `timeout: 60000` if entity count exceeds 500.
-> Output is tabular text, not JSON. See `references/hass-cli.md` for parsing patterns.
+After prefetch, count entities from the states file to determine output scaling tier:
+```bash
+# Count entities (skip header line)
+tail -n +2 .claude/ha-prefetch-states.txt | wc -l
+```
 
-**From local config files:**
+**Do NOT run a separate background task for compliance statistics.** All analysis — including compliance rates — must be performed by the naming-analyzer agent in a single foreground pass over the prefetched data.
+
+When spawning the naming-analyzer agent, instruct it to read from these prefetch files:
+> "Analyze the prefetched data in `.claude/ha-prefetch-entities.json`, `.claude/ha-prefetch-areas.json`, `.claude/ha-prefetch-devices.json`, and `.claude/ha-prefetch-states.txt`."
+
+**From local config files (also prefetch or let agent read directly):**
 - Parse automations.yaml for automation names
 - Parse scripts.yaml for script names
 - Parse scenes.yaml for scene names
@@ -163,6 +178,20 @@ Identify existing naming patterns:
 - Function-based: `motion_sensor`, `door_lock`
 - Mixed patterns (inconsistent)
 
+### Area Coverage Check (MANDATORY)
+
+The audit MUST include an "Area Coverage" section that cross-references entity prefixes with the area registry. This catches mismatches the user would otherwise have to identify manually.
+
+**What to check:**
+1. **Unmatched prefixes** — entity ID prefixes (e.g., `garage_*`) that have no corresponding area in the registry
+2. **Empty areas** — areas registered in HA with zero entities assigned
+3. **ID vs prefix mismatches** — area IDs that don't match the prefix convention used by their entities (e.g., area `ll_bath` but entities use `downstairs_bathroom_*`)
+4. **Ambiguous areas** — area names that may need disambiguation (e.g., "hallway" when there are upstairs and downstairs hallways)
+
+**How:** Cross-reference `.claude/ha-prefetch-areas.json` with entity ID prefixes extracted from `.claude/ha-prefetch-entities.json`.
+
+Present findings proactively — do NOT wait for the user to ask "what areas do I have?"
+
 ### Inconsistency Types
 
 1. **Case Inconsistencies** - `Living Room` vs `living room` vs `LIVING ROOM`
@@ -172,6 +201,25 @@ Identify existing naming patterns:
 5. **Missing Context** - Generic names: `light.light`, `switch.switch_1`
 
 ### Audit Report Format
+
+The audit report MUST include an evidence table (Safety Invariant #6) showing what data sources were checked:
+
+```
+## What Ran vs Skipped
+
+| Check                  | Status  | Result                     |
+|------------------------|---------|----------------------------|
+| Entity registry scan   | Ran     | 147 entities               |
+| Area registry scan     | Ran     | 12 areas                   |
+| Device registry scan   | Ran     | 45 devices                 |
+| State list scan        | Ran     | 147 states                 |
+| Config file ref scan   | Ran     | 8 references found         |
+| Area coverage check    | Ran     | 2 mismatches               |
+| Existing spec check    | Ran     | Found at .claude/naming.md |
+| Existing plan check    | Skipped | No plan file found         |
+```
+
+Then the analysis body:
 
 ```
 Naming Audit Report
@@ -294,20 +342,26 @@ device_renames:
 
 #### Step 4: Dependency Analysis
 
-##### Investigating Unknown Devices
+##### Investigating Unknown Devices (MANDATORY before blocking)
 
 When the plan includes entities whose purpose is unclear (e.g., `zwave_js.node_4`, generic device names):
 
-**Always investigate BEFORE asking the user:**
-1. Query entity state and attributes: `hass-cli -o json state get <entity_id>`
-2. Check device class, manufacturer, model from attributes
-3. Check if the node/device is alive or dead (last_seen, node_status)
-4. Search config files for references to understand how it's used
+**Investigation is MANDATORY before using `new_id: null` / BLOCKED.** Do NOT mark entities as blocked without completing these steps:
+
+1. **Check device registry** (prefetched in `.claude/ha-prefetch-devices.json`): manufacturer, model, area assignment
+2. **Query entity state and attributes:** `hass-cli -o json state get <entity_id>` — check device_class, manufacturer, model
+3. **Check if alive or dead:** last_seen, node_status attributes
+4. **Search config files** for references to understand how it's used
+5. **Cross-reference area assignment** from device registry with entity prefix
+
+A single `hass-cli -o json state get` call often resolves the device identity. This takes seconds, not minutes.
 
 **Then ask WITH context:** Present what you found and ask the user to confirm or clarify:
 "I found `zwave_js.node_4` — it appears to be a Zooz ZEN27 dimmer (alive, last seen 2 min ago) in the Rec Room area. It's referenced in 2 automations. Should I rename it to `light.rec_room_dimmer`?"
 
 **Never ask bare questions like** "What is Node 4?" without first investigating.
+
+**Only use `new_id: null` with reason "BLOCKED"** if investigation yields genuinely ambiguous results (e.g., device offline with no attributes, no config references, no area assignment).
 
 ##### Dependency Mapping
 
@@ -380,7 +434,25 @@ renames:
       to_id: light.living_room_ceiling
       to_name: "Living Room Ceiling"
       dependencies: [automation.motion_lights]
+    # Blocked entry — investigated but unresolvable
+    - from: zwave_js.node_99
+      to_id: null
+      reason: "BLOCKED: device offline, no attributes, no config references"
   # ... more renames
+
+# Area operations (optional — included when audit finds mismatches)
+area_operations:
+  create_areas:
+    - name: "Storage Room"
+      proposed_id: storage_room
+      reason: "Entities use storage_room_* prefix but no area exists"
+  delete_areas:
+    - area_id: old_unused_area
+      reason: "Zero entities assigned, confirmed unused"
+  rename_areas:
+    - current_id: ll_bath
+      new_name: "Downstairs Bathroom"
+      reason: "Mismatch: area ID 'll_bath' vs entity prefix 'downstairs_bathroom_*'"
 
 execution:
   estimated_changes: 47
@@ -389,6 +461,27 @@ execution:
 
 status: pending
 ```
+
+**Schema notes:**
+- `to_id: null` means the rename is blocked — `/ha-apply-naming` must skip these and report them
+- `area_operations` is optional — only present when the audit identifies area mismatches
+- `create_areas`, `delete_areas`, `rename_areas` are all optional subsections
+
+#### Step 7: Validate Plan YAML
+
+After writing or updating `.claude/naming-plan.yaml`, always validate it parses correctly:
+
+```bash
+python -c "import yaml; yaml.safe_load(open('.claude/naming-plan.yaml')); print('Plan YAML valid')"
+```
+
+If the Python command is not `python`, use the detected Python from `.claude/ha-python.txt`:
+```bash
+PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+$PY -c "import yaml; yaml.safe_load(open('.claude/naming-plan.yaml')); print('Plan YAML valid')"
+```
+
+If validation fails, fix the YAML syntax before proceeding. A malformed plan will cause `/ha-apply-naming` to fail.
 
 ### User Review Points
 

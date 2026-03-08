@@ -117,9 +117,48 @@ If the naming plan (from `/ha-naming`) already contains a `dependencies` section
 
 This avoids the redundant full-scan that added 51 tool uses and 2+ minutes in testing.
 
+### Phase 1.5: Area Operations (if present in plan)
+
+If the plan contains an `area_operations` section, process it BEFORE entity renames:
+
+**Create areas:**
+```bash
+# Create missing areas so entity renames can reference them
+hass-cli area create "Storage Room"
+```
+
+**Rename areas:**
+```bash
+hass-cli area rename old_area_id "New Area Name"
+```
+
+**Delete areas** (only after confirming zero entities):
+```bash
+hass-cli area delete area_id
+```
+
+**Dry-run:** In dry-run mode, list area operations that WOULD happen without executing them.
+
+### Handling Blocked Entries (`new_id: null`)
+
+When processing entity renames, **skip any entry where `to_id` is `null`**:
+
+```yaml
+# This entry is blocked — do NOT attempt to rename
+- from: zwave_js.node_99
+  to_id: null
+  reason: "BLOCKED: device offline, no attributes"
+```
+
+**Behavior:**
+- Skip the entry entirely (no hass-cli call)
+- Log it in the progress report: `SKIPPED (blocked): zwave_js.node_99 — {reason}`
+- Include all skipped entries in the final summary under a "Blocked Renames" section
+- Do NOT treat blocked entries as errors — they are intentionally deferred
+
 ### Phase 2: Entity ID Renames (via hass-cli)
 
-For each entity rename in the plan:
+For each entity rename in the plan (where `to_id` is NOT null):
 
 ```bash
 # Rename entity via HA API
@@ -231,10 +270,16 @@ Current: Renaming entities...
 Naming Plan Applied
 
 Summary:
-  Entities renamed: 23/23
+  Entities renamed: 23/25
+  Blocked (skipped): 2
+  Area operations: 3 (1 created, 1 renamed, 1 deleted)
   Friendly names updated: 23/23
   Config files updated: 8
   Dashboard files updated: 3
+
+Blocked Renames (deferred):
+  - zwave_js.node_99: device offline, no attributes
+  - sensor.unknown_3: no area assignment found
 
 Git Commits:
   Pre-rename backup: abc1234
@@ -250,6 +295,7 @@ Recommended Next Steps:
   2. Check dashboards in HA UI
   3. Run /ha-deploy to sync with HA
   4. Monitor logs for entity errors
+  5. Investigate blocked entities and re-run /ha-naming to resolve
 
 Rollback available:
   git revert def5678 abc1234
