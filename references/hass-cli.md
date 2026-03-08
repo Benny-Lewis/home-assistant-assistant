@@ -95,6 +95,14 @@ hass-cli state list | awk '$1 ~ /\./ {split($1, a, "."); print a[1]}' | sort | u
 4. **Entity rename** — Only changes the registry ID, not the device itself.
 5. **Rate limiting** — Avoid rapid-fire calls in loops; batch where possible.
 
+## Known Limitations
+
+1. **No `entity delete` command** — hass-cli cannot remove entities from the registry. Use `helpers/entity-registry.py remove` instead (WebSocket API).
+2. **`raw ws` broken on HA 2026.2+** — Returns "Unknown command" for all message types. Use Python helpers (`helpers/trace-fetch.py`, `helpers/entity-registry.py`) for WebSocket operations.
+3. **curl auth fails in MINGW/Git Bash** — Even with `MSYS_NO_PATHCONV=1`, Authorization headers may not be sent correctly. Use hass-cli or Python helpers instead of curl for HA API calls.
+4. **No friendly name clear** — `hass-cli entity update --name ""` doesn't clear custom name overrides (doesn't send `null`). Use `helpers/entity-registry.py clear-name` to revert to `has_entity_name` device defaults.
+5. **`device rename` not available** — hass-cli has no `device rename` command. Use `helpers/entity-registry.py` or the HA UI for device name changes.
+
 ## Performance Notes
 
 `entity list` can be slow on large setups (>500 entities). For bulk entity inventory:

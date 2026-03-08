@@ -174,12 +174,43 @@ renames_completed:
   - light.light_2 -> light.living_room_lamp
 ```
 
+**Count reconciliation:** If the actual rename count differs from the plan count, report the discrepancy:
+```
+Plan specified 48 renames, executed 47 — 1 entity skipped: sensor.old_node (not found in registry)
+```
+
+### Phase 2.5: Device Renames (if present in plan)
+
+If the plan contains a `device_renames` section, process it after entity renames:
+
+```bash
+# Device renames require the HA UI or WebSocket API — hass-cli has no device rename command.
+# Use the entity-registry helper for WebSocket operations:
+PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+# For device name changes, use the HA UI (Settings > Devices) or automate via WebSocket:
+# WebSocket type: config/device_registry/update, params: {device_id: "...", name_by_user: "New Name"}
+```
+
+**Note:** Document any device renames that must be done manually in the HA UI and report them in the summary.
+
 ### Phase 3: Friendly Name Updates
 
 Update friendly names via hass-cli:
 ```bash
 hass-cli entity update entity_id --name "New Friendly Name"
 ```
+
+#### Clearing Name Overrides (has_entity_name devices)
+
+For devices that use `has_entity_name: true` (most Z-Wave, Zigbee, and modern integrations), a custom name override in the entity registry suppresses device name inheritance. After renaming the parent device, you must **clear** the custom name override instead of setting a new friendly name:
+
+```bash
+# Clear custom name override so the entity inherits from the device name
+PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+$PY helpers/entity-registry.py clear-name sensor.front_yard_sconces_node_status light.kitchen_dimmer_1
+```
+
+**How to tell:** After a device rename, if an entity's friendly name still shows the old value, it has a custom name override that needs clearing. Use `clear-name` (sends `name: null` via WebSocket) rather than setting a new name.
 
 ### Phase 4: Configuration File Updates
 
@@ -218,6 +249,35 @@ After all renames complete:
 1. Update plan status to "completed"
 2. Create post-rename git commit
 3. Generate summary report
+
+### Phase 8 (Optional): Stale Entity Removal
+
+If stale/orphaned entities are identified during execution (e.g., old Z-Wave nodes, entities that were replaced), offer removal as an **optional** post-execution step with its own preview:
+
+```bash
+# Remove stale entities from the registry (irreversible!)
+PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+$PY helpers/entity-registry.py remove sensor.stale_entity_1 sensor.stale_entity_2
+```
+
+**This phase requires its own dry-run preview and explicit user confirmation** — entity removal is irreversible. Show the list of entities to be removed and wait for approval before proceeding.
+
+## Post-Plan Scope Gate
+
+After all plan phases are complete, **do NOT proceed with additional cleanup or modifications** without explicit confirmation. Use AskUserQuestion:
+
+```
+All plan phases complete. I noticed additional cleanup opportunities:
+- [list items found, e.g., "20 stale entities from old Z-Wave nodes"]
+- [e.g., "3 device names with typos"]
+- [e.g., "5 friendly name overrides suppressing device inheritance"]
+
+Would you like to:
+1. Preview and address these items
+2. Skip — I'm done for now
+```
+
+**Destructive operations** (entity removal, device deletion) always require their own dry-run preview showing exactly what will be deleted, even if the user says "proceed with all." This is Safety Invariant #5 applied to post-plan work.
 
 ## Rollback Capability
 
@@ -273,9 +333,30 @@ Summary:
   Entities renamed: 23/25
   Blocked (skipped): 2
   Area operations: 3 (1 created, 1 renamed, 1 deleted)
+  Device renames: 2
   Friendly names updated: 23/23
+  Name overrides cleared: 5
   Config files updated: 8
   Dashboard files updated: 3
+
+## What Ran vs Skipped
+
+| Check                  | Status  | Result                     |
+|------------------------|---------|----------------------------|
+| Plan YAML parse        | Ran     | Valid, 9 phases            |
+| Entity existence check | Ran     | 23/25 found                |
+| Reference scan         | Ran     | 8 config + 3 dashboard     |
+| Area operations        | Ran     | 1 created, 1 renamed, 1 deleted |
+| Entity renames         | Ran     | 23 succeeded, 2 blocked    |
+| Device renames         | Ran     | 2 succeeded                |
+| Friendly name updates  | Ran     | 23 updated, 5 cleared      |
+| Config file updates    | Ran     | 8 files, 47 replacements   |
+| Dashboard updates      | Ran     | 3 files                    |
+| Post-rename validation | Ran     | Spot-check 5 entities OK   |
+| YAML config validation | Skipped | No syntax errors detected  |
+| .storage scan          | Scanned | Read-only, 0 references    |
+| Node-RED flows         | Skipped | External tool              |
+| AppDaemon configs      | Skipped | External tool              |
 
 Blocked Renames (deferred):
   - zwave_js.node_99: device offline, no attributes
