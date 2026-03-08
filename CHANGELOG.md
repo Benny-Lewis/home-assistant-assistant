@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.2.1
+
+### Added
+
+- **Token leak guard** — PreToolUse hook (`env-guard.sh`) blocks `env`, `printenv`, `set`, and `export -p` commands that would expose HASS_TOKEN (Safety Invariant #4)
+- **Device & integration troubleshooting** — ha-troubleshooting skill now covers unavailable/unresponsive devices with Z-Wave, Zigbee, and WiFi protocol-specific diagnostics
+- **HA Web UI reference** (`references/ha-web-ui.md`) — documents Shadow DOM limitations and preferred alternatives for browser automation
+- Package installation added to side-effect classification table (Safety Invariant #5)
+
+### Fixed
+
+- **ha-analyze follow-up routing** — after analysis, the model now routes to the appropriate skill instead of editing config files directly
+- **ha-deploy Git Pull timing** — no longer enters futile sleep/retry loops after push; documents Git Pull add-on polling delay and allows "Pending" verification status
+- **PostToolUse hook errors** — added error suppression to prevent noisy hook failure messages
+- **Parallel data collection** — ha-analyze now collects data in independent batches so one failed source doesn't cancel others
+
+### Documentation
+
+- ha-devices cross-references ha-troubleshooting for existing device issues
+- `python3: command not found` on Windows documented in CLAUDE.md Known Environment Issues
+- Safety Invariant #4 expanded with explicit bad examples for env-dumping commands
+
 ## 1.2.0
 
 ### Added
