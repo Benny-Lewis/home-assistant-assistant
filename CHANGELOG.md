@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.1
+
+### Fixed
+
+- **Self-hosted marketplace source resolution** - switched the single-plugin marketplace entry to `source: "./"` so Claude installs the plugin from the marketplace checkout instead of recursively repackaging the marketplace repo into the plugin cache on local-scope installs and updates
+
 ## 1.3.0
 
 ### Added
