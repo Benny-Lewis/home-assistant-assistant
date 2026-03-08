@@ -1,6 +1,6 @@
 ---
 name: ha-troubleshooting
-description: Use when user asks "why didn't X work", "not working", "debug", "check logs", mentions something "stopped working", or needs to diagnose Home Assistant issues.
+description: Use when user asks "why didn't X work", "not working", "debug", "check logs", mentions something "stopped working", needs to diagnose Home Assistant issues, or has device/integration problems like "unavailable", "unresponsive", device connection issues, Z-Wave/Zigbee/WiFi troubleshooting.
 user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash(hass-cli:*,python*,py:*)
 ---
@@ -11,9 +11,12 @@ allowed-tools: Read, Grep, Glob, Bash(hass-cli:*,python*,py:*)
 > To apply fixes, use the appropriate generator skill (ha-automations, ha-scripts, ha-scenes)
 > with proper safety guards. See the ha-resolver skill for entity verification.
 
+> **Do NOT install packages** (`pip install`, `npm install`, etc.) without asking the user first.
+> Modifying the user's environment is a side effect (Safety Invariant #5).
+
 ## Overview
 
-Debug automations, analyze logs, and diagnose why things didn't work. Core principle: gather data first, then analyze—never guess without evidence.
+Debug automations, devices, integrations, and diagnose why things didn't work. Core principle: gather data first, then analyze—never guess without evidence.
 
 ## When to Use
 
@@ -23,11 +26,15 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
 - User wants to "debug", "check logs", "troubleshoot"
 - Automation triggered but action didn't happen
 - User says "it used to work"
+- Device is "unavailable", "unresponsive", or shows "unknown" state
+- Integration or protocol issues (Z-Wave, Zigbee, WiFi, Matter)
+- User asks for help with a specific device that isn't behaving correctly
 
 **When NOT to use:**
 - Creating new automations → use `ha-automations`
 - Creating new scripts → use `ha-scripts`
 - Creating new scenes → use `ha-scenes`
+- Setting up a brand new device → use `ha-devices`
 
 ## Quick Reference
 
@@ -128,7 +135,90 @@ Debug automations, analyze logs, and diagnose why things didn't work. Core princ
 | Works sometimes | Time/sun condition, entity unavailable intermittently |
 | Used to work | Recent config change, entity renamed, integration issue |
 
+## Device & Integration Troubleshooting
+
+When a device is unavailable, unresponsive, or behaving incorrectly, follow this process.
+
+### Step 1: Check Device State
+
+```bash
+# Find all entities for the device
+hass-cli state list | grep -i "<device_name>"
+
+# Get detailed state for each entity
+hass-cli state get <entity_id>
+```
+
+Look for: `state: unavailable`, `state: unknown`, or unexpected attribute values.
+
+### Step 2: Check Integration Health
+
+```bash
+# Look up the device in the registry
+hass-cli -o json device list | grep -A 5 -i "<device_name>"
+```
+
+Check: Is the device still registered? What integration owns it? Are other devices on the same integration working?
+
+### Step 3: Protocol-Specific Checks
+
+#### Z-Wave
+
+- **Check node status** via the Z-Wave JS UI add-on dashboard (Settings → Add-ons → Z-Wave JS UI → Open Web UI)
+- **Compare to working devices** — if other Z-Wave devices work, the issue is device-specific (range, interview, security)
+- **Common causes:**
+  - Device out of range (mesh too weak)
+  - Failed S2 security interview — device needs exclusion and re-inclusion
+  - Security class mismatch — device paired with wrong security level
+  - Dead node — device lost power or hardware failure
+  - Firmware issue — check for updates in Z-Wave JS UI
+- **Do NOT** attempt Z-Wave websocket API operations directly — use the Z-Wave JS UI add-on dashboard for node management (interview, heal, exclude/include)
+
+#### Zigbee
+
+- **Check coordinator** — is the Zigbee coordinator (ZHA/Zigbee2MQTT) running?
+- **Check mesh** — devices far from coordinator with no repeaters may drop off
+- **Common causes:**
+  - WiFi interference (Zigbee and WiFi share 2.4GHz)
+  - Battery exhaustion (sleepy end devices)
+  - Channel conflict — try changing Zigbee channel
+  - Device fell off mesh — re-pair the device
+
+#### WiFi
+
+- **Check device connectivity** — is the device on the network?
+- **Common causes:**
+  - IP address changed (device needs static IP or DHCP reservation)
+  - WiFi signal weak (check RSSI if available)
+  - Cloud service outage (for cloud-dependent integrations)
+  - Firmware update changed behavior
+
+### Step 4: Evidence Table
+
+Present findings using this ran-vs-skipped table:
+
+| Check | Status | Result | Evidence |
+|-------|--------|--------|----------|
+| Entity state | ✓ Ran | unavailable/ok | `state: unavailable` from hass-cli |
+| Device registry | ✓ Ran | registered/missing | Device found in registry |
+| Other devices on integration | ✓ Ran | working/also failing | Checked 3 other Z-Wave devices |
+| Protocol-specific | ✓ Ran / ⊘ Skipped | details | Z-Wave JS UI checked / not applicable |
+| Error logs | ✓ Ran / ✗ Failed | details | Relevant errors found / 404 |
+
+**Status values:** `✓ Ran` — check completed, `⊘ Skipped (reason)` — not applicable, `✗ Failed` — check errored
+
+### Common Device Issues
+
+| Symptom | Likely Cause | First Step |
+|---------|--------------|------------|
+| `unavailable` state | Device offline, integration down, or communication failure | Check physical power + integration status |
+| `unknown` state | Integration connected but device not reporting | Check device firmware, re-interview |
+| Intermittent availability | Weak signal, interference, or flaky hardware | Check mesh/signal strength, move device closer |
+| Works in UI but not automation | Entity ID mismatch, automation disabled, or condition not met | Use automation troubleshooting (above) |
+| All devices on integration down | Integration or coordinator failure | Restart integration, check coordinator hardware |
+
 ## References
 
 - `references/log-patterns.md` - Common error patterns and fixes
 - `references/diagnostic-api.md` - History, Logbook, and Trace API procedures
+- `references/ha-web-ui.md` - Browser automation limitations with HA's Shadow DOM

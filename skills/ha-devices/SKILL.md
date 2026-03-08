@@ -12,6 +12,10 @@ allowed-tools: Read, Grep, Glob, Bash, AskUserQuestion, Task
 
 This skill provides guidance on Home Assistant devices, integrations, and entity management.
 
+> **When NOT to use:** If the user has an existing device that is unavailable, unresponsive,
+> or not working correctly, route to `ha-troubleshooting` instead. This skill is for **new device
+> setup and device knowledge**, not diagnosing problems with existing devices.
+
 ## Capability Snapshot Contract
 
 **Before generating YAML that controls a device, you MUST:**

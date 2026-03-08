@@ -118,9 +118,19 @@ echo "Token: $HASS_TOKEN"
 echo "Token prefix: ${HASS_TOKEN:0:10}..."
 echo "Token set: ${HASS_TOKEN:+yes}${HASS_TOKEN:-no}"  # :-no expands to value when set!
 
+# BAD - dumps all env vars including HASS_TOKEN
+env | grep -i hass
+printenv | grep TOKEN
+set | grep HASS
+export -p | grep HASS
+
 # GOOD - reports presence without revealing value
 TLEN=$(printf '%s' "$HASS_TOKEN" | wc -c); echo "TOKEN_LEN=$TLEN"
 ```
+
+> **Hook enforcement:** The `env-guard.sh` PreToolUse hook blocks `env`, `printenv`, `set`,
+> and `export -p` commands automatically. If you need to check env var presence, use the
+> safe `wc -c` pattern above.
 
 ### 5. Never Deploy Unless Explicitly Requested
 
@@ -149,6 +159,11 @@ Side-effectful commands must:
 | Git push | Yes | Yes |
 | HA reload | Yes | Yes |
 | Entity rename | Yes | Yes |
+| Install package (pip/npm/etc.) | Yes | Yes |
+
+**Package Installation:** Installing packages on the user's machine (`pip install`, `npm install`, etc.)
+modifies their environment. Always ask before installing. Exception: `/ha-onboard` Step 5
+(hass-cli installation) already has an explicit confirmation gate.
 
 ### 6. Evidence Tables Required
 

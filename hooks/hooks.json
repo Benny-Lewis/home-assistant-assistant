@@ -12,13 +12,25 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/env-guard.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'You just edited an HA config file. If a skill is active, follow its next-step instructions (usually calling AskUserQuestion). Otherwise, mention /ha-deploy is available for validation and deployment.'",
+            "command": "echo 'You just edited an HA config file. If a skill is active, follow its next-step instructions (usually calling AskUserQuestion). Otherwise, mention /ha-deploy is available for validation and deployment.' 2>/dev/null || true",
             "timeout": 5
           }
         ]

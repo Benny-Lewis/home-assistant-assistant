@@ -40,6 +40,10 @@ If no arguments, analyze all areas.
 
 ## Data Collection
 
+### Error Resilience
+
+Collect data in **independent batches** — do not mix file reads with hass-cli calls in the same parallel batch. If one source fails, proceed with whatever data was collected. Report which data sources were available vs unavailable in the output.
+
 ### From hass-cli (if available):
 ```bash
 # Entity inventory (state list is faster than entity list for large setups)
@@ -216,16 +220,21 @@ Performance:
   Note: 3 template sensors could be simplified
 
 Next Steps:
-  1. Ask me to create any suggested automation
-  2. Review and customize generated configs
-  3. Run /ha-deploy to apply changes
+  1. Ask me to implement any suggestion — I'll load the right skill automatically
+  2. Run /ha-deploy when ready to apply changes
 ```
 
 ## Interactive Mode
 
 After presenting analysis:
 1. Ask if user wants to implement any suggestion
-2. Offer to generate the automation/config
+2. **Route to the appropriate skill** — do NOT edit config files directly:
+   - Automation changes → invoke `ha-automations` skill
+   - Script changes → invoke `ha-scripts` skill
+   - Scene changes → invoke `ha-scenes` skill
+   - Naming/organization → invoke `ha-naming` skill
+   - Device issues → invoke `ha-troubleshooting` skill
+   - New devices → invoke `ha-devices` skill
 3. Guide through testing
 4. Iterate on improvements
 

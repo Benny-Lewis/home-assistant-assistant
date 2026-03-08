@@ -144,6 +144,13 @@ export HASS_TOKEN="your-long-lived-access-token"
 - `--no-headers` only works with `entity list` — not `state list`, `device list`, or `service list`
 - `state list` domain count: `hass-cli state list | awk '$1 ~ /\./ {split($1, a, "."); print a[1]}' | sort | uniq -c | sort -rn`
 
+## Known Environment Issues
+
+### `python3: command not found` on Windows
+Windows typically provides `python` or `py`, not `python3`. The plugin detects this automatically
+via session-check.sh. If you see `python3` errors from hooks, check your user-level hooks
+(`.claude/hooks.json`) or other plugins for hardcoded `python3` references.
+
 ## Releasing Updates
 
 - Bump `version` in `.claude-plugin/plugin.json` AND `.claude-plugin/marketplace.json` — Claude Code caches by version, so users won't get updates without a bump

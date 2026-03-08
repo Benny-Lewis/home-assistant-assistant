@@ -114,6 +114,16 @@ Handle push failures:
   b) Retry push
   c) Abort deployment"
 
+### Git Pull Timing
+
+> **Important:** `automation.reload` only applies config that HA already has on disk.
+> If `deploy.pull_method` is `git_pull_addon`, HA's config won't update until the add-on
+> polls (default: every 5 minutes). Do NOT loop/retry reload — it will not help.
+> Instead: tell the user the push succeeded, mention they can restart the Git Pull add-on
+> from the HA UI (Settings → Add-ons → Git Pull → Restart) for immediate effect,
+> and proceed to reload **once**. Mark verification as "Pending — awaiting HA pull"
+> if entity state still shows old values.
+
 ### Step 6: Reload Home Assistant
 
 If hass-cli is configured, offer to trigger a reload:
@@ -152,6 +162,9 @@ Report verification result with evidence:
 | Entity exists | Found: automation.kitchen_motion_light |
 | Entity enabled | state: on |
 ```
+
+> If the Git Pull add-on hasn't synced yet, verification will show stale data.
+> This is expected. Mark as "Pending — awaiting HA pull" rather than retrying.
 
 ### Step 8: Confirm Success
 
