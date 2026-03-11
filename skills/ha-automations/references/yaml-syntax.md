@@ -6,7 +6,7 @@
 ## Basic Structure
 
 ```yaml
-- id: unique_automation_id
+- id: unique_automation_id  # internal tracking only — entity ID derives from alias
   alias: "Descriptive Name"
   description: "What this automation does"
   triggers:
@@ -168,6 +168,22 @@ actions:
       brightness: "{{ brightness_level }}"
 ```
 
+### Mid-Sequence Condition (Gate)
+```yaml
+actions:
+  - action: lock.lock
+    target:
+      entity_id: lock.front_door
+  - condition: state                   # gate — only subsequent actions are skipped if false
+    entity_id: person.ben
+    state: "not_home"
+  - action: notify.mobile_app
+    data:
+      message: "Door locked — you're away"
+```
+
+Actions before the condition always run; actions after only run if the condition passes.
+
 ## Inactivity Pattern (Correct Way)
 
 **Use `for:` in trigger, NOT delay/timer in actions:**
@@ -213,3 +229,4 @@ actions:
 | Using `delay:` for inactivity | Use `for:` in trigger |
 | Including `color_temp` on brightness-only light | Check `supported_color_modes` first |
 | `automation:` as root key in file | File should be list `- id: ...` |
+| Looking up automation by `id` field | Entity ID derives from `alias`, not `id` |

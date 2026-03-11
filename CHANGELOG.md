@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.3
+
+### Documentation
+
+- **Automation entity ID derivation** (BL-006) — documented that HA derives entity IDs from the `alias` field (not the `id` field) in ha-automations, yaml-syntax reference, and ha-resolver, with derivation rules, examples, and correct/incorrect lookup commands
+- **Mid-sequence condition gates** (BL-014) — documented that conditions placed within action sequences gate only subsequent actions (earlier actions still run), with YAML examples in ha-automations and yaml-syntax reference
+- **Regression guards** — added REG-012 (alias derivation) and REG-013 (mid-sequence conditions) eval cases
+- **Backlog entries** — added BL-017 (`common-patterns.md` deprecated syntax) and BL-018 (`--no-headers` with `service list`)
+
 ## 1.3.2
 
 ### Fixed

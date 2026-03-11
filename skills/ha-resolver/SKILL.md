@@ -96,6 +96,13 @@ Before using an entity_id in generated YAML:
 2. If error/not found, ask user for correct entity
 3. Never guess or assume entity names
 
+### Automation Entity ID Mapping
+
+Automation entity IDs are derived from the `alias` field, not the `id` field.
+**Derivation rule:** lowercase, spaces → underscores, special characters removed
+(e.g., `alias: "Turn On Kitchen Lights"` → `automation.turn_on_kitchen_lights`).
+The `id` field is for internal tracking only (traces, UI).
+
 ## Area-Based Entity Search
 
 Find all entities in a specific room/area using HA registries.

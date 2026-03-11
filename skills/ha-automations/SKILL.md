@@ -30,10 +30,36 @@ Create Home Assistant automations from natural language descriptions. Core princ
 
 | Component | Purpose |
 |-----------|---------|
-| alias | Human-readable name |
+| alias | Human-readable name **and entity ID source** |
 | trigger | What starts it (state, time, event) |
 | condition | Additional requirements (optional) |
 | action | What happens when triggered |
+
+## Automation Entity IDs
+
+The YAML `id` field is for internal tracking only — it is **not** the entity ID. HA derives entity IDs from the `alias` field.
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `id` | Internal tracking (traces, UI) | `1234567890` |
+| `alias` | Display name **→ entity ID source** | `"Morning Lights"` → `automation.morning_lights` |
+
+**Derivation rule:** lowercase, spaces → underscores, special characters removed.
+
+| Alias | Derived Entity ID |
+|-------|-------------------|
+| `"Turn On Kitchen Lights"` | `automation.turn_on_kitchen_lights` |
+| `"Motion — Hallway (Night)"` | `automation.motion_hallway_night` |
+
+**Correct lookup:**
+```bash
+hass-cli state get automation.turn_on_kitchen_lights  # derived from alias
+```
+
+**Incorrect lookup:**
+```bash
+hass-cli state get automation.1234567890  # WRONG — id ≠ entity ID
+```
 
 ## Process
 
@@ -68,6 +94,28 @@ Create Home Assistant automations from natural language descriptions. Core princ
 
 **NEVER use timers for inactivity** unless you also add cancel-on-motion logic.
 
+## Conditions in Action Sequences
+
+HA supports placing `condition:` blocks mid-action-sequence as **gates**. Earlier actions still run; only subsequent actions are skipped if the condition fails.
+
+```yaml
+actions:
+  - action: lock.lock                  # Always runs
+    target:
+      entity_id: lock.front_door
+  - condition: state                   # Gate — checks before continuing
+    entity_id: person.ben
+    state: "not_home"
+  - action: notify.mobile_app          # Only runs if person is away
+    data:
+      message: "Door locked — you're away"
+```
+
+**Key rules:**
+- Actions **before** the condition always execute
+- Actions **after** the condition only execute if it passes
+- This is NOT the same as top-level `conditions:` (which gate the entire automation)
+
 ## Common Mistakes
 
 | Mistake | Fix |
@@ -77,6 +125,8 @@ Create Home Assistant automations from natural language descriptions. Core princ
 | Missing conditions | Add time/state guards to prevent unwanted triggers |
 | Invalid services | Verify service exists before using |
 | Auto-deploying | Ask user first, never assume |
+| Looking up by `id` field | Entity ID derives from `alias`, not `id` |
+| Condition gates entire sequence | Top-level `conditions:` gates all; mid-sequence gates only subsequent actions |
 
 ## References
 

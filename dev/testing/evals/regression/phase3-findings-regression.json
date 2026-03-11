@@ -167,6 +167,36 @@
       ]
     },
     {
+      "id": "REG-012",
+      "name": "automation entity ID alias derivation documented",
+      "description": "Skills should document that entity IDs derive from alias, not the id field.",
+      "checks": [
+        {
+          "path": "skills/ha-automations/SKILL.md",
+          "contains": "entity ID source"
+        },
+        {
+          "path": "skills/ha-resolver/SKILL.md",
+          "contains": "derived from the `alias` field"
+        }
+      ]
+    },
+    {
+      "id": "REG-013",
+      "name": "mid-sequence condition gate pattern documented",
+      "description": "Automation docs should document mid-sequence conditions as gates.",
+      "checks": [
+        {
+          "path": "skills/ha-automations/SKILL.md",
+          "contains": "Conditions in Action Sequences"
+        },
+        {
+          "path": "skills/ha-automations/references/yaml-syntax.md",
+          "contains": "Mid-Sequence Condition"
+        }
+      ]
+    },
+    {
       "id": "DUP-001",
       "name": "duplicate id regression half",
       "description": "Harness should keep this regression case distinct from the capability case with the same id.",
