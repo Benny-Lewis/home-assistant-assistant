@@ -8,19 +8,6 @@ This is a Claude Code plugin for Home Assistant. It allows users to manage Home 
 
 **Type**: Claude Code plugin (markdown-based, no build system or compiled code)
 
-## Repository Structure
-
-```
-.claude-plugin/
-  plugin.json                   # Plugin manifest
-skills/                         # 15 skill directories (14 user-invocable + 1 infrastructure)
-agents/                         # 6 subagent markdown files
-helpers/                        # Python helper scripts for complex operations
-hooks/                          # hooks.json + session-check.sh (bash)
-references/                     # safety-invariants.md, settings-schema.md, hass-cli.md
-templates/                      # templates.md
-```
-
 ## Safety Invariants
 
 All generated YAML and commands enforce these invariants (canonical wording in `references/safety-invariants.md`):
@@ -56,15 +43,27 @@ skills/
   ha-analyze/               # Setup analysis + recommendations (user-invocable)
   ha-resolver/              # Entity resolution (NOT user-invocable, agent-preloaded)
 agents/
-  *.md                      # Subagents with specialized prompts (config-debugger,
-                            # ha-config-validator, device-advisor, naming-analyzer)
+  *.md                      # 6 subagents (config-debugger, ha-config-validator,
+                            # device-advisor, naming-analyzer, ha-entity-resolver,
+                            # ha-log-analyzer)
+helpers/
+  area-search.py            # Area-based entity search (registry cross-referencing)
+  entity-registry.py        # Entity registry operations
+  ha-overview.py            # HA setup overview generation
+  trace-fetch.py            # Automation trace fetching
 hooks/
-  hooks.json                # Event-driven hooks (SessionStart, PostToolUse)
+  hooks.json                # Event-driven hooks (SessionStart, PreToolUse, PostToolUse)
+  session-check.sh          # Async env check (HASS_TOKEN, HASS_SERVER, python detection)
+  env-guard.sh              # PreToolUse guard for Bash commands
+  docs-check.sh             # Documentation validation
+  docs-check.py             # Documentation validation helper
 references/
   safety-invariants.md      # Core safety rules referenced by all skills
   settings-schema.md        # Settings file schema
+  hass-cli.md               # hass-cli usage reference
+  ha-web-ui.md              # HA web UI reference
 templates/
-  *.md                      # Reference templates for generated configs
+  templates.md              # Reference templates for generated configs
 ```
 
 **15 skills total:** 14 user-invocable + 1 infrastructure (ha-resolver). ha-validate is both user-invocable and agent-preloadable.
@@ -77,11 +76,22 @@ Do not point that marketplace entry back to this same repository via a remote gi
 
 ## Testing
 
-Minimal deterministic eval harness exists for core safety/contract checks:
+Deterministic eval harness checks safety contracts and regression guards (no HA connection needed):
 
 ```bash
+# Run all suites (3 passes each)
 powershell -ExecutionPolicy Bypass -File dev/testing/scripts/eval-harness.ps1 -Suite all -Passes 3
+
+# Run a single suite
+powershell -ExecutionPolicy Bypass -File dev/testing/scripts/eval-harness.ps1 -Suite capability
+powershell -ExecutionPolicy Bypass -File dev/testing/scripts/eval-harness.ps1 -Suite regression
 ```
+
+**Suites:**
+- `capability` — safety contracts: `disable-model-invocation` flags, deploy validation gates, push target resolution, tool allowlists, breadcrumb gitignore, invariant count
+- `regression` — guards against past bugs: broken skill references, deploy wording drift, settings schema keys, helper function correctness (trace URLs, area matching, overview JSON, timestamps)
+
+Cases are JSON files in `dev/testing/evals/{capability,regression}/`. Each case declares file-content or command-output checks. The harness runs multi-pass and reports single-run pass rate and pass@k.
 
 Manual testing approach (still required for live HA workflows):
 
@@ -128,18 +138,25 @@ export HASS_TOKEN="your-long-lived-access-token"
 
 ## Key Files
 
-**Infrastructure skill (preloaded by agents):**
-- `skills/ha-resolver/SKILL.md` - Entity resolution and capability snapshots
+**Core wiring:**
+- `hooks/hooks.json` - Hook event→command mapping (SessionStart, PreToolUse, PostToolUse)
+- `references/safety-invariants.md` - Canonical safety rules (all skills reference this)
+- `skills/ha-resolver/SKILL.md` - Entity resolution (preloaded by agents, not user-invocable)
 
-**Skill references (domain-specific):**
+**Domain-specific references:**
 - `skills/ha-automations/references/intent-classifier.md` - Inactivity vs delay classification
 - `skills/ha-naming/references/editor.md` - YAML AST editing procedures
+
+**Eval cases:**
+- `dev/testing/evals/capability/core-safety-contracts.json` - Safety contract checks
+- `dev/testing/evals/regression/phase3-findings-regression.json` - Regression guards
 
 ## Development Notes
 
 - Settings stored in `.claude/settings.local.json` (gitignored)
 - Conventions stored in `.claude/ha.conventions.json` (user's naming patterns)
 - SessionStart async hook runs env check via bash (HASS_TOKEN, HASS_SERVER, configuration.yaml, settings) and writes breadcrumb files for agent discovery
+- PreToolUse Bash hook runs env-guard.sh for command safety checks
 - PostToolUse Edit|Write hook reminds about /ha-deploy after config changes
 - The plugin uses hass-cli for HA API operations, local Python helpers for registry/trace workflows, and git for configuration deployment
 - ha-apply-naming uses `disable-model-invocation: true`; ha-deploy uses in-skill confirmation gates instead

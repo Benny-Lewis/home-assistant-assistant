@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.2
+
+### Fixed
+
+- **Block `hass-cli raw ws` at the hook level** — PreToolUse guard now blocks `hass-cli raw ws` commands (broken on HA 2026.2+) before they execute, preventing wasted tool calls and retry cascades. The block message directs to `hass-cli -o json` built-in commands and Python websocket helpers.
+- **Eval coverage** — added CAP-009 regression guard verifying the `hass-cli raw ws` block remains in env-guard.sh
+
 ## 1.3.1
 
 ### Fixed

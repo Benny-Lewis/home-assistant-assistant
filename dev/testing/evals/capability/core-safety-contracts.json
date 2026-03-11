@@ -114,6 +114,29 @@
       ]
     },
     {
+      "id": "CAP-009",
+      "name": "env-guard blocks hass-cli raw ws",
+      "description": "PreToolUse hook must block hass-cli raw ws commands (broken on HA 2026.2+).",
+      "checks": [
+        {
+          "path": "hooks/env-guard.sh",
+          "contains": "hass-cli"
+        },
+        {
+          "path": "hooks/env-guard.sh",
+          "contains": "raw ws"
+        },
+        {
+          "path": "hooks/env-guard.sh",
+          "contains": "BLOCKED"
+        },
+        {
+          "path": "hooks/env-guard.sh",
+          "contains": "exit 2"
+        }
+      ]
+    },
+    {
       "id": "DUP-001",
       "name": "duplicate id capability half",
       "description": "Harness should keep this capability case distinct from the regression case with the same id.",
