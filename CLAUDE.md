@@ -176,10 +176,8 @@ via session-check.sh. If you see `python3` errors from hooks, check your user-le
 
 ## Releasing Updates
 
-- Bump `version` in three places — Claude Code caches by version, so users won't get updates without a bump:
-  1. `.claude-plugin/plugin.json` (this repo)
-  2. `.claude-plugin/marketplace.json` (this repo, self-hosted marketplace)
-  3. `Benny-Lewis/benny-lewis-plugins` repo → `.claude-plugin/marketplace.json` (external marketplace)
+- Bump `version` in `.claude-plugin/plugin.json` AND `.claude-plugin/marketplace.json` — Claude Code caches by version, so users won't get updates without a bump
+- The external marketplace (`Benny-Lewis/benny-lewis-plugins`) omits the version field — `plugin.json` is authoritative for GitHub-sourced plugins
 - Update `CHANGELOG.md` with a summary of changes
 - If renaming slash commands or changing install steps, add a **Breaking Changes** section to the changelog
 - Merge to main — marketplace source URL points to the repo, auto-update pulls latest
