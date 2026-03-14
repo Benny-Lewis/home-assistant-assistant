@@ -8,7 +8,6 @@
 .claude/plans/
 
 # Dev artifacts
-dev/backlog.md
 dev/testing/reports/
 
 # OS files
