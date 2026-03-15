@@ -33,6 +33,13 @@ Each entry traces back to one or more session transcripts and is self-contained 
 | BL-020 | S3 | 1.4.0 | Sections view safe-edit playbook with grid sizing tables in SKILL.md |
 | BL-021 | S3 | 1.4.0 | Entity preflight validation before dashboard saves via find-entities subcommand |
 | BL-022 | S4 | 1.4.0 | Custom card research workflow with stable fallback order in SKILL.md |
+| BL-029 | S3 | 1.5.0 | Editing conventions added as Safety Invariant #7 (minimal edits only) |
+| BL-030 | S3 | 1.5.0 | Post-edit verification added as Safety Invariant #8 (deploy/reload + entity check) |
+| BL-003 | S3 | 1.5.0 | History API URL encoding gotcha added to diagnostic-api.md |
+| BL-007 | S3 | 1.5.0 | Entity existence validation added to ha-automations step 1 |
+| BL-013 | S3 | 1.5.0 | Z-Wave re-inclusion side-effects warning added to ha-troubleshooting |
+| BL-017 | S5 | 1.5.0 | common-patterns.md updated to 2024+ YAML syntax |
+| BL-018 | S5 | 1.5.0 | Fixed `--no-headers` with `service list` in ha-resolver |
 
 ## PR Groupings
 

@@ -173,6 +173,12 @@ Check: Is the device still registered? What integration owns it? Are other devic
   - Dead node — device lost power or hardware failure
   - Firmware issue — check for updates in Z-Wave JS UI
 - **Do NOT** attempt Z-Wave websocket API operations directly — use the Z-Wave JS UI add-on dashboard for node management (interview, heal, exclude/include)
+- **Re-inclusion side effects** — Excluding and re-including a Z-Wave device can cause:
+  - **User codes cleared** (locks) — all programmed codes may be wiped. Back up codes via the manufacturer's app BEFORE re-inclusion
+  - **Device settings reset** — parameters, associations, and configuration values may revert to factory defaults
+  - **Entity IDs changed** — if HA assigns a new node ID, entity IDs may change, breaking automations that reference them
+  - **Device parameters need reconfiguration** — wake-up intervals, reporting thresholds, etc.
+  - Always warn the user about these risks before proceeding with Z-Wave exclusion/re-inclusion
 
 #### Zigbee
 

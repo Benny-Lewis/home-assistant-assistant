@@ -8,6 +8,9 @@ allowed-tools: Read, Grep, Glob, Bash(hass-cli:*,python*,py:*,gh:*)
 
 # Home Assistant Lovelace Dashboards
 
+> **Safety Invariants:** #5 (no implicit deploy), #7 (minimal edits), #8 (post-edit verify)
+> See `references/safety-invariants.md`
+
 This skill provides workflow procedures for creating and managing Lovelace dashboards.
 
 For card types, layout options, and examples, read `references/dashboard-guide.md`.

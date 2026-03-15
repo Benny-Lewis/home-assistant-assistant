@@ -119,13 +119,15 @@ Agents are spawned by skills when needed. They run in isolated context, do their
 
 ## Design
 
-Every component in this plugin enforces six safety invariants (canonical: `references/safety-invariants.md`):
+Every component in this plugin enforces eight safety invariants (canonical: `references/safety-invariants.md`):
 - No YAML is emitted with unsupported device attributes.
 - Inactivity patterns are never silently replaced with timers.
 - Config edits use context-aware anchors, not brittle string replacement.
 - Tokens are never printed.
 - Nothing deploys without explicit user request and confirmation.
 - Validation/deploy/troubleshooting outputs include evidence tables (what ran vs skipped).
+- Edits are minimal and surgical — no unrequested restructuring of adjacent content.
+- After config edits, deploy/reload is offered and entity IDs are verified before use.
 
 Validation outputs include evidence tables — not just "passed" or "failed," but what checks actually ran, what was skipped, and why. When the plugin can't fully validate (no HA connection, hass-cli unavailable), it says so. False confidence is worse than no confidence.
 

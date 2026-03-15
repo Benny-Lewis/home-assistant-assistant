@@ -19,11 +19,11 @@
     {
       "id": "REG-002",
       "name": "README invariant count consistency",
-      "description": "README should remain aligned to six safety invariants.",
+      "description": "README should remain aligned to eight safety invariants.",
       "checks": [
         {
           "path": "README.md",
-          "contains": "enforces six safety invariants"
+          "contains": "enforces eight safety invariants"
         }
       ]
     },
@@ -316,6 +316,21 @@
         {
           "path": "skills/ha-lovelace/references/dashboard-guide.md",
           "contains": "Recommended `rows`"
+        }
+      ]
+    },
+    {
+      "id": "REG-023",
+      "name": "common-patterns uses 2024+ syntax",
+      "description": "Automation patterns must not use deprecated platform: or service: keys.",
+      "checks": [
+        {
+          "path": "skills/ha-automations/references/common-patterns.md",
+          "not_contains": "platform:"
+        },
+        {
+          "path": "skills/ha-automations/references/common-patterns.md",
+          "not_contains": "service:"
         }
       ]
     },

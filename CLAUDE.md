@@ -10,7 +10,7 @@ This is a Claude Code plugin for Home Assistant. It allows users to manage Home 
 
 ## Safety Invariants
 
-All generated YAML and commands enforce these invariants (canonical wording in `references/safety-invariants.md`):
+All generated YAML and commands enforce eight safety invariants (canonical wording in `references/safety-invariants.md`):
 
 1. **No unsupported attributes** - Always check `supported_features`/`supported_color_modes` before suggesting device attributes
 2. **No semantic substitution** - Never replace "after no motion" (inactivity) with raw timers
@@ -18,6 +18,8 @@ All generated YAML and commands enforce these invariants (canonical wording in `
 4. **No secrets printed** - Never echo tokens; show "TOKEN is set" not the value
 5. **Never deploy unless explicitly requested** - All side-effectful skills require explicit user request and confirmation
 6. **Evidence tables** - All validation outputs show "what ran vs skipped"
+7. **Minimal edits only** - Make only the specific changes requested; do not reorganize adjacent content
+8. **Verify after config edits** - Offer deploy/reload after YAML changes; validate entity IDs exist before use
 
 ## Plugin Architecture
 

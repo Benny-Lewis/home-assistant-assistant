@@ -5,19 +5,19 @@
 ```yaml
 - alias: "Motion Light - [Room]"
   description: "Turn on light when motion detected, off after delay"
-  trigger:
-    - platform: state
+  triggers:
+    - trigger: state
       entity_id: binary_sensor.[room]_motion
       to: "on"
-  condition:
+  conditions:
     - condition: sun
       after: sunset
-  action:
-    - service: light.turn_on
+  actions:
+    - action: light.turn_on
       target:
         entity_id: light.[room]
     - delay: "00:02:00"
-    - service: light.turn_off
+    - action: light.turn_off
       target:
         entity_id: light.[room]
 ```
@@ -27,10 +27,10 @@
 ```yaml
 - alias: "Morning Routine"
   description: "Turn on lights at specific time on weekdays"
-  trigger:
-    - platform: time
+  triggers:
+    - trigger: time
       at: "06:30:00"
-  condition:
+  conditions:
     - condition: time
       weekday:
         - mon
@@ -38,8 +38,8 @@
         - wed
         - thu
         - fri
-  action:
-    - service: light.turn_on
+  actions:
+    - action: light.turn_on
       target:
         entity_id: light.bedroom
       data:
@@ -51,15 +51,15 @@
 ```yaml
 - alias: "Welcome Home"
   description: "Turn on lights when arriving home"
-  trigger:
-    - platform: state
+  triggers:
+    - trigger: state
       entity_id: person.user
       to: "home"
-  condition:
+  conditions:
     - condition: sun
       after: sunset
-  action:
-    - service: light.turn_on
+  actions:
+    - action: light.turn_on
       target:
         entity_id:
           - light.entryway
@@ -71,12 +71,12 @@
 ```yaml
 - alias: "Too Hot Alert"
   description: "Notify when temperature exceeds threshold"
-  trigger:
-    - platform: numeric_state
+  triggers:
+    - trigger: numeric_state
       entity_id: sensor.indoor_temperature
       above: 78
-  action:
-    - service: notify.mobile_app
+  actions:
+    - action: notify.mobile_app
       data:
         title: "Temperature Alert"
         message: "Indoor temp is {{ states('sensor.indoor_temperature') }}F"
@@ -87,13 +87,13 @@
 ```yaml
 - alias: "Door Left Open"
   description: "Alert if door open for too long"
-  trigger:
-    - platform: state
+  triggers:
+    - trigger: state
       entity_id: binary_sensor.front_door
       to: "on"
       for: "00:05:00"
-  action:
-    - service: notify.mobile_app
+  actions:
+    - action: notify.mobile_app
       data:
         title: "Door Alert"
         message: "Front door has been open for 5 minutes"

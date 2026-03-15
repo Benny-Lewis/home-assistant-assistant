@@ -153,10 +153,11 @@ def validate_invariant_count_consistency(errors: list[str]) -> None:
             has_count_phrase = (
                 f"{count_word} safety invariants" in content
                 or f"{expected_count} safety invariants" in content
+                or f"{count_word} invariants" in content
+                or f"{expected_count} invariants" in content
             )
-            has_generic_phrase = "these invariants" in content
-            if not has_count_phrase and not has_generic_phrase:
-                errors.append(f"{rel_path} should mention {count_word} safety invariants or 'these invariants'")
+            if not has_count_phrase:
+                errors.append(f"{rel_path} should mention '{count_word} (safety) invariants' or '{expected_count} (safety) invariants'")
 
     # Defensive cross-check: ensure headings are sequentially numbered from 1..N.
     expected_sequence = [f"{i}." for i in range(1, expected_count + 1)]

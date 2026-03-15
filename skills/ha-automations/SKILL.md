@@ -7,7 +7,7 @@ allowed-tools: Read, Grep, Glob, Edit, Bash(hass-cli:*), AskUserQuestion
 
 # Home Assistant Automations
 
-> **Safety Invariants:** #1 (capability check), #2 (no timer substitution), #5 (no implicit deploy)
+> **Safety Invariants:** #1 (capability check), #2 (no timer substitution), #5 (no implicit deploy), #7 (minimal edits), #8 (post-edit verify)
 > See `references/safety-invariants.md` and `references/intent-classifier.md`
 
 ## Overview
@@ -63,7 +63,10 @@ hass-cli state get automation.1234567890  # WRONG — id ≠ entity ID
 
 ## Process
 
-1. **Resolve entities** via ha-entity-resolver agent (Invariant #1)
+1. **Resolve and verify entities** via ha-entity-resolver agent (Invariants #1, #8)
+   - Resolve ALL entity references that will appear in triggers, conditions, and actions
+   - Verify each entity exists: `hass-cli state get <entity_id>` — if "not found", resolve using ha-resolver patterns before proceeding
+   - Note: `hass-cli config check` validates YAML syntax only — it does NOT check entity existence
 2. **Classify intent** - Is this inactivity detection or pure delay? (Invariant #2)
    - "After no motion for X" → Inactivity → Use `for:` in trigger, NOT timers
    - "Wait X then do Y" → Pure delay → `delay:` or timer acceptable

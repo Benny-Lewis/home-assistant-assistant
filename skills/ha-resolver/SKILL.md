@@ -201,7 +201,7 @@ hass-cli service list
 hass-cli service list | grep "^light\."
 
 # Count services
-hass-cli service list --no-headers | wc -l
+hass-cli service list | tail -n +2 | wc -l
 ```
 
 ### Validate a Specific Service

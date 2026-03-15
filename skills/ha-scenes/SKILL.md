@@ -7,7 +7,7 @@ allowed-tools: Read, Grep, Glob, Edit, Bash(hass-cli:*), AskUserQuestion
 
 # Home Assistant Scenes
 
-> **Safety Invariants:** #1 (capability check), #5 (no implicit deploy)
+> **Safety Invariants:** #1 (capability check), #5 (no implicit deploy), #7 (minimal edits), #8 (post-edit verify)
 > See `references/safety-invariants.md`
 
 ## Overview
@@ -37,7 +37,9 @@ Create presets that set multiple entities to specific states simultaneously. Cor
 ## Process
 
 1. **Understand intent** - What state should each device be in?
-2. **Resolve entities** via ha-entity-resolver agent
+2. **Resolve and verify entities** via ha-entity-resolver agent (Invariants #1, #8)
+   - Resolve ALL entity references that will appear in the scene
+   - Verify each entity exists: `hass-cli state get <entity_id>` — if "not found", resolve using ha-resolver patterns before proceeding
 3. **Get capability snapshot** for each device (Invariant #1):
    - Lights: check `supported_color_modes` (brightness, color_temp, rgb_color)
    - Covers: check supported positions/tilt

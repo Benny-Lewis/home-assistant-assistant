@@ -7,7 +7,7 @@ allowed-tools: Read, Grep, Glob, Edit, Bash(hass-cli:*), AskUserQuestion
 
 # Home Assistant Scripts
 
-> **Safety Invariants:** #1 (capability check), #5 (no implicit deploy)
+> **Safety Invariants:** #1 (capability check), #5 (no implicit deploy), #7 (minimal edits), #8 (post-edit verify)
 > See `references/safety-invariants.md`
 
 ## Overview
@@ -39,7 +39,9 @@ Create reusable action sequences that can be triggered manually or from automati
 ## Process
 
 1. **Understand intent** - What sequence of actions?
-2. **Resolve entities** via ha-entity-resolver agent (Invariant #1)
+2. **Resolve and verify entities** via ha-entity-resolver agent (Invariants #1, #8)
+   - Resolve ALL entity references that will appear in the script sequence
+   - Verify each entity exists: `hass-cli state get <entity_id>` — if "not found", resolve using ha-resolver patterns before proceeding
 3. **Get capability snapshot** - For each device, verify supported services/attributes
    - If user's request requires unsupported attributes, **STOP and use AskUserQuestion** to explain the mismatch and offer alternatives before proceeding.
 4. **Generate YAML** using `references/yaml-syntax.md`
