@@ -10,7 +10,7 @@ This is a Claude Code plugin for Home Assistant. It allows users to manage Home 
 
 ## Safety Invariants
 
-All generated YAML and commands enforce these invariants (canonical wording in `references/safety-invariants.md`):
+All generated YAML and commands enforce eight safety invariants (canonical wording in `references/safety-invariants.md`):
 
 1. **No unsupported attributes** - Always check `supported_features`/`supported_color_modes` before suggesting device attributes
 2. **No semantic substitution** - Never replace "after no motion" (inactivity) with raw timers
