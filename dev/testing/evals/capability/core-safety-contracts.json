@@ -63,12 +63,12 @@
     },
     {
       "id": "CAP-005",
-      "name": "canonical invariant source declares six",
-      "description": "Safety invariant source of truth must explicitly declare six invariants.",
+      "name": "canonical invariant source declares eight",
+      "description": "Safety invariant source of truth must explicitly declare eight invariants.",
       "checks": [
         {
           "path": "references/safety-invariants.md",
-          "contains": "## The Six Invariants"
+          "contains": "## The Eight Invariants"
         },
         {
           "path": "references/safety-invariants.md",

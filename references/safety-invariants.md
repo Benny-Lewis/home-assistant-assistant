@@ -3,7 +3,7 @@
 These are the **north-star rules** that every skill, command, and agent in this plugin must follow. Violations break user trust and cause real-world failures.
 This file is the canonical source of truth for invariant count and wording.
 
-## The Six Invariants
+## The Eight Invariants
 
 ### 1. No Unsupported Attributes
 
@@ -172,6 +172,34 @@ modifies their environment. Always ask before installing. Exception: `/ha-onboar
 **Why:** Summary-only status can hide skipped checks and create false confidence.
 
 See "Invariant 6 Details" below for the required table format.
+
+### 7. Minimal Edits Only
+
+**Rule:** Make only the specific changes requested. Do not reorganize, merge, or restructure adjacent content unless explicitly asked.
+
+**Why:** Unrequested restructuring can break working configurations and create unexpected side effects. Users expect precise, surgical edits.
+
+**Enforcement:**
+```markdown
+When editing YAML or dashboard configs:
+1. Change only the targeted lines
+2. Preserve surrounding structure, ordering, and formatting
+3. If adjacent content has issues, note them separately — do not fix them as part of the current edit
+```
+
+### 8. Verify After Config Edits
+
+**Rule:** After editing YAML config files, offer to deploy and verify changes are live. Validate entity IDs exist before use.
+
+**Why:** YAML config changes are not live until deployed and reloaded. Entity references that don't exist cause silent runtime failures (conditions evaluate to false, triggers never fire).
+
+**Enforcement:**
+```markdown
+After saving config edits:
+1. Offer `/ha-deploy` to deploy and reload
+2. Before writing entity references in automations/scripts/scenes, verify each entity exists via `hass-cli state get <entity_id>`
+3. Note: `hass-cli config check` validates YAML syntax only — it does NOT check entity existence
+```
 
 ## Applying Invariants
 

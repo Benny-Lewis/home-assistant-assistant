@@ -72,6 +72,7 @@ With `minimal_response`: intermediate states only have `state` + `last_changed`.
 - Default window is 1 day before request time — extend with `end_time` if debugging older events
 - Always use `filter_entity_id` — unfiltered returns ALL entities (huge, slow)
 - `end_time` uses `&` not `?` — common mistake: `...period?end_time=...` (wrong) vs `...period?filter_entity_id=X&end_time=...` (correct)
+- **Path-segment timestamps cause 400 errors** — The form `/api/history/period/{ISO_timestamp}?filter_entity_id=X` fails via hass-cli when the timestamp contains `+00:00` (the `+` is not URL-encoded in the path segment). Use the parameterless form instead: `/api/history/period?filter_entity_id=X` (returns last 24h) and filter results with grep/jq. If you need a specific time window, use `end_time` as a query parameter with URL-encoded timestamps (e.g., `2026-03-08T23%3A10%3A00%2B00%3A00`).
 
 ---
 

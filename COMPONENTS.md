@@ -124,7 +124,7 @@ Shared reference documents used across skills and agents:
 
 | File | Description |
 |------|-------------|
-| `references/safety-invariants.md` | The 6 safety invariants enforced across all components |
+| `references/safety-invariants.md` | The 8 safety invariants enforced across all components |
 | `references/settings-schema.md` | Schema for `.claude/settings.local.json` |
 | `references/hass-cli.md` | hass-cli command reference |
 | `templates/templates.md` | Reference templates for generated configurations |
@@ -139,3 +139,5 @@ Every skill, agent, and hook enforces these rules (canonical wording in `referen
 4. **No secrets printed** — never echoes tokens or API keys
 5. **Never deploy unless explicitly requested** — all side-effectful actions require explicit confirmation
 6. **Evidence tables** — all validation output shows what ran vs. what was skipped
+7. **Minimal edits only** — make only the specific changes requested; do not reorganize adjacent content
+8. **Verify after config edits** — offer deploy/reload after YAML changes; validate entity IDs exist before use

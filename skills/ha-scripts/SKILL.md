@@ -7,7 +7,7 @@ allowed-tools: Read, Grep, Glob, Edit, Bash(hass-cli:*), AskUserQuestion
 
 # Home Assistant Scripts
 
-> **Safety Invariants:** #1 (capability check), #5 (no implicit deploy)
+> **Safety Invariants:** #1 (capability check), #5 (no implicit deploy), #7 (minimal edits), #8 (post-edit verify)
 > See `references/safety-invariants.md`
 
 ## Overview
