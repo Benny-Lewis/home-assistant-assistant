@@ -29,6 +29,10 @@ Each entry traces back to one or more session transcripts and is self-contained 
 | BL-002 | S2 | 1.3.2 | `hass-cli raw ws` blocked at hook level in env-guard.sh; residual skill references are informational only |
 | BL-006 | S3 | 1.3.3 | Automation entity ID derivation from `alias` documented in ha-automations and ha-resolver |
 | BL-014 | S2 | 1.3.3 | Mid-sequence condition placement documented in ha-automations with examples and common-mistake entry |
+| BL-019 | S2 | 1.4.0 | Storage-mode save contract with read-after-write verification via lovelace-dashboard.py |
+| BL-020 | S3 | 1.4.0 | Sections view safe-edit playbook with grid sizing tables in SKILL.md |
+| BL-021 | S3 | 1.4.0 | Entity preflight validation before dashboard saves via find-entities subcommand |
+| BL-022 | S4 | 1.4.0 | Custom card research workflow with stable fallback order in SKILL.md |
 
 ## PR Groupings
 
