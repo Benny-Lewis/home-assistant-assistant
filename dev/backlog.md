@@ -529,3 +529,28 @@ Work is grouped into PRs by theme. Sequence reflects recommended order, not stri
 - **Suggested approach:**
   1. Update `skills/ha-naming/SKILL.md` to include an estimated duration message before launching the naming-analyzer: "Running naming audit — this typically takes 5-10 minutes for setups with 500+ entities."
   2. Consider breaking the naming-analyzer into phases (convention detection → violation scan → plan generation) with intermediate results shown to the user between phases, rather than running as a single monolithic agent call.
+
+---
+
+## 11. Editing Conventions
+
+### BL-029: No editing conventions section to prevent unwanted restructuring
+
+- **Severity:** S3
+- **Transcripts:** User feedback (2026-03-15)
+- **Affected components:** Multiple skills (ha-lovelace, ha-config, ha-automations, ha-naming)
+- **Description:** When making dashboard or document edits, the model sometimes reorganizes, merges, or restructures adjacent content beyond what was explicitly requested. There is no documented convention constraining edits to only the specific changes asked for.
+- **Rationale:** Users expect precise, minimal edits. Unrequested restructuring can break working configurations and create unexpected side effects.
+- **Suggested approach:**
+  1. Add an "Editing Conventions" section to relevant skills (or to `references/safety-invariants.md` as a cross-cutting rule) stating: "When making dashboard or document edits, make only the specific changes requested. Do not reorganize, merge, or restructure adjacent content unless explicitly asked."
+
+### BL-030: No post-edit verification convention for YAML config changes
+
+- **Severity:** S3
+- **Transcripts:** User feedback (2026-03-15)
+- **Affected components:** `skills/ha-automations/SKILL.md`, `skills/ha-scripts/SKILL.md`, `skills/ha-scenes/SKILL.md`, `skills/ha-config/SKILL.md`
+- **Description:** After editing YAML config files, the model does not consistently trigger deployment/reload to verify changes appear on the dashboard. Entity IDs are not always verified against the actual HA instance before use. The ha-lovelace skill now has entity preflight (BL-021) and save contract (BL-019), but similar discipline is missing from YAML-mode config editing workflows.
+- **Rationale:** Changes to YAML config files are not live until deployed and reloaded. Without a verification step, users may believe changes are active when they are not.
+- **Suggested approach:**
+  1. Add post-edit verification guidance to YAML-editing skills: after editing config files, prompt the user to deploy via `/ha-deploy` and verify the changes are live.
+  2. Add entity preflight validation to automation/script/scene creation workflows (cross-reference ha-resolver for entity resolution before writing YAML).
