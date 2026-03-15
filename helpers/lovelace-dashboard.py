@@ -130,6 +130,98 @@ async def cmd_fetch(url_path: str) -> None:
         await ws.close()
 
 
+async def cmd_save_and_verify(url_path: str, config_file: str) -> None:
+    """Save dashboard config and verify with read-after-write."""
+    # Read config from file or stdin
+    if config_file == "-":
+        config_data = sys.stdin.read()
+    else:
+        try:
+            with open(config_file, "r") as f:
+                config_data = f.read()
+        except FileNotFoundError:
+            print(f"Error: Config file not found: {config_file}", file=sys.stderr)
+            sys.exit(1)
+
+    try:
+        config = json.loads(config_data)
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON in config file: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    hass_server, token = get_connection_params()
+    ws = await connect(hass_server, token)
+    msg_id = 0
+
+    try:
+        # Save config
+        msg_id += 1
+        save_params = {"config": config}
+        if url_path and url_path != "lovelace":
+            save_params["url_path"] = url_path
+
+        save_result = await ws_command(ws, msg_id, "lovelace/config/save", **save_params)
+
+        if not save_result.get("success"):
+            error = save_result.get("error", {})
+            msg = error.get("message", str(error)) if isinstance(error, dict) else str(error)
+            print(f"SAVE FAILED: {msg}", file=sys.stderr)
+            sys.exit(1)
+
+        print("Save: OK (result: null — success)")
+
+        # Read-after-write verification
+        msg_id += 1
+        verify_params = {"force": True}
+        if url_path and url_path != "lovelace":
+            verify_params["url_path"] = url_path
+
+        verify_result = await ws_command(ws, msg_id, "lovelace/config", **verify_params)
+
+        if not verify_result.get("success"):
+            error = verify_result.get("error", {})
+            msg = error.get("message", str(error)) if isinstance(error, dict) else str(error)
+            print(f"VERIFY FAILED: Could not re-fetch config: {msg}", file=sys.stderr)
+            sys.exit(1)
+
+        fetched_config = verify_result.get("result", {})
+
+        # Compare view count
+        saved_views = config.get("views", [])
+        fetched_views = fetched_config.get("views", [])
+
+        if len(saved_views) != len(fetched_views):
+            print(
+                f"VERIFY FAILED: View count mismatch — saved {len(saved_views)}, "
+                f"fetched {len(fetched_views)}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        # Compare view paths (where explicitly set in saved config)
+        mismatches = []
+        for i, saved_view in enumerate(saved_views):
+            saved_path = saved_view.get("path")
+            if saved_path is not None and i < len(fetched_views):
+                fetched_path = fetched_views[i].get("path")
+                if saved_path != fetched_path:
+                    mismatches.append(
+                        f"  View {i}: saved path='{saved_path}', "
+                        f"fetched path='{fetched_path}'"
+                    )
+
+        if mismatches:
+            print("VERIFY FAILED: View path mismatches:", file=sys.stderr)
+            for m in mismatches:
+                print(m, file=sys.stderr)
+            sys.exit(1)
+
+        print(f"Verify: OK ({len(fetched_views)} views confirmed)")
+
+    finally:
+        await ws.close()
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__)
@@ -141,7 +233,14 @@ def main():
         url_path = sys.argv[2] if len(sys.argv) > 2 else "lovelace"
         asyncio.run(cmd_fetch(url_path))
 
-    # save-and-verify and find-entities added in subsequent tasks
+    elif command == "save-and-verify":
+        if len(sys.argv) < 4:
+            print("Error: save-and-verify requires <url_path> and <config_file>.")
+            print("Usage: lovelace-dashboard.py save-and-verify <url_path> <config_file>")
+            sys.exit(1)
+        asyncio.run(cmd_save_and_verify(sys.argv[2], sys.argv[3]))
+
+    # find-entities added in subsequent tasks
 
     else:
         print(f'Unknown command: "{command}"')
