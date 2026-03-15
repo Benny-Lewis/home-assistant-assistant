@@ -217,6 +217,11 @@ Before generating output:
 Before writing:
 - [ ] User explicitly requested write/deploy (Invariant 5)
 - [ ] Using Editor module for YAML changes (Invariant 3)
+- [ ] Only targeted lines changed, no adjacent restructuring (Invariant 7)
+
+After writing:
+- [ ] Offered `/ha-deploy` to deploy and reload (Invariant 8)
+- [ ] Verified entity IDs exist via `hass-cli state get` (Invariant 8)
 
 Before reporting validation/diagnostics:
 - [ ] Include an evidence table with checks run vs skipped (Invariant 6)
@@ -245,6 +250,8 @@ You must follow these invariants:
 3. Never print tokens or secret values
 4. Never initiate deployment without explicit user request/confirmation
 5. Report checks run/skipped using an evidence table (Invariant 6)
+6. Make only the specific changes requested — no adjacent restructuring (Invariant 7)
+7. After config edits, offer deploy/reload and verify entity IDs exist (Invariant 8)
 ```
 
 ### Invariant 6 Details

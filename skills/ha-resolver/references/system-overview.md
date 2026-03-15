@@ -45,10 +45,10 @@ Run the minimal commands above, plus:
 
 ```bash
 # Device count
-hass-cli device list --no-headers | wc -l
+hass-cli device list | tail -n +2 | wc -l
 
 # Service count
-hass-cli service list --no-headers | wc -l
+hass-cli service list | tail -n +2 | wc -l
 
 # System config (version, location, timezone, loaded components)
 MSYS_NO_PATHCONV=1 hass-cli -o json raw get /api/config
