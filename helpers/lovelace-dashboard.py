@@ -222,6 +222,86 @@ async def cmd_save_and_verify(url_path: str, config_file: str) -> None:
         await ws.close()
 
 
+def extract_entities(obj) -> set:
+    """Recursively extract entity IDs from a dashboard config object."""
+    entities = set()
+
+    if isinstance(obj, dict):
+        # Direct entity reference
+        if "entity" in obj and isinstance(obj["entity"], str):
+            entities.add(obj["entity"])
+
+        # Entity list (entities card, etc.)
+        if "entities" in obj and isinstance(obj["entities"], list):
+            for item in obj["entities"]:
+                if isinstance(item, str):
+                    entities.add(item)
+                elif isinstance(item, dict) and "entity" in item:
+                    entities.add(item["entity"])
+
+        # Recurse into nested card structures
+        # cards: stacks, grids
+        if "cards" in obj and isinstance(obj["cards"], list):
+            for card in obj["cards"]:
+                entities.update(extract_entities(card))
+
+        # card: conditional card
+        if "card" in obj and isinstance(obj["card"], dict):
+            entities.update(extract_entities(obj["card"]))
+
+        # elements: picture-elements card
+        if "elements" in obj and isinstance(obj["elements"], list):
+            for elem in obj["elements"]:
+                entities.update(extract_entities(elem))
+
+        # sections: sections view
+        if "sections" in obj and isinstance(obj["sections"], list):
+            for section in obj["sections"]:
+                entities.update(extract_entities(section))
+
+        # badges: view-level entity references
+        if "badges" in obj and isinstance(obj["badges"], list):
+            for badge in obj["badges"]:
+                if isinstance(badge, str):
+                    entities.add(badge)
+                elif isinstance(badge, dict) and "entity" in badge:
+                    entities.add(badge["entity"])
+
+        # views: top-level
+        if "views" in obj and isinstance(obj["views"], list):
+            for view in obj["views"]:
+                entities.update(extract_entities(view))
+
+    return entities
+
+
+async def cmd_find_entities(url_path: str) -> None:
+    """Find all entity IDs referenced in a dashboard."""
+    hass_server, token = get_connection_params()
+    ws = await connect(hass_server, token)
+
+    try:
+        params = {"force": True}
+        if url_path and url_path != "lovelace":
+            params["url_path"] = url_path
+
+        result = await ws_command(ws, 1, "lovelace/config", **params)
+
+        if not result.get("success"):
+            error = result.get("error", {})
+            msg = error.get("message", str(error)) if isinstance(error, dict) else str(error)
+            print(f"Error fetching dashboard '{url_path}': {msg}", file=sys.stderr)
+            sys.exit(1)
+
+        config = result.get("result", {})
+        entities = extract_entities(config)
+
+        for entity_id in sorted(entities):
+            print(entity_id)
+    finally:
+        await ws.close()
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__)
@@ -240,7 +320,9 @@ def main():
             sys.exit(1)
         asyncio.run(cmd_save_and_verify(sys.argv[2], sys.argv[3]))
 
-    # find-entities added in subsequent tasks
+    elif command == "find-entities":
+        url_path = sys.argv[2] if len(sys.argv) > 2 else "lovelace"
+        asyncio.run(cmd_find_entities(url_path))
 
     else:
         print(f'Unknown command: "{command}"')
