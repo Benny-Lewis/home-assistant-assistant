@@ -2,373 +2,38 @@
 name: ha-lovelace
 description: This skill should be used when the user asks about "dashboard", "lovelace", "card", "view", "theme", "UI", mentions dashboard design, card configuration, dashboard layout, or needs help with Home Assistant Lovelace dashboard creation and customization.
 user-invocable: true
-version: 0.1.0
-allowed-tools: Read, Grep, Glob
+version: 0.2.0
+allowed-tools: Read, Grep, Glob, Bash(hass-cli:*,python*,py:*)
 ---
 
 # Home Assistant Lovelace Dashboards
 
-This skill provides guidance on creating effective Lovelace dashboards.
+This skill provides workflow procedures for creating and managing Lovelace dashboards.
+
+For card types, layout options, and examples, read `references/dashboard-guide.md`.
 
 ## Important: Templating in Lovelace
 
 **Most Lovelace cards do NOT support Jinja2 templating.**
 
 If you type `{{ states('sensor.x') }}` in an Entities card, Button card, or most other cards,
-it will display as literal text - NOT the sensor value.
+it will display as literal text — NOT the sensor value.
 
-**Exception: Markdown Card** - The Markdown Card renders templates server-side. This is one of
-the few native cards that supports Jinja. See the Markdown Card section below.
+**Exception: Markdown Card** — renders templates server-side.
 
-For dynamic values in other cards, use one of these approaches:
-1. **Template entities** - Create a template sensor/binary_sensor, display that entity
-2. **Custom cards** - Install cards like `button-card` that implement their own templating
+For dynamic values in other cards:
+1. **Template entities** — create a template sensor/binary_sensor, display that entity
+2. **Custom cards** — install cards like `button-card` that implement their own templating
 
 See `ha-jinja` skill for templating reference.
 
-## Dashboard Structure
+## Dashboard Modes
 
-Dashboards contain views, views contain cards.
+### YAML Mode
+File-managed dashboards deployed via git. Edit `ui-lovelace.yaml` (or per-dashboard YAML files) and deploy with `/ha-deploy`.
 
 ```yaml
-views:
-  - title: Home
-    path: home
-    icon: mdi:home
-    cards:
-      - type: entities
-        entities:
-          - light.living_room
-```
-
-## View Configuration
-
-### Basic View
-```yaml
-views:
-  - title: "Living Room"
-    path: living-room
-    icon: mdi:sofa
-    badges: []
-    cards: []
-```
-
-### View Options
-```yaml
-views:
-  - title: "Main"
-    path: main
-    icon: mdi:home
-    theme: dark  # Optional theme override
-    background: "center / cover no-repeat url('/local/bg.jpg')"
-    panel: false  # true = single card fills view
-    badges:
-      - entity: person.john
-      - entity: sensor.temperature
-    cards: []
-```
-
-## Common Card Types
-
-### Entities Card
-List entities with states:
-```yaml
-type: entities
-title: Living Room
-entities:
-  - entity: light.living_room
-    name: Main Light
-  - entity: switch.tv
-  - type: divider
-  - entity: climate.living_room
-```
-
-### Entity Card
-Single entity display:
-```yaml
-type: entity
-entity: sensor.temperature
-name: Temperature
-icon: mdi:thermometer
-```
-
-### Button Card
-Tap to trigger action:
-```yaml
-type: button
-entity: light.bedroom
-name: Bedroom Light
-icon: mdi:lightbulb
-tap_action:
-  action: toggle
-```
-
-### Light Card
-Control lights with brightness:
-```yaml
-type: light
-entity: light.living_room
-name: Living Room
-```
-
-### Thermostat Card
-Climate control:
-```yaml
-type: thermostat
-entity: climate.main
-```
-
-### Weather Card
-Weather display:
-```yaml
-type: weather-forecast
-entity: weather.home
-show_forecast: true
-```
-
-### Picture Elements Card
-Image with overlays:
-```yaml
-type: picture-elements
-image: /local/floorplan.png
-elements:
-  - type: state-icon
-    entity: light.kitchen
-    style:
-      top: 30%
-      left: 40%
-```
-
-### History Graph Card
-State history:
-```yaml
-type: history-graph
-title: Temperature History
-hours_to_show: 24
-entities:
-  - entity: sensor.temperature
-  - entity: sensor.humidity
-```
-
-### Gauge Card
-Visual gauge:
-```yaml
-type: gauge
-entity: sensor.cpu_usage
-name: CPU
-min: 0
-max: 100
-severity:
-  green: 0
-  yellow: 50
-  red: 80
-```
-
-### Glance Card
-Compact entity display:
-```yaml
-type: glance
-title: Family
-entities:
-  - entity: person.john
-  - entity: person.jane
-  - entity: person.kids
-```
-
-### Horizontal/Vertical Stack
-Layout cards:
-```yaml
-type: vertical-stack
-cards:
-  - type: horizontal-stack
-    cards:
-      - type: button
-        entity: light.one
-      - type: button
-        entity: light.two
-  - type: entities
-    entities:
-      - sensor.temperature
-```
-
-### Grid Card
-Responsive grid layout:
-```yaml
-type: grid
-columns: 3
-square: false
-cards:
-  - type: button
-    entity: light.one
-  - type: button
-    entity: light.two
-  - type: button
-    entity: light.three
-```
-
-### Conditional Card
-Show based on state:
-```yaml
-type: conditional
-conditions:
-  - entity: input_boolean.show_details
-    state: "on"
-card:
-  type: entities
-  entities:
-    - sensor.details
-```
-
-### Markdown Card (Supports Templates!)
-Rich text content with Jinja2 - **this is the exception** where Jinja works natively:
-```yaml
-type: markdown
-title: Welcome
-content: |
-  ## Good {{ 'morning' if now().hour < 12 else 'afternoon' }}!
-
-  Temperature: {{ states('sensor.temperature') }}°F
-```
-Note: Templates are rendered server-side. Other cards do NOT support this.
-
-## Tap Actions
-
-Available on most cards:
-```yaml
-tap_action:
-  action: toggle  # toggle entity state
-
-tap_action:
-  action: call-service
-  service: light.turn_on
-  service_data:
-    entity_id: light.bedroom
-    brightness_pct: 50
-
-tap_action:
-  action: navigate
-  navigation_path: /lovelace/settings
-
-tap_action:
-  action: url
-  url_path: https://example.com
-
-tap_action:
-  action: more-info  # Show entity details
-
-tap_action:
-  action: none  # Disable tap
-```
-
-Also: `hold_action`, `double_tap_action`
-
-## Dashboard Organization
-
-### By Room
-```yaml
-views:
-  - title: Living Room
-    path: living-room
-    cards: [...]
-  - title: Kitchen
-    path: kitchen
-    cards: [...]
-  - title: Bedroom
-    path: bedroom
-    cards: [...]
-```
-
-### By Function
-```yaml
-views:
-  - title: Lights
-    path: lights
-    cards: [...]
-  - title: Climate
-    path: climate
-    cards: [...]
-  - title: Security
-    path: security
-    cards: [...]
-```
-
-### By User
-```yaml
-views:
-  - title: Overview
-    path: home
-  - title: Admin
-    path: admin
-    visible:
-      - user: admin_user_id
-```
-
-## Responsive Design
-
-### Masonry Layout (Default)
-Cards automatically arrange based on screen size.
-
-### Grid Layout
-Control columns:
-```yaml
-type: grid
-columns: 3
-cards: [...]
-```
-
-### Panel Mode
-Single card fills view:
-```yaml
-views:
-  - title: Floor Plan
-    panel: true
-    cards:
-      - type: picture-elements
-        image: /local/floor.png
-```
-
-### Mobile Considerations
-- Use vertical stacks for mobile-first design
-- Larger tap targets (buttons over toggles)
-- Fewer columns on mobile
-
-## Themes
-
-### Apply Theme
-```yaml
-views:
-  - title: Dark Mode
-    theme: dark
-    cards: [...]
-```
-
-### Custom Theme
-```yaml
-# In configuration.yaml
-frontend:
-  themes:
-    my_theme:
-      primary-color: "#1E88E5"
-      accent-color: "#FF4081"
-      card-background-color: "#333"
-```
-
-## YAML Mode vs UI Mode
-
-### Enable YAML Mode
-In dashboard settings, enable "Edit in YAML"
-
-### Dashboard File
-```yaml
-# ui-lovelace.yaml
-title: My Home
-views:
-  - title: Home
-    cards: [...]
-```
-
-Reference in configuration.yaml:
-```yaml
+# configuration.yaml
 lovelace:
   mode: yaml
   resources:
@@ -376,13 +41,167 @@ lovelace:
       type: module
 ```
 
-## Best Practices
+### Storage Mode
+UI-managed dashboards mutated via the WebSocket API. Use `helpers/lovelace-dashboard.py` for programmatic operations. See `references/dashboard-api.md` for the API contract.
 
-1. **Group related entities**: Use cards to organize by room/function
-2. **Use icons consistently**: Same icon family (mdi:)
-3. **Provide feedback**: Use state colors, badges
-4. **Mobile-first**: Design for smallest screen first
-5. **Use sections**: Add headers between card groups
-6. **Don't overcrowd**: Better to have more views than cluttered views
-7. **Use conditional cards**: Hide irrelevant information
-8. **Test on multiple devices**: Check responsive behavior
+## Dashboard Organization
+
+Organize dashboards by room, function, or user — see `references/dashboard-guide.md` for examples of each pattern.
+
+**General principles:**
+- Group related entities in the same section
+- Use consistent icon families (mdi:)
+- Design for smallest screen first (mobile-first)
+- Prefer more views over cluttered views
+- Use conditional cards to hide irrelevant information
+
+---
+
+## Entity Preflight Validation
+
+> Addresses BL-021: Dashboard entity preflight validation.
+
+**Before any dashboard save that adds or changes entity references, validate every entity ID.**
+
+### Workflow
+
+1. **Extract entity IDs** from the proposed dashboard config. During in-progress editing, scan the JSON directly. For auditing existing dashboards:
+   ```bash
+   PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+   PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt)"
+   "$PY" "$PLUGIN_ROOT/helpers/lovelace-dashboard.py" find-entities <url_path>
+   ```
+
+2. **Validate each entity** against live state:
+   ```bash
+   hass-cli state get <entity_id>
+   ```
+   If "not found", resolve using `ha-resolver` patterns (area search, name search, capability snapshot).
+
+3. **Suggest corrections** for near-misses. Common pattern: abbreviated entity name vs full device-qualified name (e.g., `sensor.fan_vent_temperature` → `sensor.upstairs_hallway_whole_house_fan_temperature`).
+
+4. **Do NOT save until all entities resolve.** A single wrong entity renders the card as "Entity not found" in the UI.
+
+---
+
+## Storage Dashboard Save Contract
+
+> Addresses BL-019: Storage-mode dashboard save contract with success/failure detection.
+
+**Every storage-mode dashboard mutation MUST follow this workflow.**
+
+### Mandatory Save Workflow
+
+1. **Fetch current config:**
+   ```bash
+   PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+   PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt)"
+   "$PY" "$PLUGIN_ROOT/helpers/lovelace-dashboard.py" fetch <url_path> > current.json
+   ```
+
+2. **Modify the JSON** — edit `current.json` with the desired changes.
+
+3. **Save and verify:**
+   ```bash
+   "$PY" "$PLUGIN_ROOT/helpers/lovelace-dashboard.py" save-and-verify <url_path> current.json
+   ```
+
+4. **Check exit code:**
+   - Exit 0 = save confirmed (view count and paths verified)
+   - Exit non-zero = **save failed or verification failed — do NOT claim success**
+
+5. **Visual verification:** Ask the user to open the dashboard URL in their browser and confirm it renders correctly.
+
+### Common Mistake
+
+A successful save returns `result: null`. This is correct — **null is not an error**. A failure returns `success: false` with an `error` object. See `references/dashboard-api.md` for full response format.
+
+---
+
+## Sections View Mutation Rules
+
+> Addresses BL-020: Sections view safe-edit playbook.
+
+### One Section at a Time
+
+**Never replace the entire `sections` array in a single save.** Instead:
+
+1. Fetch current config
+2. Modify ONE section (add, edit, or remove)
+3. Save and verify
+4. Confirm the view renders correctly
+5. Proceed to the next section
+
+Bulk section replacement risks validation conflicts and blank views.
+
+### `max_columns` Tuning
+
+| Content type | Recommended `max_columns` |
+|---|---|
+| Tile cards (compact) | 4 |
+| Custom cards with legends | 3 |
+| Dense multi-entity cards | 2-3 |
+
+Overly wide layouts cause cards to render too narrow, especially custom cards with legends or multiple entities.
+
+### `grid_options.rows` Sizing
+
+| Card content | Recommended `rows` |
+|---|---|
+| Single entity, no extras | 1 (default) |
+| Entity with legend or name | 2 |
+| Multi-entity with legend + extrema | 3 |
+| Graph card with 3+ entities | 3-4 |
+
+If legends overlap or cards look cramped, increase `rows`.
+
+### Blank View Recovery
+
+If a structural edit produces a blank view:
+1. The sections array is likely malformed
+2. Re-fetch the current config from HA (it may have reverted)
+3. Compare against the last known-good state
+4. Fix the structure and re-save
+
+### Visual Verification
+
+After EVERY structural mutation, ask the user to verify the view renders before making the next change. Do not batch structural changes.
+
+---
+
+## Custom Card Research Workflow
+
+> Addresses BL-022: Stable workflow for researching custom card capabilities.
+
+### Documentation Lookup Order
+
+When the user asks about custom card options or capabilities, follow this stable fallback order:
+
+1. **Plugin reference first:** Check `references/dashboard-guide.md` popular cards section for common cards (Mushroom, mini-graph-card, button-card, card-mod, apexcharts-card, layout-card).
+
+2. **HACS / installed resources:** Check what's installed:
+   ```bash
+   hass-cli raw get /api/lovelace/resources
+   ```
+
+3. **GitHub API:** Fetch the card's README directly:
+   ```bash
+   gh api repos/<owner>/<repo>/readme --jq .content | base64 -d
+   ```
+   Examples:
+   - `gh api repos/kalkih/mini-graph-card/readme --jq .content | base64 -d`
+   - `gh api repos/piitaya/lovelace-mushroom/readme --jq .content | base64 -d`
+
+4. **Web search (last resort):** Only if the above fail or return rate-limited responses.
+
+### Post-Install Availability
+
+After installing a custom card via HACS, the HA frontend must reload before the new card type is recognized:
+1. Hard-refresh the browser (Ctrl+Shift+R / Cmd+Shift+R)
+2. If that doesn't work, restart Home Assistant
+
+Do NOT attempt to use a newly installed card type in a dashboard save until the user confirms the frontend has reloaded.
+
+### Common Mistake
+
+Each custom card has its own configuration schema. Do NOT guess option names based on other cards or built-in cards. Always check the card's README for supported options.
