@@ -53,7 +53,7 @@ These skills provide reference knowledge and activate automatically when you ask
 | Skill | Description | Tools |
 |-------|-------------|-------|
 | `ha-config` | Configuration file structure — `configuration.yaml`, packages, includes, `secrets.yaml`, splitting and organizing config files | Read, Grep, Glob |
-| `ha-lovelace` | Dashboard design — card types, views, layouts, themes, conditional cards, custom components | Read, Grep, Glob |
+| `ha-lovelace` | Dashboard design and storage-mode operations — card types, views, layouts, themes, entity preflight, save contract, sections mutation, custom card research | Read, Grep, Glob, Bash(hass-cli:*,python*,py:*,gh:*) |
 | `ha-jinja` | Jinja2 templating — template sensors, `value_template`, `state_attr()`, `states()`, filters, and debugging | Read, Grep, Glob |
 | `ha-devices` | Device and integration knowledge — device types, setup workflows, Zigbee/Z-Wave/WiFi, entity relationships | Read, Grep, Glob, Bash, AskUserQuestion, Task |
 
@@ -77,6 +77,7 @@ Some skills include reference subdirectories with domain-specific knowledge:
 | `skills/ha-naming/references/editor.md` | ha-naming | Safe YAML AST editing procedures |
 | `skills/ha-naming/references/naming-conventions.md` | ha-naming | HA naming convention patterns |
 | `skills/ha-troubleshooting/references/log-patterns.md` | ha-troubleshooting | Common HA error patterns and resolutions |
+| `skills/ha-lovelace/references/dashboard-guide.md` | ha-lovelace | Card types, layout options, grid sizing, HACS cards, complete examples |
 
 ## Agents
 

@@ -197,6 +197,129 @@
       ]
     },
     {
+      "id": "REG-014",
+      "name": "ha-lovelace allowed-tools includes Bash",
+      "description": "SKILL.md must allow Bash for helper and hass-cli access after BL-019/BL-021.",
+      "checks": [
+        {
+          "path": "skills/ha-lovelace/SKILL.md",
+          "contains": "Bash(hass-cli:*,python*,py:*,gh:*)"
+        }
+      ]
+    },
+    {
+      "id": "REG-015",
+      "name": "ha-lovelace references dashboard-guide",
+      "description": "SKILL.md must reference the dashboard-guide.md for card types and layout.",
+      "checks": [
+        {
+          "path": "skills/ha-lovelace/SKILL.md",
+          "contains": "references/dashboard-guide.md"
+        }
+      ]
+    },
+    {
+      "id": "REG-016",
+      "name": "ha-lovelace save contract requires lovelace-dashboard.py",
+      "description": "SKILL.md save workflow must use the helper, not ad hoc WebSocket calls.",
+      "checks": [
+        {
+          "path": "skills/ha-lovelace/SKILL.md",
+          "contains": "lovelace-dashboard.py"
+        },
+        {
+          "path": "skills/ha-lovelace/SKILL.md",
+          "contains": "save-and-verify"
+        }
+      ]
+    },
+    {
+      "id": "REG-017",
+      "name": "ha-lovelace entity preflight before save",
+      "description": "SKILL.md must require entity validation before dashboard saves.",
+      "checks": [
+        {
+          "path": "skills/ha-lovelace/SKILL.md",
+          "contains": "Do NOT save until all entities resolve"
+        }
+      ]
+    },
+    {
+      "id": "REG-018",
+      "name": "ha-lovelace sections one-at-a-time rule",
+      "description": "SKILL.md must prohibit bulk section replacement.",
+      "checks": [
+        {
+          "path": "skills/ha-lovelace/SKILL.md",
+          "contains": "Never replace the entire"
+        }
+      ]
+    },
+    {
+      "id": "REG-019",
+      "name": "ha-lovelace custom card fallback order",
+      "description": "SKILL.md must define a stable documentation lookup order for custom cards.",
+      "checks": [
+        {
+          "path": "skills/ha-lovelace/SKILL.md",
+          "contains": "Plugin reference first"
+        },
+        {
+          "path": "skills/ha-lovelace/SKILL.md",
+          "contains": "GitHub API"
+        }
+      ]
+    },
+    {
+      "id": "REG-020",
+      "name": "dashboard-api.md documents null success contract",
+      "description": "The API reference must document that null result on save is success.",
+      "checks": [
+        {
+          "path": "references/dashboard-api.md",
+          "contains": "result: null"
+        },
+        {
+          "path": "references/dashboard-api.md",
+          "contains": "NOT an error"
+        }
+      ]
+    },
+    {
+      "id": "REG-021",
+      "name": "lovelace-dashboard.py has all three subcommands",
+      "description": "Helper must expose fetch, save-and-verify, and find-entities.",
+      "checks": [
+        {
+          "path": "helpers/lovelace-dashboard.py",
+          "contains": "cmd_fetch"
+        },
+        {
+          "path": "helpers/lovelace-dashboard.py",
+          "contains": "cmd_save_and_verify"
+        },
+        {
+          "path": "helpers/lovelace-dashboard.py",
+          "contains": "cmd_find_entities"
+        }
+      ]
+    },
+    {
+      "id": "REG-022",
+      "name": "dashboard-guide.md covers grid_options.rows sizing",
+      "description": "Dashboard guide must include the rows sizing table from BL-020.",
+      "checks": [
+        {
+          "path": "skills/ha-lovelace/references/dashboard-guide.md",
+          "contains": "grid_options"
+        },
+        {
+          "path": "skills/ha-lovelace/references/dashboard-guide.md",
+          "contains": "Recommended `rows`"
+        }
+      ]
+    },
+    {
       "id": "DUP-001",
       "name": "duplicate id regression half",
       "description": "Harness should keep this regression case distinct from the capability case with the same id.",

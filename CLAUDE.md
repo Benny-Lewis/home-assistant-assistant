@@ -51,6 +51,7 @@ helpers/
   entity-registry.py        # Entity registry operations
   ha-overview.py            # HA setup overview generation
   trace-fetch.py            # Automation trace fetching
+  lovelace-dashboard.py     # Lovelace dashboard fetch/save/verify/find-entities
 hooks/
   hooks.json                # Event-driven hooks (SessionStart, PreToolUse, PostToolUse)
   session-check.sh          # Async env check (HASS_TOKEN, HASS_SERVER, python detection)
@@ -62,6 +63,7 @@ references/
   settings-schema.md        # Settings file schema
   hass-cli.md               # hass-cli usage reference
   ha-web-ui.md              # HA web UI reference
+  dashboard-api.md          # WebSocket API contract for storage dashboards
 templates/
   templates.md              # Reference templates for generated configs
 ```
@@ -131,7 +133,7 @@ export HASS_TOKEN="your-long-lived-access-token"
 | ha-scenes | (auto) | Create scenes from descriptions |
 | ha-devices | (auto) | Device knowledge + new device workflow |
 | ha-config | (auto) | Configuration organization guidance |
-| ha-lovelace | (auto) | Dashboard design guidance |
+| ha-lovelace | (auto) | Dashboard design + storage-mode operations |
 | ha-jinja | (auto) | Jinja templating guidance |
 | ha-troubleshooting | (auto) | Debugging and log analysis |
 | ha-resolver | (agent) | Entity resolution (preloaded by agents) |
