@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.4.0
+
+### Added
+
+- **`lovelace-dashboard.py` helper** — WebSocket helper for storage-mode dashboard operations with three subcommands: `fetch` (get dashboard config), `save-and-verify` (save with read-after-write verification), and `find-entities` (recursive entity ID extraction for preflight validation)
+- **Storage Dashboard Save Contract** (BL-019) — mandatory fetch/modify/save-and-verify workflow in ha-lovelace SKILL.md with deterministic exit codes; documents that `result: null` is success, not an error
+- **Sections View Mutation Rules** (BL-020) — one-section-at-a-time edit playbook with `max_columns` tuning table and `grid_options.rows` sizing table
+- **Entity Preflight Validation** (BL-021) — workflow requiring all entity IDs to resolve against live HA before dashboard saves, with ha-resolver cross-reference for near-miss correction
+- **Custom Card Research Workflow** (BL-022) — stable documentation lookup order: plugin reference → HACS installed resources → GitHub API → web search
+- **`references/dashboard-api.md`** — WebSocket API contract reference for storage-mode dashboards
+- **`skills/ha-lovelace/references/dashboard-guide.md`** — card types, layout options, grid sizing, HACS cards, and complete dashboard examples (adapted from ha-mcp)
+- **Regression guards** — 9 new eval cases (REG-014 through REG-022) covering all new content
+
+### Changed
+
+- **ha-lovelace SKILL.md restructured** — card reference content moved to `references/dashboard-guide.md`; four new workflow sections added; `allowed-tools` expanded to include `Bash(hass-cli:*,python*,py:*)`; version bumped to 0.2.0
+
 ## 1.3.3
 
 ### Documentation
