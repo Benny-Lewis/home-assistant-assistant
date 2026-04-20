@@ -72,6 +72,8 @@ templates/
 
 **15 skills total:** 14 user-invocable + 1 infrastructure (ha-resolver). ha-validate is both user-invocable and agent-preloadable.
 
+**Progressive disclosure:** Skills with long procedural content keep SKILL.md as a tight triggering surface (frontmatter, safety banner, decision rules, workflow index) and move step-by-step detail into per-skill `references/*.md`. Skills currently using this pattern: ha-apply-naming, ha-automations, ha-devices, ha-lovelace, ha-naming, ha-onboard, ha-resolver, ha-scenes, ha-scripts, ha-troubleshooting. When exploring a skill, read its SKILL.md first, then follow the Workflow Index to the specific reference file needed.
+
 ## Marketplace Packaging Note
 
 For this repo's self-hosted single-plugin marketplace, keep `.claude-plugin/marketplace.json` pointing the plugin entry at `source: "./"`.
