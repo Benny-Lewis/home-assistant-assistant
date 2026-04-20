@@ -9,6 +9,7 @@
 
 # Dev artifacts
 dev/testing/reports/
+plans/
 
 # OS files
 .DS_Store
