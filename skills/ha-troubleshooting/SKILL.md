@@ -227,4 +227,4 @@ Present findings using this ran-vs-skipped table:
 
 - `references/log-patterns.md` - Common error patterns and fixes
 - `references/diagnostic-api.md` - History, Logbook, and Trace API procedures
-- `references/ha-web-ui.md` - Browser automation limitations with HA's Shadow DOM
+- `references/ha-web-ui.md` (plugin root) - Browser automation limitations with HA's Shadow DOM

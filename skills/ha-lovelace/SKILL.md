@@ -2,7 +2,6 @@
 name: ha-lovelace
 description: This skill should be used when the user asks about "dashboard", "lovelace", "card", "view", "theme", "UI", mentions dashboard design, card configuration, dashboard layout, or needs help with Home Assistant Lovelace dashboard creation and customization.
 user-invocable: true
-version: 0.2.0
 allowed-tools: Read, Grep, Glob, Bash(hass-cli:*,python*,py:*,gh:*)
 ---
 
@@ -45,7 +44,7 @@ lovelace:
 ```
 
 ### Storage Mode
-UI-managed dashboards mutated via the WebSocket API. Use `helpers/lovelace-dashboard.py` for programmatic operations. See `references/dashboard-api.md` for the API contract.
+UI-managed dashboards mutated via the WebSocket API. Use `helpers/lovelace-dashboard.py` for programmatic operations. See `references/dashboard-api.md` (plugin root) for the API contract.
 
 ## Dashboard Organization
 

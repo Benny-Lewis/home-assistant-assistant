@@ -2,11 +2,13 @@
 name: ha-jinja
 description: This skill should be used when the user asks about "template", "jinja", "jinja2", "template sensor", "value_template", "state_attr", "states()", mentions Jinja syntax, template debugging, or needs help with Home Assistant templating patterns.
 user-invocable: true
-version: 0.1.0
 allowed-tools: Read, Grep, Glob, Bash(hass-cli:*)
 ---
 
 # Home Assistant Jinja2 Templating
+
+> **Safety Invariants:** #4 (never render secrets), #8 (verify entity IDs exist before use)
+> See `references/safety-invariants.md`
 
 This skill provides guidance on Jinja2 templating in Home Assistant.
 
@@ -327,7 +329,7 @@ MSYS_NO_PATHCONV=1 hass-cli raw post /api/template \
 - **Syntax error** — HTTP 400 with `"message": "TemplateSyntaxError: ..."` describing the parse failure
 - **Type error** — HTTP 400 with `"message": "UndefinedError: ..."` for missing variables/filters
 
-See `references/hass-cli.md` for the MINGW path conversion note (`MSYS_NO_PATHCONV=1`).
+See `references/hass-cli.md` (plugin root) for the MINGW path conversion note (`MSYS_NO_PATHCONV=1`).
 
 ### Common Errors
 

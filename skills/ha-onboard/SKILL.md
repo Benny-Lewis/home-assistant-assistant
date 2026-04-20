@@ -466,7 +466,7 @@ The `permissions.allow` array auto-approves all plugin skills and hass-cli comma
 Note: Connection settings (HASS_TOKEN, HASS_SERVER) are stored as
 environment variables, NOT in the settings file.
 
-See `references/settings-schema.md` for full schema.
+See `references/settings-schema.md` (plugin root) for full schema.
 
 ## Reconfigure Individual Settings
 

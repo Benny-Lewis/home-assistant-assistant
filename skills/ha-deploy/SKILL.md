@@ -1,6 +1,6 @@
 ---
 name: ha-deploy
-description: Deploy or roll back Home Assistant configuration changes via git
+description: Use when the user says "deploy", "push changes", "send to HA", "sync to Home Assistant", "rollback", "revert", or otherwise asks to apply or undo local YAML edits on the live HA instance. Commits to git, pushes, and reloads HA; requires explicit confirmation at each side-effectful step.
 user-invocable: true
 allowed-tools: Read, Write, Bash, AskUserQuestion, Glob
 ---

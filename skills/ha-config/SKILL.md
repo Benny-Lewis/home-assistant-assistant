@@ -2,11 +2,13 @@
 name: ha-config
 description: This skill should be used when the user asks about "configuration.yaml", "HA config structure", "packages", "includes", "secrets.yaml", "splitting config files", "YAML organization", mentions Home Assistant configuration organization, or needs help structuring their Home Assistant setup. Provides comprehensive guidance on Home Assistant configuration file organization and best practices.
 user-invocable: true
-version: 0.1.0
 allowed-tools: Read, Grep, Glob
 ---
 
 # Home Assistant Configuration Patterns
+
+> **Safety Invariants:** #4 (never print secrets from `secrets.yaml`), #7 (minimal edits), #8 (verify after config edits)
+> See `references/safety-invariants.md`
 
 > **This skill is REFERENCE ONLY.** It provides guidance on config organization.
 > To modify configuration files, use the appropriate skill:

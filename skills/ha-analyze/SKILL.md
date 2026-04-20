@@ -7,6 +7,9 @@ allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
 
 # Analyze Home Assistant Setup
 
+> **Safety Invariants:** #6 (evidence tables), #5 (read-only — never deploy suggestions)
+> See `references/safety-invariants.md`
+
 > **Data-Derived Analysis:** All metrics and suggestions must be backed by evidence.
 > Do NOT invent statistics. Only report what was actually measured.
 > Never use approximate counts. If you cannot measure a value exactly, write `not available`.
