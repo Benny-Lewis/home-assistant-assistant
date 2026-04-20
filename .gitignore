@@ -10,6 +10,7 @@
 # Dev artifacts
 dev/testing/reports/
 plans/
+skills/*-workspace/
 
 # OS files
 .DS_Store

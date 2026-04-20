@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(hass-cli raw get:*)",
+      "Bash(hass-cli -o json raw get:*)",
+      "Bash(hass-cli state list:*)",
+      "Bash(hass-cli state get:*)",
+      "Bash(hass-cli -o json state:*)",
+      "Bash(hass-cli -o json entity list:*)",
+      "Bash(hass-cli -o json area list:*)",
+      "Bash(hass-cli -o json device list:*)",
+      "Bash(hass-cli --version)",
+      "Bash(powershell -ExecutionPolicy Bypass -File dev/testing/scripts/eval-harness.ps1:*)"
+    ]
+  }
+}
