@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.5.0
+
+### Changed
+
+- **Progressive-disclosure refactor** — four large SKILL.md files split into per-skill `references/*.md` so the SKILL.md becomes a tight triggering surface (frontmatter, safety banner, decision rules, workflow index) while procedural detail moves to references:
+  - `ha-apply-naming` SKILL.md: 395 → 66 lines — Safety Features, 8-phase Execution Process, Post-Plan Scope Gate, Progress Reporting, and Output template moved to `references/execution.md`; Rollback and Error Handling moved to `references/recovery.md`
+  - `ha-naming` SKILL.md: 517 → 84 lines — Anti-Patterns and Migration Strategy moved to `references/anti-patterns.md`; the full Audit Workflow moved to `references/audit-workflow.md`; the full Plan Workflow moved to `references/plan-workflow.md`
+  - `ha-onboard` SKILL.md: 517 → 73 lines — Steps 1-8 plus Skip Behavior moved to `references/setup-steps.md`; Settings Storage schema, Reconfigure Individual Settings, and Post-Onboarding moved to `references/post-setup.md`
+  - `ha-devices` SKILL.md: 587 → 71 lines — Common Integration Types moved to `references/integrations.md`; Device Categories moved to `references/device-categories.md`; Adding Devices, Entity Management, Area Organization, Device Groups, Troubleshooting, and the New Device Setup Workflow moved to `references/workflow.md`
+- **ha-deploy description rewritten** — frontmatter description now front-loads explicit trigger phrases ("deploy", "push changes", "send to HA", "sync to Home Assistant", "rollback", "revert") so the skill triggers reliably on the language users actually use
+- **CLAUDE.md** — added a short progressive-disclosure note listing the 10 skills that use the `references/` pattern and pointing at the Workflow Index as the navigation hook
+
+### Fixed
+
+- **Broken per-skill reference paths** — qualified four `references/...` mentions in ha-onboard, ha-troubleshooting, ha-lovelace, and ha-jinja as plugin-root references (they point at the repo-root `references/` directory, not a skill-local one)
+- **Deprecated `version:` frontmatter** — removed the stale `version:` field from ha-config, ha-jinja, and ha-lovelace SKILL.md files
+- **Missing safety-invariant banners** — added canonical banners citing the relevant invariants from `references/safety-invariants.md` to ha-jinja (#4, #8), ha-config (#4, #7, #8), and ha-analyze (#5, #6)
+
+### Added
+
+- **`.claude/settings.json`** — project-scoped allowlist for read-only hass-cli subcommands (`raw get`, `state list/get`, `-o json entity/area/device/state list`, `--version`) and the project eval harness invocation; narrow per-subcommand patterns only, no broad `Bash(hass-cli:*)` wildcard
+- **Gitignore** — `skills/*-workspace/` added so skill-creator's throwaway eval workspaces (e.g. `ha-deploy-workspace/`) stay out of the tracked tree
+
 ## 1.4.0
 
 ### Added
