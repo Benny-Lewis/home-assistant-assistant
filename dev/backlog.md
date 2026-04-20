@@ -1,6 +1,6 @@
 # Backlog
 
-Transcript-derived issues and improvement areas from user session analysis (2026-03-07 to 2026-03-13).
+Transcript-derived issues and improvement areas from user session analysis (2026-03-07 to 2026-03-15).
 Each entry traces back to one or more session transcripts and is self-contained for future sessions.
 
 ## Transcript Legend
@@ -14,6 +14,10 @@ Each entry traces back to one or more session transcripts and is self-contained 
 | T5 | `2026-03-07-133844-command-messagehome-assistant-assistantha-onboa.txt` | 2026-03-07 | ha-naming audit and plan generation (naming spec review, area cleanup) |
 | T6 | `2026-03-12-163104-this-session-is-being-continued-from-a-previous-co.txt` | 2026-03-12 | ha-lovelace dashboard prototyping: HACS card install, storage-dashboard mutation, multi-card showcase |
 | T7 | `2026-03-13-181110-home-assistant-assistantha-naming.txt` | 2026-03-13 | ha-naming re-audit, blocked-item resolution, ha-apply-naming execution, deploy, dashboard fallout and recovery |
+| T8 | `2026-03-15-084839-this-session-is-being-continued-from-a-previous-co.txt` | 2026-03-15 | Camera dashboard finalization, stale memory context drift |
+| T9 | `2026-03-15-092628-add-the-ikea-temp-humidity-in-the-office-to-my-d.txt` | 2026-03-15 | Add IKEA sensor to dashboards, wrong skill auto-selection, Git Pull trigger failures |
+| T10 | `2026-03-15-124402-implement-the-following-plan.txt` | 2026-03-15 | White noise automation with placeholder entity IDs, premature config generation before prerequisites |
+| T11 | `2026-03-15-144436-implement-the-following-plan.txt` | 2026-03-15 | Alexa Media Player auth failure → HA Cloud pivot, Aqara ZHA pairing, Git Pull sync bypass via REST API |
 
 > **Severity key:**
 > - **S2 (Bug)** — Incorrect behavior that produces wrong output, silent failures, or errors
@@ -98,6 +102,28 @@ Work is grouped into PRs by theme. Sequence reflects recommended order, not stri
 | BL-013 | S3 | Z-Wave re-inclusion side-effects warning (lock codes, device settings) |
 | BL-017 | S5 | Update common-patterns.md to 2024+ YAML syntax |
 | BL-018 | S5 | Fix `--no-headers` with `service list` in ha-resolver |
+
+### PR 7: Dashboard Reference Repair & Skill Routing (BL-031, BL-033)
+
+| ID | Severity | Summary |
+|----|----------|---------|
+| BL-031 | S4 | Storage dashboard entity reference scanner + repair helper after renames |
+| BL-033 | S3 | Auto-select ha-lovelace skill for dashboard requests |
+
+### PR 8: Analysis & Troubleshooting UX (BL-032, BL-034, BL-035)
+
+| ID | Severity | Summary |
+|----|----------|---------|
+| BL-032 | S3 | Timezone conversion for displayed timestamps |
+| BL-034 | S3 | API-first guidance for HA UI operations; document browser automation limitations |
+| BL-035 | S3 | Proactive solution offering after analysis; close-the-loop convention |
+
+### PR 9: Config Generation Safety (BL-036, BL-037)
+
+| ID | Severity | Summary |
+|----|----------|---------|
+| BL-036 | S3 | Don't generate YAML with placeholder entity IDs; wait for prerequisites |
+| BL-037 | S5 | Portable Jinja strftime format codes |
 
 ---
 
@@ -565,3 +591,124 @@ Work is grouped into PRs by theme. Sequence reflects recommended order, not stri
 - **Suggested approach:**
   1. Add post-edit verification guidance to YAML-editing skills: after editing config files, prompt the user to deploy via `/ha-deploy` and verify the changes are live.
   2. Add entity preflight validation to automation/script/scene creation workflows (cross-reference ha-resolver for entity resolution before writing YAML).
+
+---
+
+## 12. Storage Dashboard Reference Repair
+
+### BL-031: No tool to scan and fix broken entity references in storage dashboards after renames
+
+- **Severity:** S4
+- **Transcripts:**
+  - T7:1388-2385 — After 203 entity renames, storage-mode dashboard cards showed "Entity not found." Claude spent ~45 minutes fixing references: first via 50+ individual Chrome browser clicks (slow, error-prone), then via JavaScript WebSocket calls (faster but caused side effects — wrong entities replaced, e.g., `sensor.attic_temperature` → `sensor.garage_temperature` which then had to be reverted).
+  - T9:14-89 — Adding new sensor entities to dashboards, Claude used direct Edit tool on YAML files without loading ha-lovelace skill; user had to correct the approach.
+- **Affected components:** `skills/ha-lovelace/SKILL.md`, `skills/ha-apply-naming/SKILL.md`, `helpers/`
+- **Description:** BL-019/020/021 addressed dashboard save contracts, safe editing, and entity preflight validation for *new* dashboard edits. But there is no tool for the *post-rename repair* workflow: scanning existing storage dashboards for broken entity references, showing which references are broken, and applying a rename map (old_id → new_id) across all cards/views. This is distinct from BL-021 (which validates before saves) — this is about repairing existing dashboards after bulk entity renames. Storage dashboards live in HA's `.storage/lovelace*` files (not in git), so YAML editing doesn't apply.
+- **Rationale:** Any user running ha-apply-naming with storage-mode dashboards will hit this. The transcript showed ~45 minutes of manual repair work that could be automated with a helper that fetches config via WebSocket, applies a rename map, and saves back with dry-run preview.
+- **Suggested approach:**
+  1. Create a `helpers/dashboard-refs.py` helper that: fetches storage dashboard config via WebSocket (`lovelace/config`), scans all cards for entity references, reports broken ones, applies find-and-replace for renamed entities (with dry-run preview), and saves back via WebSocket (`lovelace/config/save`).
+  2. Integrate into ha-apply-naming post-execution: after renames complete, scan storage dashboards and offer to fix broken references.
+  3. Reference ha-mcp's `tools_config_dashboards.py` for patterns: `ha_dashboard_find_card` searches for entity refs within dashboards; multi-pass entity resolution collects missing entities; incremental save avoids "error: 3".
+
+---
+
+## 13. Timestamp & Timezone Handling
+
+### BL-032: Displayed timestamps show raw UTC without timezone conversion or labeling
+
+- **Severity:** S3
+- **Transcripts:**
+  - T2:963-965 — Claude reported automation fire times as "5:36 PM" and "5:41 PM" when timestamps were UTC. User corrected: Pacific time with DST (UTC-7), actual times were 10:36 AM / 10:41 AM.
+- **Affected components:** `skills/ha-troubleshooting/SKILL.md`, `skills/ha-automations/SKILL.md`, any skill displaying timestamps
+- **Description:** hass-cli and the HA REST API return timestamps in UTC. The model displays them as-is without converting to the user's local timezone or labeling them as UTC. This creates confusion when users interpret timestamps as local time. The user's timezone is available from HA config (`zone.home` attributes include timezone).
+- **Rationale:** Any troubleshooting or trace analysis session involves reading timestamps. Misinterpreted timestamps lead to wrong conclusions about when events occurred.
+- **Suggested approach:**
+  1. Detect user timezone from HA config during session: `hass-cli -o json state get zone.home` includes timezone attribute.
+  2. Add guidance to skills that display timestamps: always convert UTC → local and label with timezone (e.g., "10:36 AM PDT").
+  3. Consider a small utility function in an existing helper that handles the conversion.
+  4. Note: ha-mcp's `tools_history.py` includes relative time *input* parsing (24h, 7d → timedelta → ISO) but also lacks *output* timezone conversion — this is a gap in both projects.
+
+---
+
+## 14. Skill Routing & Auto-Selection
+
+### BL-033: Dashboard requests don't auto-select ha-lovelace skill
+
+- **Severity:** S3
+- **Transcripts:**
+  - T9:14-52 — User said "add the IKEA sensor to my dashboards." Claude used direct Edit tool on YAML dashboard files without loading ha-lovelace skill. User had to correct: "use the right skill for dashboards."
+  - T8:89-105 — Claude took 4 unnecessary browser actions before reading the YAML file to verify dashboard state; should have read config first.
+- **Affected components:** `skills/ha-lovelace/SKILL.md`, plugin-level skill routing
+- **Description:** When the user requests dashboard modifications, the model sometimes bypasses the ha-lovelace skill and uses generic Edit tool on YAML files directly. The ha-lovelace skill has entity preflight validation, save contracts, and sections-view guidance that the direct Edit path lacks. The skill should be automatically selected for any request involving dashboards, Lovelace, cards, or views.
+- **Rationale:** Every dashboard edit made without the skill bypasses the safety and quality gates added in BL-019/020/021.
+- **Suggested approach:**
+  1. Add skill-routing guidance to `skills/ha-lovelace/SKILL.md` trigger section or to a plugin-level routing note: "For any request involving dashboards, Lovelace, cards, or views → load ha-lovelace skill before using Edit tool on dashboard YAML."
+  2. Consider adding dashboard file paths to the ha-lovelace skill's trigger patterns so it activates automatically.
+
+---
+
+## 15. Browser Automation Reliability
+
+### BL-034: Browser automation against HA web UI is fragile and wastes time before falling back to API
+
+- **Severity:** S3
+- **Transcripts:**
+  - T2:338-385 — Chrome extension disconnected mid-Z-Wave UI navigation
+  - T7:2937-2960 — Form field focus unreliable during Reolink camera setup; IP entered into password field 3 times before user took over
+  - T11:1080-1172 — Accessibility tree issues during Expose Entities flow; eventually used JavaScript API instead
+  - T11:505-650 — 25 minutes trying to automate Alexa sign-in via browser before pivoting to manual approach
+- **Affected components:** `skills/ha-devices/SKILL.md`, `skills/ha-troubleshooting/SKILL.md`
+- **Description:** HA's web UI uses Shadow DOM and web components that are inherently hostile to browser automation. Across 4 transcripts, browser automation failed for Z-Wave node management, integration config flows, entity exposure settings, and form-filling. In every case, Claude eventually fell back to API calls or manual step-by-step instructions — but only after spending 10–25 minutes on failed browser attempts.
+- **Rationale:** The pattern is consistent: browser automation attempts fail, time is wasted, then the API or manual approach works. Skills should guide toward API-first, browser-last.
+- **Suggested approach:**
+  1. Add guidance to ha-devices and ha-troubleshooting: "HA's web UI uses Shadow DOM. Browser automation is unreliable for: Z-Wave node management, integration config flows, entity exposure settings, third-party auth flows. Use REST/WebSocket APIs as primary path; provide numbered manual steps when no API exists."
+  2. When browser automation fails on the first attempt, immediately switch to API or manual instructions instead of retrying.
+
+---
+
+## 16. Analysis & Troubleshooting UX
+
+### BL-035: Analysis that discovers problems doesn't proactively offer fix options
+
+- **Severity:** S3
+- **Transcripts:**
+  - T1:467-593 — Analysis found duplicate notification bug (camera person-detection flicker causing 2 notifications in 11 seconds). Claude explained the root cause but didn't offer fix options until the user asked "can you explain mode: single?" Only then did Claude suggest a 60-second cooldown delay.
+  - T2:770-847 — User reported "my old codes don't work" after Z-Wave re-inclusion. Claude investigated but session ended without confirming the codes were restored or providing a recovery path.
+- **Affected components:** `skills/ha-troubleshooting/SKILL.md`, `skills/ha-analyze/SKILL.md`
+- **Description:** When ha-troubleshooting or ha-analyze discovers an issue, the model sometimes stops at diagnosis without offering actionable remediation options. The user has to ask follow-up questions to get solutions. Additionally, sessions can end with unresolved issues and no explicit confirmation that the problem was fixed.
+- **Rationale:** Users call troubleshooting skills because they want problems fixed, not just diagnosed. The gap between "here's what's wrong" and "here are 3 ways to fix it" should be closed automatically.
+- **Suggested approach:**
+  1. Update ha-troubleshooting and ha-analyze to require: when a problem is identified, immediately present 2–3 solution options with tradeoffs (e.g., "Option A: 60s cooldown [simple, may miss real events]. Option B: debounce helper [configurable, more complex]").
+  2. Add a "close the loop" convention: before ending a session with an unresolved issue, explicitly ask "Can you confirm X is working now?"
+
+---
+
+## 17. Config Generation Prerequisites
+
+### BL-036: Automations generated with placeholder entity IDs before prerequisites are confirmed
+
+- **Severity:** S3
+- **Transcripts:**
+  - T10:269-272 — Generated 3 automations with hardcoded placeholders like `media_player.rec_room_echo` and `event.top_of_stairs_button` before the user had paired the Aqara button or installed Alexa Media Player. When prerequisites changed, all three automations had to be rewritten.
+  - T11:1544-1550 — Assumed Aqara button would create an `event.*` entity (it didn't) and command name was `remote_button_short_press` (actual: `single`). Required 20+ minutes of debugging to discover the real trigger.
+- **Affected components:** `skills/ha-automations/SKILL.md`, `skills/ha-devices/SKILL.md`
+- **Description:** The model generates complete YAML automations referencing entities that don't yet exist, assuming the user will complete prerequisites later. When the real entities turn out to have different IDs or different capabilities than assumed, the automations must be rewritten. This extends BL-007 (entity existence validation) to cover the case where entities don't exist *yet* — the model should wait for them rather than guessing.
+- **Rationale:** Generating config with placeholder IDs creates rework. For new device integrations, the actual entity IDs, event types, and command names are only known after the device is paired and interviewed.
+- **Suggested approach:**
+  1. Add to ha-automations: "When automations reference devices not yet integrated, do not write final YAML. Instead, document the planned automation structure and list prerequisites. Only generate YAML after all referenced entities are confirmed to exist."
+  2. Add to ha-devices: "After device pairing, verify actual entity IDs and event types via `hass-cli -o json entity list` before proceeding to automation creation."
+
+---
+
+## 18. Jinja Template Portability
+
+### BL-037: Generated Jinja templates use platform-specific strftime format codes
+
+- **Severity:** S5
+- **Transcripts:**
+  - T2:561 — Automation includes `{{ now().strftime('%-I:%M %p') }}`. The `%-I` format (no-pad hour) is a GNU libc extension and is not portable to Windows or some musl-based systems.
+- **Affected components:** `skills/ha-automations/SKILL.md`, `skills/ha-jinja/SKILL.md`, `templates/templates.md`
+- **Description:** The `%-I` strftime format code removes leading zeros from the hour but is Linux-specific. On Windows HA instances (rare but possible) or in certain Python builds, this raises a `ValueError`. The portable alternative is `%I` (zero-padded) with `.lstrip('0')` or using `{{ now().hour % 12 or 12 }}` directly.
+- **Rationale:** Most HA instances run on Linux where this works fine. Low severity, but worth noting for template reference material.
+- **Suggested approach:**
+  1. Note in ha-jinja or templates.md that `%-` format codes are not portable; recommend `%I` with `.lstrip('0')` for no-pad formatting.
