@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.1
+
+### Changed
+
+- **SessionStart tool-selection prose sharpened** — `hooks/session-check.sh` line 87 reframed from a technical caveat ("HA Web UI uses deep Shadow DOM — prefer hass-cli/API over browser automation") to an actionable default ("TOOL SELECTION: For HA tasks, default to hass-cli, REST API, or direct YAML edits. Use chrome MCP only for genuinely UI-only work — HACS install flows, visual dashboard QA, screenshots."). Same trigger gate, sharper signal. Aligns with the 1.5.0 "tight triggering surfaces" direction. Reference link to `references/ha-web-ui.md` preserved.
+
 ## 1.5.0
 
 ### Changed

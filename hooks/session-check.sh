@@ -84,7 +84,7 @@ output+="\n  - New device setup → /ha-devices"
 output+="\n  - Device/integration troubleshooting → /ha-troubleshooting"
 output+="\n  - Create automations/scripts/scenes → /ha-automations, /ha-scripts, /ha-scenes"
 output+="\nSAFETY: Never run env/printenv/set to inspect environment — use safe token check instead"
-output+="\nHA Web UI uses deep Shadow DOM — prefer hass-cli/API over browser automation (see references/ha-web-ui.md)"
+output+="\nTOOL SELECTION: For HA tasks, default to hass-cli, REST API, or direct YAML edits. Use chrome MCP only for genuinely UI-only work (HACS install flows, visual dashboard QA, screenshots). HA Web UI's deep Shadow DOM makes browser automation fragile (see references/ha-web-ui.md)."
 output+="\n====================================================="
 
 printf '%b' "$output"
