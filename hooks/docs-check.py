@@ -21,6 +21,7 @@ HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 
 REQUIRED_FILES = [
     Path("README.md"),
+    Path("AGENTS.md"),
     Path("CLAUDE.md"),
     Path("COMPONENTS.md"),
     Path("references/safety-invariants.md"),
@@ -31,6 +32,7 @@ REQUIRED_FILES = [
 
 COUNT_FILES = [
     Path("README.md"),
+    Path("AGENTS.md"),
     Path("CLAUDE.md"),
     Path("COMPONENTS.md"),
     Path("references/safety-invariants.md"),

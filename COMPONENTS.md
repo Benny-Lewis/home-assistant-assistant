@@ -123,7 +123,7 @@ Hooks fire automatically in response to plugin events.
 | `SessionStart` | async command | Runs `session-check.sh` on every new session. Checks for `HASS_TOKEN`, `HASS_SERVER`, `configuration.yaml`, and settings file. Detects Python command and writes breadcrumb files (`.claude/ha-python.txt`, `.claude/ha-plugin-root.txt`). Timeout: 10s |
 | `PostToolUse` (Edit\|Write) | sync command | After any file edit or write, reminds about `ha-deploy` for validation and deployment. Timeout: 5s |
 
-The Codex hook surface lives in `codex/hooks.json` and runs `codex/session-check.sh`. It writes the same breadcrumb files for shared helper discovery and adds Codex invocation wording such as `$ha-validate` and `$ha-deploy`.
+The Codex hook surface lives in `codex/hooks.json` and runs Python hooks (`codex/session_check.py`, `codex/env_guard.py`) so Windows users do not need `bash` on PATH. SessionStart writes the same gitignored breadcrumb files for shared helper discovery and adds Codex invocation wording such as `$ha-validate` and `$ha-deploy`.
 
 ## Plugin References
 

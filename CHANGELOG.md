@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.1
+
+### Fixed
+
+- **Codex hook portability** - replaced Codex hook commands that assumed `bash` with Python hooks so Windows Codex sessions can run SessionStart and PreToolUse checks without Git Bash on PATH.
+- **PowerShell env leak guard** - Codex and Claude guards now block common PowerShell environment-dump forms such as `Get-ChildItem Env:` and `[Environment]::GetEnvironmentVariables()`.
+- **Canonical docs validation** - docs checks now require and count-check `AGENTS.md`, matching the shared Claude/Codex guidance layout.
+
 ## 1.6.0
 
 ### Added

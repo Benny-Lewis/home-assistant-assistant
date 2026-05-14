@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"./codex/session-check.sh\"",
+            "command": "python \"./codex/session_check.py\"",
             "async": true,
             "timeout": 10
           }
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"./hooks/env-guard.sh\"",
+            "command": "python \"./codex/env_guard.py\"",
             "timeout": 5
           }
         ]

@@ -52,6 +52,40 @@
           "contains": "allow_implicit_invocation: false"
         }
       ]
+    },
+    {
+      "id": "CAP-014",
+      "name": "codex hooks do not require bash",
+      "description": "Codex hooks should use Python wrappers so Windows users do not need bash on PATH.",
+      "checks": [
+        {
+          "path": "codex/hooks.json",
+          "contains": "session_check.py"
+        },
+        {
+          "path": "codex/hooks.json",
+          "contains": "env_guard.py"
+        },
+        {
+          "path": "codex/hooks.json",
+          "not_contains": "\"command\": \"bash"
+        }
+      ]
+    },
+    {
+      "id": "CAP-015",
+      "name": "codex env guard covers powershell env dumps",
+      "description": "Codex env guard must block common PowerShell environment-dump commands.",
+      "checks": [
+        {
+          "path": "codex/env_guard.py",
+          "contains": "getenvironmentvariables"
+        },
+        {
+          "path": "codex/env_guard.py",
+          "contains": "env:"
+        }
+      ]
     }
   ]
 }

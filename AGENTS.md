@@ -56,7 +56,8 @@ codex-skills/
   ha-*/                     # Codex-compatible wrapper skills with Codex-valid frontmatter
 codex/
   hooks.json                # Codex hook mapping
-  session-check.sh          # Codex SessionStart check
+  session_check.py          # Codex SessionStart check (no Bash dependency)
+  env_guard.py              # Codex PreToolUse guard, including PowerShell env dumps
   references/skill-adapter.md
 agents/
   *.md                      # 6 subagents: config-debugger, ha-config-validator,
@@ -70,7 +71,7 @@ helpers/
   lovelace-dashboard.py     # Lovelace dashboard fetch/save/verify/find-entities
 hooks/
   hooks.json                # Event-driven hooks (SessionStart, PreToolUse, PostToolUse)
-  session-check.sh          # Async env check (HASS_TOKEN, HASS_SERVER, python detection)
+  session-check.sh          # Claude async env check (HASS_TOKEN, HASS_SERVER, python detection)
   env-guard.sh              # PreToolUse guard for Bash commands
   docs-check.sh             # Documentation validation
   docs-check.py             # Documentation validation helper
@@ -192,7 +193,7 @@ Eval cases:
 - Settings stored in `.claude/settings.local.json` (gitignored)
 - Conventions stored in `.claude/ha.conventions.json` (user naming patterns)
 - SessionStart async hook runs env check via bash (`HASS_TOKEN`, `HASS_SERVER`, `configuration.yaml`, settings) and writes breadcrumb files for agent discovery
-- Codex SessionStart writes the same `.claude/ha-python.txt` and `.claude/ha-plugin-root.txt` breadcrumbs for compatibility with shared helper references
+- Codex SessionStart writes the same gitignored `.claude/ha-python.txt` and `.claude/ha-plugin-root.txt` breadcrumbs for compatibility with shared helper references
 - PreToolUse Bash hook runs `env-guard.sh` for command safety checks
 - PostToolUse Edit|Write hook reminds about `/ha-deploy` after config changes
 - The plugin uses hass-cli for HA API operations, local Python helpers for registry/trace workflows, and git for configuration deployment
@@ -209,7 +210,7 @@ Eval cases:
 
 ### `python3: command not found` on Windows
 
-Windows typically provides `python` or `py`, not `python3`. The plugin detects this automatically via `session-check.sh`. If you see `python3` errors from hooks, check user-level hooks (`.claude/hooks.json`) or other plugins for hardcoded `python3` references.
+Windows typically provides `python` or `py`, not `python3`. The Claude hook detects this automatically via `session-check.sh`; Codex hooks run through `codex/session_check.py` to avoid requiring Git Bash on Windows. If you see `python3` errors from hooks, check user-level hooks (`.claude/hooks.json`) or other plugins for hardcoded `python3` references.
 
 ## Releasing Updates
 

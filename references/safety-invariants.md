@@ -128,9 +128,10 @@ export -p | grep HASS
 TLEN=$(printf '%s' "$HASS_TOKEN" | wc -c); echo "TOKEN_LEN=$TLEN"
 ```
 
-> **Hook enforcement:** The `env-guard.sh` PreToolUse hook blocks `env`, `printenv`, `set`,
-> and `export -p` commands automatically. If you need to check env var presence, use the
-> safe `wc -c` pattern above.
+> **Hook enforcement:** The Claude `env-guard.sh` and Codex `codex/env_guard.py`
+> PreToolUse hooks block `env`, `printenv`, `set`, `export -p`, PowerShell `Env:`
+> dumps, and `[Environment]::GetEnvironmentVariables()` automatically. If you need
+> to check env var presence, use the safe `wc -c` pattern above.
 
 ### 5. Never Deploy Unless Explicitly Requested
 
@@ -154,6 +155,7 @@ Side-effectful commands must:
 | Read file | No | No |
 | List entities | No | No |
 | Generate YAML (preview) | No | No |
+| Write gitignored runtime breadcrumbs (`.claude/ha-python.txt`, `.claude/ha-plugin-root.txt`) | Limited setup side effect | No, contains no secrets |
 | Write to file | Yes | Yes |
 | Git commit | Yes | Yes |
 | Git push | Yes | Yes |
