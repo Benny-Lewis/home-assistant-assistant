@@ -108,6 +108,8 @@ def validate_required_files(errors: list[str]) -> None:
     if not skill_dirs:
         errors.append("no skill directories found under skills/")
     for skill_dir in skill_dirs:
+        if skill_dir.name.endswith("-workspace"):
+            continue
         if skill_dir.is_dir() and not (skill_dir / "SKILL.md").exists():
             errors.append(f"missing required skill spec: {skill_dir.relative_to(ROOT) / 'SKILL.md'}")
 

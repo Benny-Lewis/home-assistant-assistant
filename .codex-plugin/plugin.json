@@ -1,0 +1,43 @@
+{
+  "name": "home-assistant-assistant",
+  "version": "1.6.0",
+  "description": "Manage your Home Assistant setup through natural language - automations, scripts, scenes, dashboards, naming, deployment, and more.",
+  "author": {
+    "name": "blewis"
+  },
+  "homepage": "https://github.com/Benny-Lewis/home-assistant-assistant",
+  "repository": "https://github.com/Benny-Lewis/home-assistant-assistant",
+  "license": "MPL-2.0",
+  "keywords": [
+    "home-assistant",
+    "automation",
+    "smart-home",
+    "yaml",
+    "iot",
+    "home-automation",
+    "codex"
+  ],
+  "skills": "./codex-skills/",
+  "hooks": "./codex/hooks.json",
+  "interface": {
+    "displayName": "Home Assistant Assistant",
+    "developerName": "blewis",
+    "shortDescription": "Home Assistant config skills for Codex",
+    "longDescription": "Manage Home Assistant configs with Codex using entity resolution, validation, deployment gates, and Home Assistant specific skills.",
+    "category": "Productivity",
+    "websiteURL": "https://github.com/Benny-Lewis/home-assistant-assistant",
+    "privacyPolicyURL": "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement",
+    "termsOfServiceURL": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Set up Home Assistant access",
+      "Create a Home Assistant automation",
+      "Validate and deploy HA config changes"
+    ],
+    "brandColor": "#03A9F4"
+  }
+}

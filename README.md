@@ -1,25 +1,44 @@
 # home-assistant-assistant
 
-A Claude Code plugin that lets you set up and manage your Home Assistant through natural language. Describe what you want — "turn off the kitchen lights after 5 minutes of no motion" — and the plugin resolves entity names against your real HA instance, checks device capabilities, generates YAML, validates everything, and deploys to your Home Assistant via git after your confirmation.
+A Claude Code and Codex plugin that lets you set up and manage your Home Assistant through natural language. Describe what you want — "turn off the kitchen lights after 5 minutes of no motion" — and the plugin resolves entity names against your real HA instance, checks device capabilities, generates YAML, validates everything, and deploys to your Home Assistant via git after your confirmation.
 
 ## Quick Start
 
-Install the plugin. In Claude Code:
+Install the plugin.
+
+In Claude Code:
 ```
 /plugin marketplace add Benny-Lewis/benny-lewis-plugins
 /plugin install home-assistant-assistant@benny-lewis-plugins
 ```
 
-Launch the onboarding wizard:
+In Codex, add this repository as a plugin marketplace source, then install **Home Assistant Assistant** from the Codex plugin UI:
+```bash
+codex plugin marketplace add Benny-Lewis/home-assistant-assistant
+```
+
+For local Codex development:
+```bash
+codex plugin marketplace add .
+```
+
+Launch the onboarding wizard.
+
+Claude Code:
 ```
 /ha-onboard
+```
+
+Codex:
+```
+$ha-onboard
 ```
 
 The onboarding wizard walks you through hass-cli installation, token setup, git configuration, and HA connection — one step at a time. It will save progress if you need to stop halfway.
 
 ## How It Works
 
-You run Claude Code from a directory containing a clone of your Home Assistant configuration. When you make a request, such as a new automation, scene, or script, the plugin resolves your natural language to actual entity IDs by querying your HA instance through `hass-cli`. It pulls a capability snapshot for every device it touches and refuses to emit attributes a device doesn't support. If you say "warm white" for a brightness-only bulb, it stops and asks what you'd like to do instead. When your config is ready, it validates across progressive tiers (YAML syntax, HA schema, entity existence, service verification) and deploys via git commit, push, and HA reload — with explicit confirmation at every step. The entire workflow, from "make the porch lights come on at sunset" to a deployed, running automation, happens in a single conversation.
+You run Claude Code or Codex from a directory containing a clone of your Home Assistant configuration. When you make a request, such as a new automation, scene, or script, the plugin resolves your natural language to actual entity IDs by querying your HA instance through `hass-cli`. It pulls a capability snapshot for every device it touches and refuses to emit attributes a device doesn't support. If you say "warm white" for a brightness-only bulb, it stops and asks what you'd like to do instead. When your config is ready, it validates across progressive tiers (YAML syntax, HA schema, entity existence, service verification) and deploys via git commit, push, and HA reload — with explicit confirmation at every step. The entire workflow, from "make the porch lights come on at sunset" to a deployed, running automation, happens in a single conversation.
 
 ## Examples
 
@@ -81,6 +100,8 @@ The plugin resolves your climate sensors against the live instance, checks which
 
 ## Skills
 
+Claude Code invokes user-facing skills as slash commands such as `/ha-validate`. Codex invokes the same workflows as skill mentions such as `$ha-validate`.
+
 | Skill | What it does |
 |-------|-------------|
 | `/ha-onboard` | First-time setup wizard with resume detection |
@@ -110,7 +131,7 @@ Six specialized subagents handle work that benefits from deep, focused analysis:
 - **device-advisor** — New device setup: naming, capability discovery, automation suggestions, dashboard placement
 - **naming-analyzer** — Quantified naming audit with output scaling based on entity count
 
-Agents are spawned by skills when needed. They run in isolated context, do their analysis, and return results. You don't invoke them directly.
+In Claude Code, agents are spawned by skills when needed. They run in isolated context, do their analysis, and return results. You don't invoke them directly. In Codex, the wrapper skills perform the workflow locally unless the user explicitly asks for subagents or parallel agent work.
 
 ## Hooks
 
@@ -133,14 +154,26 @@ Validation outputs include evidence tables — not just "passed" or "failed," bu
 
 The plugin treats your HA instance as the source of truth. Entity IDs are resolved, not guessed. Device capabilities are queried, not assumed. If something doesn't exist or isn't supported, the plugin stops and tells you — it doesn't invent a workaround.
 
-The entire plugin is markdown files, one bash hook, and one Python helper. Every skill is a spec file — YAML frontmatter declaring tools and permissions, markdown body defining the complete behavior — that Claude Code reads and executes. See [Component Reference](COMPONENTS.md) for the full inventory.
+The entire plugin is markdown files, bash hooks, and Python helpers. Every skill is a spec file with YAML frontmatter and markdown behavior. Claude Code reads the canonical `skills/` surface directly. Codex reads `codex-skills/` wrappers, which point back to the same canonical workflows through `codex/references/skill-adapter.md`. See [Component Reference](COMPONENTS.md) for the full inventory.
 
 ## Requirements
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI or Codex with plugin support
 - [hass-cli](https://github.com/home-assistant-ecosystem/home-assistant-cli) (installed during onboarding)
 - Git repository for your HA config (setup during onboarding)
 - Home Assistant with a long-lived access token (token setup during onboarding)
+
+## Optional: ha-mcp with Codex
+
+This plugin does not bundle or auto-configure `ha-mcp`. It can run alongside `ha-mcp` when you want MCP tools in Codex, while the shared Home Assistant Assistant skills still use `hass-cli` and the `HASS_SERVER`/`HASS_TOKEN` environment variables.
+
+To add `ha-mcp` to Codex as a local stdio MCP server:
+
+```bash
+codex mcp add home-assistant --env HOMEASSISTANT_URL=http://homeassistant.local:8123 --env HOMEASSISTANT_TOKEN=<long-lived-token> -- uvx ha-mcp@latest
+```
+
+That command stores the token in Codex's local MCP configuration. If you prefer not to store a token there, use the Codex Desktop MCP UI or a streamable HTTP `ha-mcp` deployment configured with your preferred secret-management approach.
 
 ## Contributing
 
