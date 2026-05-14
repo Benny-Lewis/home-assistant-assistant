@@ -26,16 +26,20 @@ All generated YAML and commands enforce eight safety invariants (canonical wordi
 The plugin has two agent-facing surfaces that share one canonical workflow source:
 
 - Claude Code reads `.claude-plugin/`, `skills/`, `agents/`, and `hooks/`.
-- Codex reads `.codex-plugin/`, `codex-skills/`, `codex/`, and `.agents/plugins/marketplace.json`.
-- Canonical Home Assistant behavior stays in `skills/` and `references/`; Codex wrappers adapt invocation/tool semantics without forking domain logic.
+- Codex installs `plugins/home-assistant-assistant/` from `.agents/plugins/marketplace.json`; inside that package, Codex reads `.codex-plugin/`, `skills/`, `codex/`, and packaged support files.
+- Canonical Home Assistant behavior stays in root `skills/` and `references/`; Codex wrappers adapt invocation/tool semantics without forking domain logic and read packaged canonical copies from `canonical-skills/`.
 
 ```text
 .claude-plugin/
-  plugin.json               # Plugin manifest - metadata, component discovery
-.codex-plugin/
-  plugin.json               # Codex plugin manifest - points at codex-skills and codex hooks
+  plugin.json               # Claude plugin manifest - metadata, component discovery
 .agents/plugins/
-  marketplace.json          # Codex marketplace source for this single-plugin repo
+  marketplace.json          # Codex marketplace source; points at ./plugins/home-assistant-assistant
+plugins/home-assistant-assistant/
+  .codex-plugin/plugin.json # Codex plugin manifest for the installable package
+  skills/                   # Codex-visible wrapper skills; the only SKILL.md tree in the package
+  canonical-skills/         # Packaged shared workflow docs as README.md files, not SKILL.md
+  codex/                    # Codex hooks and adapter reference
+  helpers/, references/, templates/
 skills/
   ha-automations/           # Automation creation + domain knowledge (user-invocable)
   ha-scripts/               # Script creation + domain knowledge (user-invocable)
@@ -53,7 +57,7 @@ skills/
   ha-analyze/               # Setup analysis + recommendations (user-invocable)
   ha-resolver/              # Entity resolution (NOT user-invocable, agent-preloaded)
 codex-skills/
-  ha-*/                     # Codex-compatible wrapper skills with Codex-valid frontmatter
+  ha-*/                     # Source Codex wrapper skills copied into the installable package skills/ tree
 codex/
   hooks.json                # Codex hook mapping
   session_check.py          # Codex SessionStart check (no Bash dependency)
@@ -95,7 +99,7 @@ For this repo's self-hosted single-plugin marketplace, keep `.claude-plugin/mark
 
 Do not point that marketplace entry back to this same repository via a remote git/GitHub URL. In Claude Code's local-scope install/update path, that can cause the marketplace repo to be recursively repackaged into the plugin cache and break updates on Windows.
 
-For Codex, keep `.agents/plugins/marketplace.json` pointing the plugin entry at local `path: "./"`, because this repository is itself the plugin root.
+For Codex, keep `.agents/plugins/marketplace.json` pointing the plugin entry at local `path: "./plugins/home-assistant-assistant"`. Codex supplements custom skill paths with default `skills/` discovery, so installing the repository root would expose both root `skills/` and `codex-skills/` and show duplicate skills in Desktop. The installable package must expose exactly one `SKILL.md` tree: `plugins/home-assistant-assistant/skills/`.
 
 ## Testing
 
@@ -214,7 +218,7 @@ Windows typically provides `python` or `py`, not `python3`. The Claude hook dete
 
 ## Releasing Updates
 
-- Bump `version` in both `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`; keep them in sync
+- Bump `version` in both `.claude-plugin/plugin.json` and `plugins/home-assistant-assistant/.codex-plugin/plugin.json`; keep them in sync
 - Update `CHANGELOG.md` with a summary of changes
 - If renaming slash commands or changing install steps, add a Breaking Changes section to the changelog
 - Merge to main; marketplace source URL points to the repo, auto-update pulls latest

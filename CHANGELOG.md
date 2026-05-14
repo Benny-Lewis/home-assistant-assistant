@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.2
+
+### Fixed
+
+- **Codex duplicate skill discovery** - moved the Codex installable package to `plugins/home-assistant-assistant/` so Codex Desktop sees only the wrapper `skills/` tree instead of both root `skills/` and `codex-skills/`.
+- **Codex marketplace layout** - updated `.agents/plugins/marketplace.json` to the canonical `./plugins/home-assistant-assistant` package path and packaged shared workflow docs as non-discoverable `canonical-skills/*/README.md` files for wrapper use.
+
 ## 1.6.1
 
 ### Fixed

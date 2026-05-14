@@ -1,6 +1,6 @@
 {
   "name": "home-assistant-assistant",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "Manage your Home Assistant setup through natural language - automations, scripts, scenes, dashboards, naming, deployment, and more.",
   "author": {
     "name": "blewis"
@@ -17,7 +17,7 @@
     "home-automation",
     "codex"
   ],
-  "skills": "./codex-skills/",
+  "skills": "./skills/",
   "hooks": "./codex/hooks.json",
   "interface": {
     "displayName": "Home Assistant Assistant",

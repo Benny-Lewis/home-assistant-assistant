@@ -15,7 +15,7 @@ Full reference for all plugin components. For a quick overview, see [README.md](
 
 Skills are the core of the plugin. 14 are user-invocable (you can ask for them directly), 1 is infrastructure (preloaded by agents).
 
-Claude Code reads the canonical skills in `skills/`. Codex reads compatibility wrappers in `codex-skills/`; those wrappers then point back to the canonical skill and `codex/references/skill-adapter.md`.
+Claude Code reads the canonical skills in root `skills/`. Codex installs `plugins/home-assistant-assistant/`, where compatibility wrappers live in the package `skills/` directory. Those wrappers read `codex/references/skill-adapter.md` and then point to packaged canonical workflow content in `canonical-skills/*/README.md`. The source wrapper files remain in root `codex-skills/` for maintenance, but the marketplace does not install the repository root as the Codex plugin.
 
 ### Setup & Deployment (3)
 

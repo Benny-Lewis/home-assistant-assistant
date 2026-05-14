@@ -1,0 +1,222 @@
+# Home Assistant Log Patterns
+
+> **Resolver-First Approach:** When you see entity-related errors, use the ha-resolver skill
+> to verify entity IDs before assuming typos. Entities may have been renamed, disabled, or
+> the device may be offline.
+
+## Common Error Messages
+
+### Entity Not Found
+```
+ERROR (MainThread) [homeassistant.helpers.service] Entity light.wrong_name not found
+```
+**Diagnosis Steps:**
+1. **Resolve first**: Use `hass-cli state list | grep -i "light"` to find actual entity IDs
+2. Check if entity was renamed (common after device re-pairing)
+3. Check if entity is disabled in Settings → Entities
+
+**Portable Commands:**
+```bash
+# Bash/PowerShell
+hass-cli state list | Select-String "light"  # PowerShell
+hass-cli state list | grep -i "light"        # Bash/Git Bash
+```
+
+### Service Not Found
+```
+ERROR (MainThread) [homeassistant.components.automation] Error executing script. Service light.turn_onn not found
+```
+**Cause**: Service name typo
+**Fix**: Verify service exists:
+```bash
+hass-cli service list | grep "light"
+```
+
+### Automation Disabled
+```
+INFO (MainThread) [homeassistant.components.automation] Automation bedroom_light already disabled
+```
+**Cause**: Automation was turned off (intentionally or by error)
+**Diagnosis:**
+```bash
+hass-cli state get automation.bedroom_light
+# Look for: state: off
+```
+**Fix**: Enable via UI or:
+```bash
+hass-cli service call automation.turn_on --arguments entity_id=automation.bedroom_light
+```
+
+### Template Error
+```
+ERROR (MainThread) [homeassistant.helpers.template] TemplateError: UndefinedError: 'states' is undefined
+```
+**Cause**: Invalid Jinja2 template syntax or referencing non-existent entity
+**Diagnosis:**
+1. Check template syntax in Developer Tools → Template
+2. Verify all entities in template exist
+3. Look for missing quotes or incorrect filter syntax
+
+### Connection Issues
+```
+ERROR (MainThread) [homeassistant.components.mqtt] Unable to connect to broker
+```
+**Cause**: Integration connectivity issue (network, credentials, service down)
+**Diagnosis:**
+1. Check if service is reachable (ping, telnet to port)
+2. Verify credentials in integration config
+3. Check if service requires restart
+
+### Entity Unavailable
+```
+WARNING (MainThread) [homeassistant.components.automation] Automation could not be triggered, entity unavailable
+```
+**Cause**: Device offline, integration issue, or entity disabled
+**Diagnosis:**
+```bash
+hass-cli state get entity.id
+# Look for: state: unavailable
+```
+**Common Fixes:**
+- Zigbee/Z-Wave: Check mesh connectivity, device battery
+- WiFi: Check device power, network connectivity
+- Cloud: Check API status, re-authenticate
+
+## Automation Trace Analysis
+
+Traces show exactly what happened during automation execution.
+
+**Get traces via helper** (REST `/api/trace` returns 404; `hass-cli raw ws` is broken on HA 2026.2+):
+```bash
+PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null || echo '.')"
+PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+
+# List recent traces
+$PY "$PLUGIN_ROOT/helpers/trace-fetch.py" list automation.<name>
+
+# Get full trace detail
+$PY "$PLUGIN_ROOT/helpers/trace-fetch.py" get automation.<name> <run_id>
+```
+
+See `references/diagnostic-api.md` for trace path navigation and interpretation patterns.
+
+**What traces show:**
+| Section | Information |
+|---------|-------------|
+| Trigger | What started it, timestamp, entity state |
+| Conditions | Which passed/failed, why |
+| Actions | What executed, errors, timing |
+| Variables | Context variables at each step |
+
+## Debugging Checklist
+
+Use this systematic approach instead of guessing:
+
+### 1. Is automation enabled?
+```bash
+hass-cli state get automation.name
+```
+Look for `state: on`
+
+### 2. Did trigger entity reach trigger state?
+```bash
+# Check recent history
+MSYS_NO_PATHCONV=1 hass-cli raw get "/api/history/period?filter_entity_id=binary_sensor.motion"
+```
+
+### 2b. What caused this? (logbook causation)
+```bash
+MSYS_NO_PATHCONV=1 hass-cli raw get "/api/logbook?entity=automation.<name>"
+```
+
+### 3. Were conditions met at trigger time?
+- Use trace-fetch.py helper to get trace (REST endpoint returns 404):
+  ```bash
+  PLUGIN_ROOT="$(cat .claude/ha-plugin-root.txt 2>/dev/null || echo '.')"
+  PY="$(cat .claude/ha-python.txt 2>/dev/null || command -v python3 || command -v python || command -v py)"
+  $PY "$PLUGIN_ROOT/helpers/trace-fetch.py" list automation.<name>
+  ```
+- Inspect condition results in trace (`condition/N.result.result: true/false`)
+- Verify time/sun conditions match actual time
+
+### 4. Did actions execute?
+- Check trace for action results
+- Look for service call errors
+
+### 5. Any errors in logs?
+```bash
+MSYS_NO_PATHCONV=1 hass-cli raw get /api/error_log
+```
+
+## Time-Based Issues
+
+### Sun Conditions
+- Depend on location settings (lat/long)
+- Check: Settings → System → General → Location
+- Verify sunrise/sunset times match expectations
+
+### Time Conditions
+- Times use local timezone configured in HA
+- Check: Settings → System → General → Time Zone
+- Format: `"HH:MM:SS"` (24-hour)
+
+### Weekday Conditions
+Use lowercase day abbreviations:
+```yaml
+weekday:
+  - mon
+  - tue
+  - wed
+  - thu
+  - fri
+  - sat
+  - sun
+```
+
+## State-Based Issues
+
+### State vs Attribute
+```yaml
+# Check main state
+condition: state
+entity_id: light.kitchen
+state: "on"
+
+# Check attribute - use template
+condition: template
+value_template: "{{ state_attr('light.kitchen', 'brightness') > 100 }}"
+```
+
+### Numeric States
+- Use `numeric_state` trigger for number comparisons
+- States are strings - numeric triggers do the conversion
+- `above` and `below` are exclusive (not inclusive)
+
+### State "for" Duration
+```yaml
+trigger:
+  - trigger: state
+    entity_id: binary_sensor.motion
+    to: "off"
+    for: "00:05:00"  # Must stay "off" for full 5 minutes
+```
+- If state changes before duration completes, trigger is cancelled
+- This is **correct behavior for inactivity detection**
+
+## Evidence Table Template
+
+When reporting troubleshooting results, use this ran-vs-skipped format:
+
+| Check | Status | Result | Evidence |
+|-------|--------|--------|----------|
+| Automation enabled | ✓ Ran | on/off | `state: on/off` from hass-cli |
+| Trigger entity exists | ✓ Ran | found/missing | `hass-cli state list` output |
+| Trigger state reached | ✓ Ran | reached/not reached | History shows state change |
+| Logbook events | ✓ Ran | causation found/absent | Logbook shows triggered by X |
+| Conditions met | ✓ Ran | passed/failed | Trace shows condition result |
+| Actions executed | ✓ Ran | success/error | Trace shows action result |
+| Error in logs | ✗ Failed | 404 | API unavailable, checked UI |
+
+**Status values:** `✓ Ran` — check completed, `⊘ Skipped (reason)` — not applicable, `✗ Failed` — check errored
+
+Every check MUST appear in the table. Never silently omit a check.

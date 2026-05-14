@@ -17,7 +17,7 @@ In Codex, add this repository as a plugin marketplace source, then install **Hom
 codex plugin marketplace add Benny-Lewis/home-assistant-assistant
 ```
 
-For local Codex development:
+For local Codex development from this repository root:
 ```bash
 codex plugin marketplace add .
 ```
@@ -154,7 +154,7 @@ Validation outputs include evidence tables — not just "passed" or "failed," bu
 
 The plugin treats your HA instance as the source of truth. Entity IDs are resolved, not guessed. Device capabilities are queried, not assumed. If something doesn't exist or isn't supported, the plugin stops and tells you — it doesn't invent a workaround.
 
-The entire plugin is markdown files, bash hooks, and Python helpers. Every skill is a spec file with YAML frontmatter and markdown behavior. Claude Code reads the canonical `skills/` surface directly. Codex reads `codex-skills/` wrappers, which point back to the same canonical workflows through `codex/references/skill-adapter.md`. See [Component Reference](COMPONENTS.md) for the full inventory.
+The entire plugin is markdown files, hook configs, and Python helpers. Every skill is a spec file with YAML frontmatter and markdown behavior. Claude Code reads the canonical root `skills/` surface directly. Codex installs the package at `plugins/home-assistant-assistant/`, which exposes a single wrapper `skills/` tree and keeps the shared workflow source in `canonical-skills/` README files so Codex Desktop does not discover duplicate skills. The wrappers still use `codex/references/skill-adapter.md` before following the canonical workflow content. See [Component Reference](COMPONENTS.md) for the full inventory.
 
 ## Requirements
 
@@ -194,7 +194,7 @@ Run the documentation validation check locally from the repository root:
 bash hooks/docs-check.sh
 ```
 
-The check validates internal markdown links, verifies required docs files exist (including `skills/*/SKILL.md` and `agents/*.md`), and enforces consistency rules like the safety-invariant count.
+The check validates internal markdown links, verifies required docs files exist (including `skills/*/SKILL.md` and `agents/*.md`), and enforces consistency rules like the safety-invariant count. The Codex capability eval also verifies that the installable package exposes only one `SKILL.md` tree.
 
 ## License
 

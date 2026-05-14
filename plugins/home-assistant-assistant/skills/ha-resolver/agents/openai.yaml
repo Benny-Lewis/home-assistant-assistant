@@ -1,0 +1,6 @@
+interface:
+  display_name: HA Resolver
+  short_description: Internal Home Assistant entity resolution helper.
+  default_prompt: Use $ha-resolver to resolve Home Assistant entity IDs and capability snapshots.
+policy:
+  allow_implicit_invocation: false

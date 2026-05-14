@@ -1,0 +1,71 @@
+---
+name: ha-scripts
+description: Use when user wants reusable action sequences, mentions "script", "sequence of actions", or needs to chain multiple commands that can be triggered manually or from automations.
+user-invocable: true
+allowed-tools: Read, Grep, Glob, Edit, Bash(hass-cli:*), AskUserQuestion
+---
+
+# Home Assistant Scripts
+
+> **Safety Invariants:** #1 (capability check), #5 (no implicit deploy), #7 (minimal edits), #8 (post-edit verify)
+> See `references/safety-invariants.md`
+
+## Overview
+
+Create reusable action sequences that can be triggered manually or from automations. Core principle: scripts are for repeatable sequences, not event-driven behavior.
+
+## When to Use
+
+**Symptoms:**
+- User says "create a script", "sequence of actions", "chain commands"
+- Wants something they can trigger manually (button, voice, dashboard)
+- Needs to reuse the same action sequence in multiple automations
+- Describes a multi-step process without a trigger event
+
+**When NOT to use:**
+- Event-driven behavior ("when X happens") → use `ha-automations`
+- Setting multiple devices to specific states → use `ha-scenes`
+- Debugging existing scripts → use `ha-troubleshooting`
+
+## Quick Reference
+
+| Component | Purpose |
+|-----------|---------|
+| alias | Human-readable name |
+| sequence | List of actions to perform |
+| mode | single, restart, queued, parallel |
+| fields | Input parameters for the script |
+
+## Process
+
+1. **Understand intent** - What sequence of actions?
+2. **Resolve and verify entities** via ha-entity-resolver agent (Invariants #1, #8)
+   - Resolve ALL entity references that will appear in the script sequence
+   - Verify each entity exists: `hass-cli state get <entity_id>` — if "not found", resolve using ha-resolver patterns before proceeding
+3. **Get capability snapshot** - For each device, verify supported services/attributes
+   - If user's request requires unsupported attributes, **STOP and use AskUserQuestion** to explain the mismatch and offer alternatives before proceeding.
+4. **Generate YAML** using `references/yaml-syntax.md`
+5. **Preview** with inline comments explaining choices
+6. **Save and offer deployment** (Invariant #5 - never auto-deploy):
+   - Save to scripts.yaml
+   - When editing existing files, include enough surrounding context in `old_string` to be unique (e.g., include the scene name or automation alias above the edit point). If appending, use the last few lines of the file as the anchor.
+   - **MANDATORY: Call the AskUserQuestion tool** (do NOT just print text) with:
+     - Question: "Saved to scripts.yaml. What would you like to do next?"
+     - Option 1: "Deploy now" → invoke ha-deploy skill
+     - Option 2: "Keep editing" → ready for more changes
+   - **Never suggest manual file transfer (scp, rsync, manual copy). Always use ha-deploy.**
+
+## Common Mistakes
+
+| Mistake | Fix |
+|---------|-----|
+| Using script when automation needed | If there's a trigger event, use automation instead |
+| Unsupported service attributes | Get capability snapshot first (Invariant #1) |
+| Forgetting mode for long sequences | Add `mode: restart` or `queued` for interruptible scripts |
+| Hardcoding values | Use `fields` for reusable parameters |
+| Missing delays between actions | Add `delay` between sequential device commands |
+| Auto-deploying without asking | Offer options, let user choose (Invariant #5) |
+
+## References
+
+- `references/yaml-syntax.md` - Full syntax documentation

@@ -1,0 +1,83 @@
+---
+name: ha-scenes
+description: Use when user wants device presets, mentions "scene", "mood", "setting", or describes setting multiple devices to specific states like "movie mode" or "goodnight".
+user-invocable: true
+allowed-tools: Read, Grep, Glob, Edit, Bash(hass-cli:*), AskUserQuestion
+---
+
+# Home Assistant Scenes
+
+> **Safety Invariants:** #1 (capability check), #5 (no implicit deploy), #7 (minimal edits), #8 (post-edit verify)
+> See `references/safety-invariants.md`
+
+## Overview
+
+Create presets that set multiple entities to specific states simultaneously. Core principle: scenes capture a snapshot of desired device states, not sequences or logic.
+
+## When to Use
+
+**Symptoms:**
+- User says "create a scene", "preset", "mood", "setting"
+- Describes multiple devices in specific states ("lights dim, TV on, blinds closed")
+- Mentions named states like "movie night", "goodnight", "morning", "away"
+- Wants to capture current device states as a preset
+
+**When NOT to use:**
+- Needs triggers or conditions → use `ha-automations`
+- Needs sequential actions with delays → use `ha-scripts`
+- Debugging existing scenes → use `ha-troubleshooting`
+
+## Quick Reference
+
+| Component | Purpose |
+|-----------|---------|
+| name | Scene identifier |
+| entities | Map of entity_id to desired state |
+
+## Process
+
+1. **Understand intent** - What state should each device be in?
+2. **Resolve and verify entities** via ha-entity-resolver agent (Invariants #1, #8)
+   - Resolve ALL entity references that will appear in the scene
+   - Verify each entity exists: `hass-cli state get <entity_id>` — if "not found", resolve using ha-resolver patterns before proceeding
+3. **Get capability snapshot** for each device (Invariant #1):
+   - Lights: check `supported_color_modes` (brightness, color_temp, rgb_color)
+   - Covers: check supported positions/tilt
+   - Media players: check supported features
+   - **Only include attributes the device actually supports!**
+4. **Check for capability mismatches** (Invariant #1 — STOP if mismatch):
+   - Compare what the user requested against the capability snapshot
+   - If ANY requested attribute is not supported (e.g., "warm white" on a brightness-only light):
+     - **STOP — do NOT silently substitute or downgrade**
+     - Use AskUserQuestion to explain the mismatch and offer alternatives:
+       - "Use brightness only" (if applicable)
+       - "Pick a different device"
+       - "Cancel"
+     - Wait for user response before proceeding
+5. **Determine states** - Only use supported attributes from snapshot
+6. **Generate YAML** using `references/yaml-syntax.md`
+7. **Preview** with inline comments explaining capability checks
+8. **Save and offer deployment** (Invariant #5 - never auto-deploy):
+   - Save to scenes.yaml
+   - When editing existing files, include enough surrounding context in `old_string` to be unique (e.g., include the scene name or automation alias above the edit point). If appending, use the last few lines of the file as the anchor.
+   - **MANDATORY: Call the AskUserQuestion tool** (do NOT just print text) with:
+     - Question: "Saved to scenes.yaml. What would you like to do next?"
+     - Option 1: "Deploy now" → invoke ha-deploy skill
+     - Option 2: "Keep editing" → ready for more changes
+   - **Never suggest manual file transfer (scp, rsync, manual copy). Always use ha-deploy.**
+
+## Common Mistakes
+
+| Mistake | Fix |
+|---------|-----|
+| Using scene for sequences | Scenes set states instantly; use scripts for timed sequences |
+| Unsupported attributes | Get capability snapshot first - only use supported modes |
+| Silently downgrading attributes | STOP and ask the user — never substitute without confirmation |
+| Including non-stateful entities | Only include entities that have controllable states |
+| Forgetting all relevant devices | Ask user to confirm all devices they want included |
+| Wrong state values | Check entity for valid state options (brightness 0-255, etc.) |
+| Auto-deploying without asking | Offer options, let user choose (Invariant #5) |
+
+## References
+
+- `references/yaml-syntax.md` - Full syntax documentation
