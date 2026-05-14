@@ -6,13 +6,16 @@ Full reference for all plugin components. For a quick overview, see [README.md](
 
 | Component | Count |
 |-----------|-------|
-| Skills | 15 |
-| Agents | 6 |
-| Hooks | 2 |
+| Claude skills | 15 |
+| Codex wrapper skills | 15 |
+| Claude agents | 6 |
+| Hook configs | 2 |
 
 ## Skills
 
 Skills are the core of the plugin. 14 are user-invocable (you can ask for them directly), 1 is infrastructure (preloaded by agents).
+
+Claude Code reads the canonical skills in `skills/`. Codex reads compatibility wrappers in `codex-skills/`; those wrappers then point back to the canonical skill and `codex/references/skill-adapter.md`.
 
 ### Setup & Deployment (3)
 
@@ -83,6 +86,8 @@ Some skills include reference subdirectories with domain-specific knowledge:
 
 Agents are subagents launched via the Task tool for deeper analysis. They run in their own context and return results.
 
+These `agents/*.md` files are the Claude Code agent surface. Codex wrapper skills do the work locally unless the user explicitly asks for subagents or parallel agent work.
+
 ### Debugging (2)
 
 | Agent | Description | Tools | Preloaded Skills |
@@ -117,6 +122,8 @@ Hooks fire automatically in response to plugin events.
 |-------|------|-------------|
 | `SessionStart` | async command | Runs `session-check.sh` on every new session. Checks for `HASS_TOKEN`, `HASS_SERVER`, `configuration.yaml`, and settings file. Detects Python command and writes breadcrumb files (`.claude/ha-python.txt`, `.claude/ha-plugin-root.txt`). Timeout: 10s |
 | `PostToolUse` (Edit\|Write) | sync command | After any file edit or write, reminds about `ha-deploy` for validation and deployment. Timeout: 5s |
+
+The Codex hook surface lives in `codex/hooks.json` and runs `codex/session-check.sh`. It writes the same breadcrumb files for shared helper discovery and adds Codex invocation wording such as `$ha-validate` and `$ha-deploy`.
 
 ## Plugin References
 

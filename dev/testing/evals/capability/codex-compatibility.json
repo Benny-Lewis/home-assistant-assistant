@@ -1,0 +1,57 @@
+{
+  "suite": "capability",
+  "cases": [
+    {
+      "id": "CAP-010",
+      "name": "codex plugin manifest routes to codex surface",
+      "description": "Codex manifest must load Codex-compatible wrappers and hooks instead of the Claude-only skill surface.",
+      "checks": [
+        {
+          "path": ".codex-plugin/plugin.json",
+          "contains": "\"skills\": \"./codex-skills/\""
+        },
+        {
+          "path": ".codex-plugin/plugin.json",
+          "contains": "\"hooks\": \"./codex/hooks.json\""
+        }
+      ]
+    },
+    {
+      "id": "CAP-011",
+      "name": "codex marketplace points at plugin root",
+      "description": "The single-plugin Codex marketplace entry must install this repository root as the plugin.",
+      "checks": [
+        {
+          "path": ".agents/plugins/marketplace.json",
+          "contains": "\"path\": \"./\""
+        }
+      ]
+    },
+    {
+      "id": "CAP-012",
+      "name": "codex wrappers preserve naming side-effect contract",
+      "description": "Codex compatibility must preserve ha-apply-naming as a manual dry-run-first workflow.",
+      "checks": [
+        {
+          "path": "codex-skills/ha-apply-naming/SKILL.md",
+          "contains": "hard manual-execution contract"
+        },
+        {
+          "path": "codex-skills/ha-apply-naming/SKILL.md",
+          "contains": "dry-run first"
+        }
+      ]
+    },
+    {
+      "id": "CAP-013",
+      "name": "codex resolver remains infrastructure",
+      "description": "Codex should not implicitly invoke the infrastructure resolver skill.",
+      "checks": [
+        {
+          "path": "codex-skills/ha-resolver/agents/openai.yaml",
+          "contains": "allow_implicit_invocation: false"
+        }
+      ]
+    }
+  ]
+}

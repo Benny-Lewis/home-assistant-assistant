@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.0
+
+### Added
+
+- **Codex plugin support** - added `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, Codex hook wiring, and 15 Codex-compatible wrapper skills.
+- **Codex skill adapter** - added `codex/references/skill-adapter.md` to map Claude tool/invocation semantics to Codex while keeping Home Assistant behavior in the canonical `skills/` tree, including the "Never deploy unless explicitly requested" safety contract.
+- **Dual-agent documentation** - updated README, AGENTS, and component docs so install, invocation, optional `ha-mcp`, and release workflows cover both Claude Code and Codex.
+
 ## 1.5.1
 
 ### Changed
